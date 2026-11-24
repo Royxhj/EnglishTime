@@ -127,7 +127,7 @@ function normalizeProfile(profile) {
   p.customWords ||= {};
   p.readingRead ||= {};
   p.notesRead ||= {};
-  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword"]) {
+  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email"]) {
     p[section] ||= { best: {}, wrong: {} };
     p[section].best ||= {};
     p[section].wrong ||= {};
@@ -165,10 +165,35 @@ function updateWrongEntry(entries, id, isCorrect, base) {
     if (!entry) return;
     const hits = (entry.hits || 0) + 1;
     if (hits >= WRONG_CLEAR_STREAK) delete entries[id];
-    else entries[id] = { ...entry, hits };
+    else entries[id] = { ...entry, hits, lastHit: dateKey() };
   } else {
-    entries[id] = { ...base, hits: 0, missed: (entry?.missed || 0) + 1, lastMissed: dateKey() };
+    entries[id] = { ...base, hits: 0, missed: (entry?.missed || 0) + 1, lastMissed: dateKey(), lastHit: null };
   }
+}
+
+// 오답 복습 간격: 틀린 다음 날 → 한 번 맞히면 3일 뒤 → 또 맞히면 졸업
+const WRONG_REVIEW_DAYS = [1, 3];
+
+function daysSinceKey(key) {
+  if (!key) return Infinity;
+  return Math.round((new Date(dateKey()) - new Date(key)) / 86400000);
+}
+
+function isWrongDue(entry) {
+  const last = entry.lastHit || entry.lastMissed;
+  const wait = WRONG_REVIEW_DAYS[Math.min(entry.hits || 0, WRONG_REVIEW_DAYS.length - 1)];
+  return daysSinceKey(last) >= wait;
+}
+
+// 오늘 복습할 때가 된 오답 (단어 · 문법 · 연습), 오래 기다린 것부터
+function getDueWrongs(profileName) {
+  const p = getProfileData(profileName);
+  const sortOld = (list) => list.filter(isWrongDue).sort((a, b) => (a.lastHit || a.lastMissed || "").localeCompare(b.lastHit || b.lastMissed || ""));
+  return {
+    words: sortOld(Object.values(p.wrongWords)),
+    grammar: sortOld(Object.entries(p.grammar.wrong).map(([id, v]) => (v === true ? { id, hits: 0 } : { ...v, id }))),
+    drill: sortOld(Object.values(p.drill.wrong)),
+  };
 }
 
 function recordAnswerOutcome(profileName, wordId, levelId, isCorrect) {

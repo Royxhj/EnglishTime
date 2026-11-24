@@ -119,6 +119,7 @@ function mcSourceInfo(source) {
     const set = findIrregularSet(source.id);
     return { label: `🔁 ${set.title}`, level: levelById(set.levelId), quitTo: "irregular", listScreen: "irregular" };
   }
+  if (source.type === "email") return { label: "📧 업무 이메일", level: levelById("adult"), quitTo: "practiceList", listScreen: "practiceList" };
   if (source.type === "exam") {
     const grade = BASIC_GRADES.find((g) => g.id === source.id);
     return { label: `📝 ${grade.label} 모의고사`, level: levelById(grade.levelId), quitTo: "examList", listScreen: "examList" };
@@ -165,6 +166,7 @@ function nextMcQuestion() {
   if (mc.source.type === "grammar") isNewBest = recordSectionResult(currentProfile(), "grammar", mc.source.id, correct, total);
   if (mc.source.type === "reading") isNewBest = recordSectionResult(currentProfile(), "reading", mc.source.id, correct, total);
   if (mc.source.type === "irregular") isNewBest = recordSectionResult(currentProfile(), "irregular", mc.source.id, correct, total);
+  if (mc.source.type === "email") isNewBest = recordSectionResult(currentProfile(), "email", "all", correct, total);
   if (mc.source.type === "exam") isNewBest = recordSectionResult(currentProfile(), "exam", mc.source.id, correct, total);
   if (mc.source.type === "idiom" || mc.source.type === "affix") isNewBest = recordSectionResult(currentProfile(), mc.source.type, mc.source.id, correct, total);
   if (mc.source.type === "listening") isNewBest = recordSectionResult(currentProfile(), "listening", mc.source.id, correct, total);
@@ -206,6 +208,15 @@ function mcResultActions(source, hasWrong) {
         { ...retry, onClick: () => startIrregularTest(source.id) },
         { label: "🔁 변화표 다시 보기", onClick: () => set({ screen: "irregular" }) },
         ...(next ? [{ label: `다음 단계: ${next.emoji} ${next.title}`, onClick: () => startIrregularTest(next.id) }] : []),
+        { label: "🏠 홈으로", onClick: goHome },
+      ],
+    };
+  }
+  if (source.type === "email") {
+    return {
+      actions: [
+        { ...retry, onClick: startEmail },
+        { label: "💬 회화 롤플레이 하러 가기", onClick: () => set({ screen: "practiceList" }) },
         { label: "🏠 홈으로", onClick: goHome },
       ],
     };
@@ -270,10 +281,15 @@ function mcResultActions(source, hasWrong) {
     };
   }
   if (source.type === "daily") {
+    // 오늘의 학습을 마치면 다음 공부로 바로 이어지게 한다
+    const next = nextStep(currentProfile());
+    const wrongLeft = getWrongWords(currentProfile()).length + getGrammarWrongIds(currentProfile()).length + getDrillWrongEntries(currentProfile()).length;
     return {
       actions: [
-        { label: "🏠 홈으로", primary: true, onClick: goHome },
+        { label: `▶ 이어서 하기: ${next.emoji} ${next.title}`, primary: true, onClick: () => openNextStep(next) },
+        ...(hasWrong && wrongLeft > 0 ? [{ label: `📝 오답노트에서 바로 복습 (${wrongLeft})`, onClick: () => set({ screen: "wrongNote" }) }] : []),
         { label: "☀️ 한 번 더 하기", onClick: startDaily },
+        { label: "🏠 홈으로", onClick: goHome },
       ],
     };
   }
@@ -320,6 +336,57 @@ function nextChunk() {
   const isNewBest = recordSectionResult(currentProfile(), "chunks", chunk.setId, correct, chunk.items.length);
   set({ chunk: { ...chunk, isNewBest }, screen: "chunkResult" });
   announceBadges(checkNewBadges(currentProfile()));
+}
+
+// ── 실전 연습: 회화 롤플레이 · 업무 이메일 ──
+const startRoleplay = (id) => set({ roleplay: buildRoleplaySession(id), screen: "roleplay" });
+const startEmail = () => startMc({ type: "email", id: "all" }, buildEmailQuestions());
+
+const roleplayActions = {
+  choose: (choice) => {
+    const { roleplay } = store.getState();
+    const turn = findRoleplay(roleplay.id).turns[roleplay.turn];
+    const item = roleplay.items[roleplay.turn];
+    if (item.solved || item.wrong.includes(choice)) return;
+    const ok = choice === turn.answer;
+    if (item.firstTry === undefined) {
+      item.firstTry = ok;
+      recordActivity(currentProfile());
+    }
+    if (ok) {
+      item.solved = true;
+      answerFeedback(true);
+      speak(turn.choices[turn.answer]);
+    } else {
+      item.wrong.push(choice);
+      playSound("wrong");
+    }
+    set({});
+  },
+  next: () => {
+    const { roleplay } = store.getState();
+    const rp = findRoleplay(roleplay.id);
+    if (roleplay.turn + 1 < rp.turns.length) {
+      roleplay.turn += 1;
+      set({});
+      return;
+    }
+    const correct = roleplay.items.filter((it) => it.firstTry).length;
+    roleplay.isNewBest = recordSectionResult(currentProfile(), "roleplay", roleplay.id, correct, rp.turns.length);
+    set({ screen: "roleplayResult" });
+    announceBadges(checkNewBadges(currentProfile()));
+  },
+  quit: () => set({ screen: "practiceList" }),
+};
+
+// "이어서 하기" 열기 (홈 · 오늘의 학습 결과에서 같이 쓴다)
+function openNextStep(step) {
+  if (step.type === "lesson") startBasic(step.id);
+  else if (step.type === "listening") startListening(step.id);
+  else if (step.type === "exam") startExam(step.id);
+  else if (step.type === "crossword") startCrossword(step.id);
+  else if (step.type === "screen") set({ screen: step.screen });
+  else set({ screen: "settings" });
 }
 
 // ── 가로세로 낱말 퀴즈 ──
@@ -693,6 +760,7 @@ const QUIZ_QUIT_TARGET = {
   chunkSession: () => "chunkIntro",
   speakingSession: () => "speakingList",
   writingSession: () => "writingList",
+  roleplay: () => "practiceList",
 };
 
 function parentScreen(state) {
@@ -701,7 +769,8 @@ function parentScreen(state) {
     case "level": case "grammarList": case "readingList": case "chunkIntro":
     case "settings": case "wrongNote": case "report": case "vocab": case "grammarNotes": case "phonics": case "talk":
     case "irregular": case "verbPattern": case "speakingList": case "listeningList": case "writingList":
-    case "idioms": case "affixes": case "examList": case "goals": case "crosswordList": case "family": return "home";
+    case "idioms": case "affixes": case "examList": case "goals": case "crosswordList": case "family": case "practiceList": return "home";
+    case "roleplayResult": return "practiceList";
     case "crossword": return "crosswordList";
     case "speakingResult": return "speakingList";
     case "writingResult": return "writingList";
@@ -746,7 +815,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -891,14 +960,8 @@ function render() {
           openGoals: () => set({ screen: "goals" }),
           openCrossword: () => set({ screen: "crosswordList" }),
           openFamily: () => set({ screen: "family" }),
-          openNext: (step) => {
-            if (step.type === "lesson") startBasic(step.id);
-            else if (step.type === "listening") startListening(step.id);
-            else if (step.type === "exam") startExam(step.id);
-            else if (step.type === "crossword") startCrossword(step.id);
-            else if (step.type === "screen") set({ screen: step.screen });
-            else set({ screen: "settings" });
-          },
+          openPractice: () => set({ screen: "practiceList" }),
+          openNext: openNextStep,
           openAffixes: () => set({ screen: "affixes" }),
           openReadingPractice: () => set({ readingMode: "read", screen: "readingList" }),
           openGrammar: () => set({ screen: "grammarList" }),
@@ -1072,6 +1135,29 @@ function render() {
         openLesson: startBasic,
         back: goHome,
       }),
+
+    practiceList: () => renderPracticeListScreen(root, { profileName: state.profileName, startRoleplay, startEmail, back: goHome }),
+    roleplay: () => renderRoleplayScreen(root, { session: state.roleplay, actions: roleplayActions }),
+    roleplayResult: () => {
+      const { roleplay } = state;
+      const rp = findRoleplay(roleplay.id);
+      const i = ROLEPLAYS.indexOf(rp);
+      const next = ROLEPLAYS[i + 1];
+      renderScoreResultScreen(root, {
+        subtitle: `${state.profileName}님 · ${rp.emoji} ${rp.title}`,
+        correct: roleplay.items.filter((it) => it.firstTry).length,
+        total: rp.turns.length,
+        level: levelById("adult"),
+        isNewBest: roleplay.isNewBest,
+        rows: rp.turns.map((t, k) => ({ html: `${t.them}<br>→ <b>${t.choices[t.answer]}</b>`, ok: !!roleplay.items[k].firstTry })),
+        actions: [
+          { label: "🔁 다시 하기", primary: true, onClick: () => startRoleplay(rp.id) },
+          ...(next ? [{ label: `다음 상황: ${next.emoji} ${next.title}`, onClick: () => startRoleplay(next.id) }] : []),
+          { label: "실전 연습 목록", onClick: () => set({ screen: "practiceList" }) },
+          { label: "🏠 홈으로", onClick: goHome },
+        ],
+      });
+    },
 
     family: () => renderFamilyScreen(root, { openMember: (name) => set({ profileName: name, screen: "home" }), back: goHome }),
 

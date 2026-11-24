@@ -91,8 +91,10 @@ function buildDailyGrammarQuestions(profileName, levelId, count) {
     picked.push(q);
   };
 
-  shuffle(getDrillWrongEntries(profileName)).slice(0, 1).forEach((e) => add(drillQuestionById(e.id)));
-  if (rank >= levelRank("middle")) shuffle(getGrammarWrongIds(profileName)).slice(0, 1).forEach((id) => add(grammarQuestionById(id)));
+  // 복습할 때가 된 오답을 먼저 (최대 2개, 새 문제가 하나는 남도록)
+  const due = getDueWrongs(profileName);
+  const dueQs = [...due.drill.map((e) => drillQuestionById(e.id)), ...(rank >= levelRank("middle") ? due.grammar.map((e) => grammarQuestionById(e.id)) : [])].filter(Boolean);
+  dueQs.slice(0, Math.min(2, count - 1)).forEach((q) => add({ ...q, label: `🔁 지난번에 틀린 문제 · ${q.label}` }));
 
   const pools = [];
   const basicPool = openBasicTopicsFor(profileName, levelId).flatMap((t) => t.practice.map((_, i) => () => basicChooseQuestion(t, i)));

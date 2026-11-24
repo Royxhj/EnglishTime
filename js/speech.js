@@ -35,18 +35,35 @@ function preferredEnglishVoice() {
   return null;
 }
 
-// onEnd는 끝까지 읽었을 때만 부른다 (중간에 다른 소리로 끊기면 부르지 않음).
+// 안드로이드 크롬은 cancel() 직후 바로 speak()하면 소리 없이 버려지는 경우가 있고,
+// 읽는 중인 문장 객체가 메모리에서 치워지면 소리가 끊기기도 한다. 그래서 읽던 게 있으면 잠깐 쉬었다가 읽고, 객체를 붙잡아 둔다.
+let currentUtterance = null;
+function startUtterance(utter) {
+  const synth = window.speechSynthesis;
+  const busy = synth.speaking || synth.pending;
+  synth.cancel();
+  currentUtterance = utter;
+  const go = () => {
+    if (currentUtterance !== utter) return; // 그사이 다른 소리를 눌렀으면 건너뛴다
+    synth.resume(); // 멈춘 상태로 남아 있는 브라우저가 있어서 풀어 준다
+    synth.speak(utter);
+  };
+  if (busy) setTimeout(go, 120);
+  else go();
+}
+
+// onEnd는 끝까지 읽었을 때만 부른다 (중간에 다른 소리로 끊기면 부르지 않음). 읽을 문장 객체를 돌려준다.
 function speak(text, { rate = 0.9, onEnd, lang = "en-US" } = {}) {
-  if (!speechSupported || !text) return;
+  if (!speechSupported || !text) return null;
   dialogToken += 1; // 대화를 읽던 중이면 멈춘다
-  window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = lang;
   utter.rate = Math.min(2, rate * (lang.startsWith("en") ? speechRateScale() : 1));
   const voice = (lang.startsWith("en") && preferredEnglishVoice()) || pickVoice(lang);
   if (voice) utter.voice = voice;
   if (onEnd) utter.onend = onEnd;
-  window.speechSynthesis.speak(utter);
+  startUtterance(utter);
+  return utter;
 }
 
 // 대화 읽기: 여자(W) · 남자(M)를 다른 목소리(없으면 다른 높이)로 차례로 읽는다.
@@ -62,7 +79,6 @@ let dialogToken = 0;
 
 function playDialog(lines, { rate = 0.9 } = {}) {
   if (!speechSupported || !lines?.length) return;
-  window.speechSynthesis.cancel();
   const token = ++dialogToken;
   const sayLine = (i) => {
     if (i >= lines.length || token !== dialogToken) return;
@@ -75,7 +91,7 @@ function playDialog(lines, { rate = 0.9 } = {}) {
     const sameVoice = !dialogVoice("W") || !dialogVoice("M");
     utter.pitch = sameVoice ? (speaker === "W" ? 1.25 : 0.75) : 1;
     utter.onend = () => setTimeout(() => sayLine(i + 1), 350);
-    window.speechSynthesis.speak(utter);
+    startUtterance(utter);
   };
   sayLine(0);
 }
@@ -87,5 +103,6 @@ function speakKorean(html, options = {}) {
 
 function stopSpeaking() {
   dialogToken += 1;
+  currentUtterance = null;
   if (speechSupported) window.speechSynthesis.cancel();
 }

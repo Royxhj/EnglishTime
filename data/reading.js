@@ -767,4 +767,148 @@ const READING_PASSAGES = [
       { q: "글쓴이가 권하는 공부 방법은?", choices: ["매일 조금씩 공부하기", "일주일에 한 번 몰아서 공부하기", "시험 직전에 벼락치기 하기", "어릴 때만 공부하기"], answer: 0, explain: "Studying for fifteen minutes every day is more effective than cramming ~. 비교급 more effective than이 쓰였어요." },
     ],
   },
+  {
+    id: "fourday", levelId: "adult", emoji: "📰", title: "[뉴스] 주 4일 근무 실험",
+    sentences: [
+      { en: "A growing number of companies are testing a four-day work week without cutting pay.", ko: "임금을 줄이지 않고 주 4일 근무를 시험하는 회사가 늘고 있다." },
+      { en: "In one large trial, most firms reported that productivity stayed the same or even improved.", ko: "한 대규모 실험에서 대부분의 회사는 생산성이 그대로이거나 오히려 좋아졌다고 보고했다." },
+      { en: "Employees said they felt less stressed and had more time for their families.", ko: "직원들은 스트레스가 줄고 가족과 보낼 시간이 늘었다고 말했다." },
+      { en: "However, critics warn that the model may not suit industries such as healthcare, where staff must be available every day.", ko: "그러나 비판하는 사람들은 이 방식이 의료처럼 직원이 매일 있어야 하는 업종에는 맞지 않을 수 있다고 경고한다." },
+      { en: "Experts say the key is to cut unnecessary meetings rather than simply work longer hours on fewer days.", ko: "전문가들은 핵심이 더 적은 날에 더 오래 일하는 것이 아니라 불필요한 회의를 줄이는 것이라고 말한다." },
+    ],
+    glossary: [
+      { w: "a growing number of", ko: "점점 더 많은" }, { w: "cutting pay", ko: "임금을 줄이는 것" }, { w: "trial", ko: "시험, 실험" }, { w: "productivity", ko: "생산성" }, { w: "critics", ko: "비판하는 사람들" }, { w: "suit", ko: "~에 맞다" }, { w: "industries", ko: "산업, 업종" }, { w: "unnecessary", ko: "불필요한" }, { w: "rather than", ko: "~보다는, ~ 대신에" },
+    ],
+    questions: [
+      { q: "실험에서 대부분의 회사가 보고한 결과는?", choices: ["생산성이 그대로이거나 좋아졌다", "생산성이 크게 떨어졌다", "직원들이 그만두었다", "임금이 줄었다"], answer: 0, explain: "most firms reported that productivity stayed the same or even improved." },
+      { q: "비판하는 사람들이 걱정하는 점은?", choices: ["매일 사람이 필요한 업종에는 맞지 않을 수 있다", "직원들이 너무 쉰다", "회의가 늘어난다", "회사 수익이 너무 늘어난다"], answer: 0, explain: "may not suit industries such as healthcare, where staff must be available every day. where는 앞의 healthcare를 설명해요." },
+      { q: "전문가들이 말하는 성공의 핵심은?", choices: ["불필요한 회의 줄이기", "하루에 더 오래 일하기", "임금 줄이기", "직원 수 늘리기"], answer: 0, explain: "the key is to cut unnecessary meetings rather than ~. A rather than B = B가 아니라 A." },
+    ],
+  },
+  {
+    id: "evcharge", levelId: "adult", emoji: "🔌", title: "[뉴스] 전기차와 충전소",
+    sentences: [
+      { en: "Sales of electric vehicles have risen sharply over the past five years.", ko: "지난 5년 동안 전기차 판매가 급격히 늘었다." },
+      { en: "Yet many drivers still hesitate to switch because charging stations are hard to find in some areas.", ko: "하지만 일부 지역에서는 충전소를 찾기 어려워서 많은 운전자들이 아직 바꾸기를 망설인다." },
+      { en: "Charging also takes much longer than filling a tank with gas, which can be inconvenient on long trips.", ko: "충전은 기름을 넣는 것보다 훨씬 오래 걸려서 장거리 여행에서는 불편할 수 있다." },
+      { en: "To solve this problem, the government plans to install thousands of fast chargers along major highways.", ko: "이 문제를 해결하기 위해 정부는 주요 고속도로를 따라 고속 충전기 수천 대를 설치할 계획이다." },
+      { en: "If the plan succeeds, electric cars are expected to make up half of new car sales by 2035.", ko: "계획이 성공하면 2035년까지 전기차가 신차 판매의 절반을 차지할 것으로 예상된다." },
+    ],
+    glossary: [
+      { w: "sharply", ko: "급격히" }, { w: "hesitate", ko: "망설이다" }, { w: "switch", ko: "바꾸다, 전환하다" }, { w: "charging stations", ko: "충전소" }, { w: "inconvenient", ko: "불편한" }, { w: "install", ko: "설치하다" }, { w: "highways", ko: "고속도로" }, { w: "make up", ko: "차지하다, 구성하다" },
+    ],
+    questions: [
+      { q: "운전자들이 전기차로 바꾸기를 망설이는 이유로 나온 것은?", choices: ["충전소를 찾기 어려워서", "전기차가 너무 빨라서", "전기차가 너무 작아서", "기름값이 싸서"], answer: 0, explain: "because charging stations are hard to find in some areas." },
+      { q: "정부의 계획은?", choices: ["고속도로에 고속 충전기 설치", "전기차 판매 금지", "기름값 인하", "새 고속도로 건설"], answer: 0, explain: "the government plans to install thousands of fast chargers along major highways. To solve는 '해결하기 위해'(목적)예요." },
+      { q: "마지막 문장의 'make up'과 뜻이 가장 가까운 것은?", choices: ["차지하다", "화해하다", "화장하다", "지어내다"], answer: 0, explain: "make up half of new car sales = 신차 판매의 절반을 차지하다. make up은 뜻이 여러 개라 문맥으로 골라요." },
+    ],
+  },
+  {
+    id: "aging", levelId: "adult", emoji: "👵", title: "[뉴스] 빠르게 늙어 가는 사회",
+    sentences: [
+      { en: "Korea is aging faster than almost any other country in the world.", ko: "한국은 세계 어느 나라보다도 빠르게 고령화되고 있다." },
+      { en: "By 2025, more than one in five people were 65 or older.", ko: "2025년에는 다섯 명 중 한 명 이상이 65세 이상이었다." },
+      { en: "As the working population shrinks, fewer workers will have to support more retirees.", ko: "일하는 인구가 줄어들면서 더 적은 노동자가 더 많은 은퇴자를 부양해야 할 것이다." },
+      { en: "This could put pressure on the pension system and on healthcare costs.", ko: "이는 연금 제도와 의료비에 부담을 줄 수 있다." },
+      { en: "Some experts argue that encouraging older people to keep working longer is part of the solution.", ko: "일부 전문가들은 나이 든 사람들이 더 오래 일하도록 장려하는 것이 해결책의 일부라고 주장한다." },
+    ],
+    glossary: [
+      { w: "aging", ko: "나이 들어 가는, 고령화되는" }, { w: "one in five", ko: "다섯 명 중 한 명" }, { w: "working population", ko: "일하는 인구" }, { w: "shrinks", ko: "줄어들다" }, { w: "retirees", ko: "은퇴자들" }, { w: "put pressure on", ko: "~에 부담을 주다" }, { w: "pension system", ko: "연금 제도" }, { w: "encouraging", ko: "장려하는 것" },
+    ],
+    questions: [
+      { q: "이 글의 주제는?", choices: ["빠른 고령화와 그 영향", "출산율 증가", "청년 일자리 증가", "의료 기술 발전"], answer: 0, explain: "고령화 속도, 노동 인구 감소, 연금과 의료비 부담을 차례로 설명해요." },
+      { q: "셋째 문장의 'As'의 뜻은?", choices: ["~함에 따라", "~처럼", "~로서", "~만큼"], answer: 0, explain: "As the working population shrinks = 일하는 인구가 줄어듦에 따라. 두 변화가 함께 일어날 때 쓰는 as예요." },
+      { q: "전문가들이 제시한 해결책의 일부는?", choices: ["나이 든 사람들이 더 오래 일하도록 장려하기", "연금을 없애기", "의료비를 올리기", "은퇴를 앞당기기"], answer: 0, explain: "encouraging older people to keep working longer. encourage + 사람 + to 동사(5형식)예요." },
+    ],
+  },
+  {
+    id: "smishing", levelId: "adult", emoji: "📱", title: "[생활] 문자 사기 피하는 법",
+    sentences: [
+      { en: "Text message scams, often called smishing, are becoming more common and harder to spot.", ko: "흔히 스미싱이라고 부르는 문자 사기가 점점 흔해지고 알아채기 어려워지고 있다." },
+      { en: "A typical message claims that a package could not be delivered and asks you to click a link.", ko: "전형적인 문자는 택배를 배달하지 못했다며 링크를 누르라고 한다." },
+      { en: "Once you click it, the link may install harmful software or ask for your bank details.", ko: "누르는 순간 그 링크는 해로운 프로그램을 설치하거나 은행 정보를 물을 수 있다." },
+      { en: "Never click links from unknown numbers, and check directly with the company if you are unsure.", ko: "모르는 번호에서 온 링크는 절대 누르지 말고, 확실하지 않으면 그 회사에 직접 확인하라." },
+      { en: "If you think you have been tricked, contact your bank immediately so it can block your account.", ko: "속았다고 생각되면 즉시 은행에 연락해 계좌를 막아 달라고 하라." },
+    ],
+    glossary: [
+      { w: "scams", ko: "사기 수법들" }, { w: "spot", ko: "알아채다" }, { w: "typical", ko: "전형적인" }, { w: "claims", ko: "주장하다" }, { w: "harmful", ko: "해로운" }, { w: "bank details", ko: "은행 계좌 정보" }, { w: "tricked", ko: "속은" }, { w: "immediately", ko: "즉시" }, { w: "block", ko: "막다, 차단하다" },
+    ],
+    questions: [
+      { q: "전형적인 사기 문자의 내용은?", choices: ["택배를 배달하지 못했으니 링크를 누르라", "상품에 당첨되었다", "은행 이자가 올랐다", "회원 가입을 축하한다"], answer: 0, explain: "claims that a package could not be delivered and asks you to click a link." },
+      { q: "글에서 권하는 행동이 아닌 것은?", choices: ["링크를 눌러 내용 확인하기", "모르는 번호의 링크는 누르지 않기", "회사에 직접 확인하기", "속았다면 은행에 바로 연락하기"], answer: 0, explain: "Never click links from unknown numbers. 링크를 누르는 것은 하지 말라고 했어요." },
+      { q: "마지막 문장의 'so it can block your account'에서 so의 역할은?", choices: ["~하도록 (목적)", "그래서 (결과)", "매우 (강조)", "그렇게 (대신)"], answer: 0, explain: "so (that) + 주어 + can = ~할 수 있도록. 은행이 계좌를 막을 수 있도록 연락하라는 뜻이에요." },
+    ],
+  },
+  {
+    id: "telehealth", levelId: "adult", emoji: "🩺", title: "[뉴스] 화면으로 받는 진료",
+    sentences: [
+      { en: "During the pandemic, many patients saw their doctors through video calls for the first time.", ko: "팬데믹 동안 많은 환자들이 처음으로 영상 통화로 의사를 만났다." },
+      { en: "Online appointments save travel time and are especially helpful for people who live far from hospitals.", ko: "온라인 진료는 이동 시간을 아껴 주고, 병원에서 멀리 사는 사람들에게 특히 도움이 된다." },
+      { en: "However, doctors cannot physically examine patients, so some conditions may be missed.", ko: "하지만 의사가 환자를 직접 진찰할 수 없어서 일부 증상을 놓칠 수도 있다." },
+      { en: "Older patients who are not familiar with smartphones may also find the system difficult to use.", ko: "스마트폰에 익숙하지 않은 나이 든 환자들은 이 시스템을 쓰기 어려워할 수도 있다." },
+      { en: "Most experts believe online care works best as a supplement to, not a replacement for, in-person visits.", ko: "대부분의 전문가들은 온라인 진료가 대면 진료를 대신하는 것이 아니라 보완할 때 가장 효과적이라고 믿는다." },
+    ],
+    glossary: [
+      { w: "patients", ko: "환자들" }, { w: "appointments", ko: "진료 예약" }, { w: "physically", ko: "직접, 신체적으로" }, { w: "examine", ko: "진찰하다" }, { w: "conditions", ko: "증상, 질환" }, { w: "familiar with", ko: "~에 익숙한" }, { w: "supplement", ko: "보완, 보충" }, { w: "replacement", ko: "대체물" }, { w: "in-person", ko: "직접 만나는, 대면의" },
+    ],
+    questions: [
+      { q: "온라인 진료의 장점으로 나온 것은?", choices: ["이동 시간을 아낀다", "증상을 더 정확히 안다", "비용이 들지 않는다", "의사가 직접 진찰한다"], answer: 0, explain: "Online appointments save travel time ~." },
+      { q: "온라인 진료의 단점으로 나온 것은?", choices: ["의사가 직접 진찰할 수 없다", "예약이 어렵다", "약을 받을 수 없다", "의사가 부족하다"], answer: 0, explain: "doctors cannot physically examine patients, so some conditions may be missed." },
+      { q: "마지막 문장의 뜻으로 알맞은 것은?", choices: ["온라인 진료는 대면 진료를 보완할 때 가장 좋다", "온라인 진료가 대면 진료를 대신해야 한다", "온라인 진료를 없애야 한다", "대면 진료가 필요 없다"], answer: 0, explain: "a supplement to, not a replacement for, in-person visits = 대면 진료의 대체가 아니라 보완." },
+    ],
+  },
+  {
+    id: "coffee", levelId: "adult", emoji: "☕", title: "[건강] 커피, 몸에 좋을까?",
+    sentences: [
+      { en: "For years, coffee was blamed for causing heart problems and poor sleep.", ko: "오랫동안 커피는 심장 문제와 불면의 원인으로 지목되어 왔다." },
+      { en: "Recent studies, however, suggest that moderate coffee drinking may actually be good for your health.", ko: "그러나 최근 연구들은 적당히 마시는 커피가 실제로 건강에 좋을 수도 있다고 말한다." },
+      { en: "People who drink two to three cups a day appear to have a lower risk of some diseases.", ko: "하루에 두세 잔을 마시는 사람들은 일부 질병에 걸릴 위험이 더 낮은 것으로 보인다." },
+      { en: "Still, too much caffeine can cause anxiety, and drinking coffee late in the day can disturb sleep.", ko: "그래도 카페인을 너무 많이 먹으면 불안해질 수 있고, 늦은 시간에 커피를 마시면 잠을 방해할 수 있다." },
+      { en: "The best advice is to enjoy coffee in moderation and avoid it in the afternoon if you have trouble sleeping.", ko: "가장 좋은 조언은 커피를 적당히 즐기고, 잠들기 어렵다면 오후에는 피하는 것이다." },
+    ],
+    glossary: [
+      { w: "blamed for", ko: "~의 탓으로 여겨진" }, { w: "moderate", ko: "적당한" }, { w: "appear to", ko: "~인 것 같다" }, { w: "risk", ko: "위험" }, { w: "caffeine", ko: "카페인" }, { w: "anxiety", ko: "불안" }, { w: "disturb", ko: "방해하다" }, { w: "in moderation", ko: "적당히" },
+    ],
+    questions: [
+      { q: "최근 연구의 결과로 알맞은 것은?", choices: ["적당한 커피는 건강에 좋을 수 있다", "커피는 무조건 해롭다", "커피를 많이 마실수록 좋다", "커피는 잠을 돕는다"], answer: 0, explain: "Recent studies, however, suggest that moderate coffee drinking may actually be good ~. however로 앞 문장과 반대 내용이 나와요." },
+      { q: "글쓴이의 조언은?", choices: ["적당히 마시고, 잠이 어려우면 오후엔 피하기", "커피를 완전히 끊기", "하루 다섯 잔 이상 마시기", "밤에만 마시기"], answer: 0, explain: "enjoy coffee in moderation and avoid it in the afternoon if you have trouble sleeping." },
+      { q: "'appear to have a lower risk'에서 appear to의 뜻은?", choices: ["~인 것 같다", "나타나다", "사라지다", "~해야 한다"], answer: 0, explain: "appear to + 동사 = seem to = ~인 것 같다. 연구 결과를 단정하지 않고 말할 때 써요." },
+    ],
+  },
+  {
+    id: "tipping", levelId: "adult", emoji: "💵", title: "[여행] 나라마다 다른 팁 문화",
+    sentences: [
+      { en: "In the United States, tipping is expected in restaurants, and 15 to 20 percent of the bill is common.", ko: "미국에서는 식당에서 팁을 주는 것이 당연하게 여겨지고, 계산서의 15~20퍼센트가 일반적이다." },
+      { en: "This is because many servers earn a low base wage and depend on tips.", ko: "이는 많은 종업원이 기본급을 적게 받고 팁에 의존하기 때문이다." },
+      { en: "In Japan, on the other hand, leaving a tip can make staff feel uncomfortable.", ko: "반면 일본에서는 팁을 남기면 직원이 불편해할 수 있다." },
+      { en: "In many European countries, a service charge is often included in the bill, so a small extra amount is enough.", ko: "많은 유럽 나라에서는 봉사료가 계산서에 포함된 경우가 많아서 약간만 더 내면 충분하다." },
+      { en: "Before you travel, it is a good idea to check the local customs so that you neither offend anyone nor overpay.", ko: "여행 전에 그 지역의 관습을 확인해 두면 누구도 불쾌하게 하지 않고 돈을 더 내지도 않을 수 있다." },
+    ],
+    glossary: [
+      { w: "tipping", ko: "팁을 주는 것" }, { w: "bill", ko: "계산서" }, { w: "servers", ko: "종업원" }, { w: "base wage", ko: "기본급" }, { w: "uncomfortable", ko: "불편한" }, { w: "service charge", ko: "봉사료" }, { w: "customs", ko: "관습" }, { w: "offend", ko: "기분 상하게 하다" }, { w: "overpay", ko: "돈을 더 내다" },
+    ],
+    questions: [
+      { q: "미국에서 팁이 중요한 이유는?", choices: ["종업원 기본급이 낮아 팁에 의존해서", "법으로 정해져 있어서", "음식값이 싸서", "봉사료가 포함되어서"], answer: 0, explain: "because many servers earn a low base wage and depend on tips." },
+      { q: "일본의 팁 문화에 대한 설명은?", choices: ["팁을 주면 직원이 불편해할 수 있다", "20퍼센트가 기본이다", "봉사료가 꼭 포함된다", "현금만 받는다"], answer: 0, explain: "In Japan, on the other hand, leaving a tip can make staff feel uncomfortable. make + 목적어 + 동사원형(사역)이에요." },
+      { q: "마지막 문장의 neither A nor B의 뜻은?", choices: ["A도 B도 하지 않는", "A 또는 B", "A뿐만 아니라 B도", "A이지만 B"], answer: 0, explain: "neither offend anyone nor overpay = 누구도 불쾌하게 하지 않고, 돈을 더 내지도 않는." },
+    ],
+  },
+  {
+    id: "detox", levelId: "adult", emoji: "📵", title: "[생활] 디지털 디톡스",
+    sentences: [
+      { en: "The average adult now checks their phone more than a hundred times a day.", ko: "요즘 성인은 하루 평균 백 번 넘게 휴대폰을 확인한다." },
+      { en: "Constant notifications make it difficult to focus on one task for a long time.", ko: "끊임없는 알림은 한 가지 일에 오래 집중하기 어렵게 만든다." },
+      { en: "A digital detox means taking a planned break from screens to reduce stress and improve concentration.", ko: "디지털 디톡스란 스트레스를 줄이고 집중력을 높이기 위해 계획적으로 화면에서 벗어나 쉬는 것을 말한다." },
+      { en: "You do not have to give up your phone completely; even turning off notifications for an hour can help.", ko: "휴대폰을 완전히 포기할 필요는 없다. 한 시간 동안 알림을 끄는 것만으로도 도움이 될 수 있다." },
+      { en: "Many people who try it say they sleep better and enjoy conversations with family more.", ko: "이것을 해 본 많은 사람들은 잠을 더 잘 자고 가족과의 대화를 더 즐기게 되었다고 말한다." },
+    ],
+    glossary: [
+      { w: "average", ko: "평균의" }, { w: "Constant", ko: "끊임없는" }, { w: "notifications", ko: "알림" }, { w: "focus on", ko: "~에 집중하다" }, { w: "planned", ko: "계획된" }, { w: "concentration", ko: "집중력" }, { w: "do not have to", ko: "~할 필요는 없다" }, { w: "completely", ko: "완전히" },
+    ],
+    questions: [
+      { q: "디지털 디톡스의 뜻은?", choices: ["계획적으로 화면에서 벗어나 쉬기", "휴대폰을 새로 바꾸기", "알림을 더 자주 확인하기", "게임 시간을 늘리기"], answer: 0, explain: "taking a planned break from screens to reduce stress and improve concentration." },
+      { q: "'do not have to'의 뜻은?", choices: ["~할 필요는 없다", "~하면 안 된다", "~해야 한다", "~할 수 없다"], answer: 0, explain: "don't have to = ~할 필요 없다. must not(~하면 안 된다)과 헷갈리지 마세요." },
+      { q: "디지털 디톡스를 해 본 사람들이 말한 효과는?", choices: ["잠을 더 잘 자고 가족과 대화가 늘었다", "일을 더 오래 하게 되었다", "휴대폰을 더 많이 쓰게 되었다", "스트레스가 늘었다"], answer: 0, explain: "they sleep better and enjoy conversations with family more." },
+    ],
+  },
 ];

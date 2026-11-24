@@ -71,6 +71,7 @@ function renderWrongNoteScreen(root, { profileName, tab, actions }) {
       <button class="back-btn" id="backBtn">← 홈</button>
       <h1 class="title">📝 오답노트</h1>
       <p class="subtitle">틀린 문제는 <b>연속 ${WRONG_CLEAR_STREAK}번</b> 맞히면 졸업해요</p>
+      <p class="settings-help">틀린 문제는 다음 날, 한 번 맞히면 3일 뒤에 ☀️ 오늘의 학습에 저절로 다시 나와요. 여기서 바로 복습해도 돼요.</p>
 
       <div class="segmented segmented--wide" role="tablist">
         <button class="segmented-btn${current === "words" ? " active" : ""}" data-tab="words" role="tab" aria-selected="${current === "words"}">단어 ${words.length}</button>

@@ -7,10 +7,14 @@ function dialogScriptHtml(lines) {
   return `<div class="dialog-script">${lines.map(([s, t]) => `<p><span aria-label="${s === "W" ? "여자" : "남자"}">${s === "W" ? "👩" : "👨"}</span> ${t}</p>`).join("")}</div>`;
 }
 
+const LISTENING_TEST_SIZE = 5;
+
+// 대화가 5개보다 많은 단계는 풀 때마다 5개를 무작위로 고른다
 function buildListeningQuestions(levelId) {
   const set = findListeningSet(levelId);
   if (!set) return [];
-  return set.items.map((item, i) => ({
+  const picked = shuffle(set.items.map((item, i) => ({ item, i }))).slice(0, LISTENING_TEST_SIZE);
+  return picked.map(({ item, i }) => ({
     id: `listen|${levelId}|${i}`,
     kind: "listening",
     label: "🎧 대화를 듣고 알맞은 답을 고르세요",
@@ -48,7 +52,7 @@ function renderListeningListScreen(root, { profileName, start, back }) {
             <span class="level-icon">${level.emoji}</span>
             <span class="topic-text">
               <span class="level-label">${level.label}${s.levelId === myLevel ? " · 내 단계" : ""}</span>
-              <span class="topic-summary">대화 ${s.items.length}개</span>
+              <span class="topic-summary">${s.items.length > LISTENING_TEST_SIZE ? `대화 ${s.items.length}개 중 ${LISTENING_TEST_SIZE}개` : `대화 ${s.items.length}개`}</span>
             </span>
             <span class="level-best${best ? "" : " level-best-empty"}">${ratioLabel(best)}</span>
           </button>`;

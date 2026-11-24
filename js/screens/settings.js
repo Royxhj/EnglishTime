@@ -102,6 +102,12 @@ function renderSettingsScreen(root, { profileName, actions }) {
         <div class="settings-line"><span>목소리</span>${segmentedHtml("voice", VOICE_OPTIONS, settings.voice)}</div>
         <div class="settings-line"><span>말하기 속도</span>${segmentedHtml("rate", RATE_OPTIONS, settings.speechRate)}</div>
         <button class="secondary-btn" id="voiceTestBtn" ${speechSupported ? "" : "disabled"}>🔊 들어 보기</button>
+        <div class="vp-tip" id="voiceHelp" hidden>
+          🔇 소리가 시작되지 않았어요. 이렇게 확인해 보세요.<br>
+          ① 휴대폰 옆 버튼으로 <b>미디어 음량</b>을 올리고, 무음 · 진동 모드를 꺼요.<br>
+          ② 안드로이드: 설정 → <b>텍스트 음성 변환(TTS)</b>에서 기본 엔진이 'Google 음성 인식 및 합성'인지, 영어 음성 데이터가 설치되어 있는지 확인해요.<br>
+          ③ 앱을 완전히 닫았다가 다시 열고 한 번 더 눌러 봐요.
+        </div>
       </section>
 
       <section class="settings-card">
@@ -143,7 +149,28 @@ function renderSettingsScreen(root, { profileName, actions }) {
     applyTheme(theme);
   });
 
-  const voiceTest = () => speak("Hello! Let's learn English together.");
+  // 들어 보기: 재생 중인지 버튼에 보여 주고, 소리가 시작되지 않으면 확인할 것을 안내한다
+  const voiceBtn = root.querySelector("#voiceTestBtn");
+  const voiceHelp = root.querySelector("#voiceHelp");
+  const voiceTest = () => {
+    voiceHelp.hidden = true;
+    const utter = speak("Hello! Let's learn English together.");
+    if (!utter) return;
+    let started = false;
+    voiceBtn.textContent = "🔊 재생 중…";
+    const reset = () => (voiceBtn.textContent = "🔊 들어 보기");
+    utter.addEventListener("start", () => (started = true));
+    utter.addEventListener("end", reset);
+    utter.addEventListener("error", (e) => {
+      reset();
+      if (e.error !== "interrupted" && e.error !== "canceled") voiceHelp.hidden = false;
+    });
+    setTimeout(() => {
+      if (started || !voiceBtn.isConnected) return;
+      reset();
+      voiceHelp.hidden = false;
+    }, 3000);
+  };
   bindSegmented(root, "voice", (voice) => {
     updateSettings({ voice });
     voiceTest();
@@ -152,7 +179,7 @@ function renderSettingsScreen(root, { profileName, actions }) {
     updateSettings({ speechRate });
     voiceTest();
   });
-  root.querySelector("#voiceTestBtn").addEventListener("click", voiceTest);
+  voiceBtn.addEventListener("click", voiceTest);
 
   const soundSwitch = root.querySelector("#soundSwitch");
   soundSwitch.addEventListener("click", () => {

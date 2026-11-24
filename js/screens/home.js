@@ -101,6 +101,8 @@ function renderHomeScreen(root, ctx) {
   const passagesRead = READING_PASSAGES.filter((p) => isPassageRead(profileName, p.id)).length;
   const goal = goalSummary(profileName);
   const next = nextStep(profileName);
+  const dueWrongs = getDueWrongs(profileName);
+  const dueWrong = dueWrongs.words.length + dueWrongs.grammar.length + dueWrongs.drill.length;
   // 단계에 맞지 않는 타일은 숨긴다 (초등은 중학교 이상 내용, 중학교 이상은 파닉스)
   const level = getPreferredLevel(profileName);
   const isKid = !level || level.startsWith("elementary");
@@ -134,7 +136,7 @@ function renderHomeScreen(root, ctx) {
         <span class="daily-emoji">${daily ? "✅" : "☀️"}</span>
         <span class="daily-text">
           <span class="daily-title">${daily ? "오늘의 학습 완료!" : "오늘의 학습"}</span>
-          <span class="daily-desc">${daily ? `${daily.correct} / ${daily.total} 정답 · 한 번 더 할 수 있어요` : `${vocab.due > 0 ? "복습 단어 포함 · " : ""}단어 ${DAILY_WORDS} + 문법 ${DAILY_GRAMMAR}문제 · 약 5분`}</span>
+          <span class="daily-desc">${daily ? `${daily.correct} / ${daily.total} 정답 · 한 번 더 할 수 있어요` : `${dueWrong > 0 ? `🔁 틀린 문제 복습 ${Math.min(dueWrong, 4)}개 포함 · ` : vocab.due > 0 ? "복습 단어 포함 · " : ""}단어 ${DAILY_WORDS} + 문법 ${DAILY_GRAMMAR}문제 · 약 5분`}</span>
         </span>
         <span class="daily-go" aria-hidden="true">›</span>
       </button>
@@ -178,6 +180,7 @@ function renderHomeScreen(root, ctx) {
       <section class="group">
         <h2 class="group-title">🗣️ 말하기 · 듣기 · 쓰기</h2>
         <div class="tile-grid">
+          ${["high", "adult"].includes(level) ? homeTile({ id: "practiceBtn", emoji: "💼", title: "실전 연습", meta: "롤플레이 · 이메일" }) : ""}
           ${homeTile({ id: "speakingBtn", emoji: "🎙️", title: "따라 말하기", meta: `${sectionCount(profileName, "speaking", TALK_GROUPS)} / ${TALK_GROUPS.length} 묶음` })}
           ${homeTile({ id: "listeningBtn", emoji: "🎧", title: "듣기 평가", meta: `${LISTENING_SETS.filter((s) => getSectionBest(profileName, "listening", s.levelId)).length} / ${LISTENING_SETS.length} 단계` })}
           ${homeTile({ id: "writingBtn", emoji: "✍️", title: "영작 연습", meta: "뜻 보고 문장 만들기" })}
@@ -213,6 +216,7 @@ function renderHomeScreen(root, ctx) {
   const bind = (id, fn) => root.querySelector(`#${id}`)?.addEventListener("click", fn);
   bind("nextBtn", () => actions.openNext(next));
   bind("familyBtn", actions.openFamily);
+  bind("practiceBtn", actions.openPractice);
   bind("backBtn", actions.backToProfile);
   bind("settingsBtn", actions.openSettings);
   bind("wrongNoteBtn", actions.openWrongNote);

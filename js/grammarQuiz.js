@@ -61,18 +61,20 @@ const DAILY_WORDS = 5;
 const DAILY_GRAMMAR = 3;
 
 // 오늘의 학습: 단어 5문제 + 문법 3문제.
-// 단어는 오답노트 → 단어장 오늘 복습 → 내 단계의 새 단어 순서로 채운다.
+// 단어는 복습할 때가 된 오답(틀린 다음 날, 맞힌 뒤 3일) → 단어장 오늘 복습 → 내 단계의 새 단어 순서로 채운다.
 function buildDailyQuestions(profileName) {
   const levelId = getPreferredLevel(profileName) || getLastWordLevel(profileName) || LEVELS[0].id;
   const vocab = getVocabEntries(profileName);
   const picked = [];
   const used = new Set();
-  const take = (id, wordLevelId) => {
+  const take = (id, wordLevelId, review = false) => {
     if (picked.length >= DAILY_WORDS || used.has(id) || !findWordById(id)) return;
     used.add(id);
-    picked.push(wordToMcQuestion(findWordById(id), wordLevelId));
+    const q = wordToMcQuestion(findWordById(id), wordLevelId);
+    if (review) q.label = `🔁 지난번에 틀린 단어 · ${q.label}`;
+    picked.push(q);
   };
-  shuffle(getWrongWords(profileName)).slice(0, 2).forEach((ref) => take(ref.id, ref.levelId));
+  getDueWrongs(profileName).words.slice(0, 2).forEach((ref) => take(ref.id, ref.levelId, true));
   shuffle(getDueVocabIds(profileName)).forEach((id) => take(id, vocab[id].levelId));
   shuffle(WORD_BANK[levelId]).forEach((w) => take(w.id, levelId));
   // 문법은 내 단계에 맞춰 기초 문법 · 불규칙 동사 · to/-ing · 독해 문법에서 고른다 (js/drill.js).
