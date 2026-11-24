@@ -309,6 +309,23 @@ function weekDateKeys() {
   return Array.from({ length: sinceMonday + 1 }, (_, i) => daysAgoKey(sinceMonday - i));
 }
 
+// 최근 n주(월~일) 기록. 오래된 주부터, 마지막이 이번 주.
+function getWeeklyHistory(profileName, n = 4) {
+  const { activity, daily } = getProfileData(profileName);
+  const sinceMonday = (new Date().getDay() + 6) % 7;
+  return Array.from({ length: n }, (_, i) => {
+    const weeksAgo = n - 1 - i;
+    const start = sinceMonday + weeksAgo * 7; // 그 주 월요일이 며칠 전인지
+    const keys = Array.from({ length: weeksAgo === 0 ? sinceMonday + 1 : 7 }, (_, d) => daysAgoKey(start - d));
+    return {
+      weeksAgo,
+      answers: keys.reduce((sum, k) => sum + (activity[k] || 0), 0),
+      days: keys.filter((k) => activity[k] > 0).length,
+      daily: keys.filter((k) => daily[k]).length,
+    };
+  });
+}
+
 function getWeekProgress(profileName) {
   const { activity, daily } = getProfileData(profileName);
   const keys = weekDateKeys();

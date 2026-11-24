@@ -34,6 +34,56 @@ function leaderboardHtml(currentName) {
     .join("");
 }
 
+// 혼자 쓰는 기기에서는 가족 순위 대신 나의 주간 기록(이번 주 vs 지난주, 최근 4주)을 보여 준다.
+function weeklyRecordHtml(profileName) {
+  const weeks = getWeeklyHistory(profileName, 4);
+  const [thisWeek, lastWeek] = [weeks[3], weeks[2]];
+  const delta = (now, before, unit) => {
+    const d = now - before;
+    if (!now && !before) return `<small class="week-delta">–</small>`;
+    if (d === 0) return `<small class="week-delta">지난주와 같아요</small>`;
+    return `<small class="week-delta ${d > 0 ? "up" : "down"}">지난주보다 ${d > 0 ? "▲" : "▼"}${Math.abs(d)}${unit}</small>`;
+  };
+  const left = 6 - ((new Date().getDay() + 6) % 7); // 이번 주 남은 날
+  const gap = lastWeek.answers - thisWeek.answers;
+  const message =
+    thisWeek.answers === 0 && lastWeek.answers === 0
+      ? "이번 주 첫 공부를 시작해 봐요! 🌱"
+      : gap < 0
+        ? `지난주보다 ${-gap}문제 더 풀었어요! 📈`
+        : gap === 0
+          ? "지난주와 같은 만큼 풀었어요. 하나만 더 풀면 기록을 넘어요! ✨"
+          : left > 0
+            ? `지난주 기록까지 ${gap}문제 남았어요. 남은 ${left}일 동안 힘내요! 💪`
+            : `지난주보다 ${gap}문제 적어요. 다음 주에 다시 도전해요! 💪`;
+  const max = Math.max(1, ...weeks.map((w) => w.answers));
+  const label = (w) => (w.weeksAgo === 0 ? "이번 주" : w.weeksAgo === 1 ? "지난주" : `${w.weeksAgo}주 전`);
+  return `
+    <section class="group">
+      <h2 class="group-title">📈 나의 주간 기록</h2>
+      <div class="settings-card week-card">
+        <div class="family-stats week-stats">
+          <div><b>${thisWeek.answers}</b><small>이번 주 문제</small>${delta(thisWeek.answers, lastWeek.answers, "")}</div>
+          <div><b>${thisWeek.days}일</b><small>공부한 날</small>${delta(thisWeek.days, lastWeek.days, "일")}</div>
+          <div><b>${thisWeek.daily}번</b><small>오늘의 학습</small>${delta(thisWeek.daily, lastWeek.daily, "번")}</div>
+        </div>
+        <p class="week-msg">${message}</p>
+        <div class="week-bars" role="img" aria-label="최근 4주 푼 문제 수: ${weeks.map((w) => `${label(w)} ${w.answers}`).join(", ")}">
+          ${weeks
+            .map(
+              (w) => `
+            <div class="week-bar${w.weeksAgo === 0 ? " now" : ""}">
+              <span class="week-bar-value">${w.answers}</span>
+              <span class="week-bar-fill" style="height:${Math.max(4, Math.round((w.answers / max) * 80))}px"></span>
+              <span class="week-bar-label">${label(w)}</span>
+            </div>`
+            )
+            .join("")}
+        </div>
+      </div>
+    </section>`;
+}
+
 function renderHomeScreen(root, ctx) {
   const { profileName, actions } = ctx;
   const profile = findMember(profileName);
@@ -147,11 +197,15 @@ function renderHomeScreen(root, ctx) {
           ${homeTile({ id: "examBtn", emoji: "📝", title: "단원 모의고사", meta: "20문제 · 100점" })}
         </div>
       </section>
-      <section class="group">
+      ${
+        getFamily().length > 1
+          ? `<section class="group">
         <h2 class="group-title">이번 주 가족 순위</h2>
         <ol class="rank-list">${leaderboardHtml(profileName)}</ol>
-        ${getFamily().length > 1 ? `<button class="secondary-btn" id="familyBtn">👨‍👩‍👧 가족 한눈에 보기</button>` : ""}
-      </section>
+        <button class="secondary-btn" id="familyBtn">👨‍👩‍👧 가족 한눈에 보기</button>
+      </section>`
+          : weeklyRecordHtml(profileName)
+      }
     </div>
   `;
 
