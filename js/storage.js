@@ -103,7 +103,7 @@ function removeFamilyMember(name) {
 
 // ── 기기 설정 ──
 function getSettings() {
-  return { sound: true, vibrate: true, theme: "auto", cardDirection: "en-ko", voice: "auto", speechRate: "normal", ...readJson(SETTINGS_KEY, {}) };
+  return { sound: true, vibrate: false, theme: "auto", cardDirection: "en-ko", voice: "auto", speechRate: "normal", ...readJson(SETTINGS_KEY, {}) };
 }
 
 function updateSettings(patch) {

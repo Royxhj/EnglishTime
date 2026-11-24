@@ -7,11 +7,11 @@ const SOUND_NOTES = {
 
 let audioContext = null;
 
-// 휴대폰 진동: 정답은 짧게 한 번, 오답은 두 번. 소리를 꺼 둬도 반응이 느껴진다.
+// 휴대폰 진동: 정답은 짧게 한 번, 오답은 두 번. 기본은 꺼져 있고 설정에서 켠다.
 const VIBRATE_PATTERNS = { correct: [30], wrong: [50, 60, 50], badge: [20, 40, 20, 40, 60] };
 
 function vibrate(name) {
-  if (getSettings().vibrate === false || !navigator.vibrate) return;
+  if (!getSettings().vibrate || !navigator.vibrate) return;
   try {
     navigator.vibrate(VIBRATE_PATTERNS[name] || 0);
   } catch {
