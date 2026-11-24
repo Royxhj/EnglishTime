@@ -1,0 +1,232 @@
+// 초등 저학년을 위한 것들: 그림 퀴즈(듣고 그림 고르기 · 그림 보고 단어 고르기), 짝 맞추기 게임,
+// 문제를 풀수록 자라는 캐릭터와 스티커북, 초1~2용 쉬운 홈.
+const PICTURE_QUIZ_SIZE = 10;
+
+// 그림만 보고는 뜻을 알기 어려운 기호 · 달력 · 화살표 같은 그림
+const VAGUE_EMOJIS = new Set(["🗓", "🗓️", "📅", "📆", "⏰", "⏳", "⌛", "❓", "❗", "➡️", "⬅️", "⬆️", "⬇️", "↩️", "🔁", "🔄", "✅", "❌", "✔️", "💬", "🗨️", "👉", "👈", "✨", "💡", "➕", "➖", "🔢", "📝", "📌"]);
+
+// 같은 단계에서 그림(이모지)이 겹치지 않고, 그림으로 알아볼 수 있는 단어만 쓴다 (보기 그림이 같으면 헷갈리니까)
+function pictureWordPool(levelId) {
+  const list = (WORD_BANK[levelId] || []).filter((w) => w.emoji && !VAGUE_EMOJIS.has(w.emoji) && /^[a-z ]+$/i.test(w.word));
+  const count = {};
+  list.forEach((w) => (count[w.emoji] = (count[w.emoji] || 0) + 1));
+  return list.filter((w) => count[w.emoji] === 1);
+}
+
+function pictureQuestion(w, levelId, kind) {
+  const pool = pictureWordPool(levelId).filter((x) => x.id !== w.id);
+  const others = shuffle(pool).slice(0, 3);
+  if (kind === "listen") {
+    return {
+      id: w.id,
+      kind: "word",
+      levelId,
+      label: "🔊 잘 듣고 알맞은 그림을 골라요",
+      q: "🔊",
+      big: true,
+      ko: null,
+      speakText: w.word,
+      bigChoices: true,
+      choices: shuffle([w.emoji, ...others.map((o) => o.emoji)]),
+      correctAnswer: w.emoji,
+      explain: `${w.emoji} = <b>${w.word}</b> (${w.meaningKo})`,
+      summary: `${w.emoji} <b>${w.word}</b> · ${w.meaningKo}`,
+      listenText: w.word,
+      selectedAnswer: null,
+    };
+  }
+  return {
+    id: w.id,
+    kind: "word",
+    levelId,
+    label: "그림에 맞는 영어 단어를 골라요",
+    q: w.emoji,
+    big: true,
+    bigEmoji: true,
+    ko: null,
+    choices: shuffle([w.word, ...others.map((o) => o.word)]),
+    correctAnswer: w.word,
+    explain: `${w.emoji} = <b>${w.word}</b> (${w.meaningKo})`,
+    summary: `${w.emoji} <b>${w.word}</b> · ${w.meaningKo}`,
+    listenText: w.word,
+    selectedAnswer: null,
+  };
+}
+
+function buildPictureQuestions(levelId, kind) {
+  return shuffle(pictureWordPool(levelId))
+    .slice(0, PICTURE_QUIZ_SIZE)
+    .map((w, i) => pictureQuestion(w, levelId, kind === "mix" ? (i % 2 ? "picture" : "listen") : kind));
+}
+
+function renderPictureQuizListScreen(root, { profileName, start, back }) {
+  const myLevel = myLevelOf(profileName) || "elementary-low";
+  const kidLevels = LEVELS.filter((lv) => lv.id.startsWith("elementary"));
+  const card = (lv, kind, emoji, title, desc) => {
+    const best = getSectionBest(profileName, "picture", `${kind}:${lv.id}`);
+    return `
+      <button class="level-card" data-level="${lv.id}" data-kind="${kind}" style="--accent:${lv.color}">
+        <span class="level-icon">${emoji}</span>
+        <span class="topic-text"><span class="level-label">${title}</span><span class="topic-summary">${desc} · ${shortLevelLabel(lv)}</span></span>
+        <span class="level-best${best ? "" : " level-best-empty"}">${ratioLabel(best)}</span>
+      </button>`;
+  };
+  const cards = (lv) => card(lv, "listen", "🎧", "듣고 그림 고르기", "소리를 듣고 그림을 눌러요") + card(lv, "picture", "🖼️", "그림 보고 단어 고르기", "그림에 맞는 영어를 골라요");
+  const { mine, others } = splitByMyLevel(kidLevels, (lv) => [lv.id], myLevel);
+  root.innerHTML = `
+    <div class="screen screen-picture">
+      <button class="back-btn" id="backBtn">← 홈</button>
+      <h1 class="title">🎧 그림 퀴즈</h1>
+      <p class="subtitle">글을 몰라도 소리와 그림으로 풀어요</p>
+      ${levelSplitHtml(mine.map(cards).join(""), others.map(cards).join(""), others.length)}
+    </div>`;
+  root.querySelector("#backBtn").addEventListener("click", back);
+  root.querySelectorAll("[data-kind]").forEach((b) => b.addEventListener("click", () => start(b.dataset.level, b.dataset.kind)));
+}
+
+// ── 짝 맞추기: 그림 카드와 영어 카드를 뒤집어 짝을 찾는다 ──
+const MEMORY_PAIRS = 6;
+
+function buildMemoryGame(levelId) {
+  const words = shuffle(pictureWordPool(levelId)).slice(0, MEMORY_PAIRS);
+  const cards = shuffle(words.flatMap((w) => [{ id: `${w.id}-p`, pair: w.id, face: w.emoji, kind: "picture", word: w }, { id: `${w.id}-w`, pair: w.id, face: w.word, kind: "word", word: w }]));
+  return { levelId, cards, open: [], matched: [], moves: 0, done: false };
+}
+
+function renderMemoryScreen(root, { game, actions }) {
+  const level = levelById(game.levelId);
+  root.innerHTML = `
+    <div class="screen screen-memory"${levelThemeStyle(level)}>
+      <div class="cw-top">
+        <button class="back-btn" id="quitBtn">× 그만하기</button>
+        <span class="cw-progress">찾은 짝 ${game.matched.length / 2} / ${MEMORY_PAIRS} · ${game.moves}번 뒤집음</span>
+      </div>
+      <h1 class="title">🃏 짝 맞추기</h1>
+      <p class="subtitle">그림과 영어 단어가 같은 짝을 찾아요</p>
+      <div class="memory-grid">
+        ${game.cards
+          .map((c, i) => {
+            const shown = game.open.includes(i) || game.matched.includes(i);
+            return `<button class="memory-card${shown ? " open" : ""}${game.matched.includes(i) ? " matched" : ""}${c.kind === "picture" ? " pic" : ""}" data-card="${i}" aria-label="${shown ? c.face : "뒤집힌 카드"}" ${game.matched.includes(i) ? "disabled" : ""}>
+              <span>${shown ? c.face : "❓"}</span>
+            </button>`;
+          })
+          .join("")}
+      </div>
+      ${
+        game.done
+          ? `<div class="result-banner correct" role="status">🎉 다 찾았어요! ${game.moves}번 만에 성공</div>
+             <div class="result-actions"><button class="primary-btn" id="againBtn">🔁 새 카드로 다시 하기</button></div>`
+          : ""
+      }
+    </div>`;
+  root.querySelector("#quitBtn").addEventListener("click", actions.quit);
+  root.querySelector("#againBtn")?.addEventListener("click", actions.again);
+  root.querySelectorAll("[data-card]").forEach((b) => b.addEventListener("click", () => actions.flip(Number(b.dataset.card))));
+}
+
+// ── 자라는 캐릭터와 스티커: 푼 문제 수만큼 자라고 모인다 ──
+const PET_STAGES = [
+  { min: 0, emoji: "🥚", name: "알" },
+  { min: 20, emoji: "🐣", name: "아기 병아리" },
+  { min: 80, emoji: "🐥", name: "병아리" },
+  { min: 200, emoji: "🐤", name: "꼬마 새" },
+  { min: 400, emoji: "🐔", name: "멋진 닭" },
+  { min: 800, emoji: "🦚", name: "공작새" },
+  { min: 1500, emoji: "🦄", name: "전설의 유니콘" },
+];
+const STICKERS = "🌟🍎🐶🐱🚗🎈🍦🦋🌈🐠🍓🚀🐻🌻🎁🦁🍩🐢⚽🎨🐧🍉🚂🐰🌙🦖🍪🎸🐳👑".match(/\p{Extended_Pictographic}/gu);
+const STICKER_EVERY = 15;
+
+function petStatus(profileName) {
+  const total = getProfileData(profileName).totalAnswered || 0;
+  let stage = PET_STAGES[0];
+  for (const s of PET_STAGES) if (total >= s.min) stage = s;
+  const next = PET_STAGES[PET_STAGES.indexOf(stage) + 1];
+  const stickers = Math.min(STICKERS.length, Math.floor(total / STICKER_EVERY));
+  return { total, stage, next, left: next ? next.min - total : 0, stickers, toNextSticker: STICKER_EVERY - (total % STICKER_EVERY) };
+}
+
+function petCardHtml(profileName) {
+  const s = petStatus(profileName);
+  const pct = s.next ? Math.round(((s.total - s.stage.min) / (s.next.min - s.stage.min)) * 100) : 100;
+  return `
+    <section class="pet-card">
+      <span class="pet-emoji" aria-hidden="true">${s.stage.emoji}</span>
+      <div class="pet-text">
+        <b>내 친구: ${s.stage.name}</b>
+        <small>${s.next ? `문제 ${s.left}개 더 풀면 ${s.next.emoji}로 자라요!` : "최고 단계까지 자랐어요! 🎉"}</small>
+        <span class="progress-track"><span class="progress-fill" style="width:${pct}%"></span></span>
+      </div>
+      <button class="pet-sticker-btn" id="stickerBtn" aria-label="스티커북">📒 <b>${s.stickers}</b></button>
+    </section>`;
+}
+
+function renderStickerScreen(root, { profileName, back }) {
+  const s = petStatus(profileName);
+  root.innerHTML = `
+    <div class="screen screen-stickers">
+      <button class="back-btn" id="backBtn">← 홈</button>
+      <h1 class="title">📒 스티커북</h1>
+      <p class="subtitle">문제를 ${STICKER_EVERY}개 풀 때마다 스티커가 하나씩 생겨요 · ${s.stickers} / ${STICKERS.length}</p>
+      <section class="pet-big">
+        <span class="pet-emoji">${s.stage.emoji}</span>
+        <p><b>${s.stage.name}</b> · 지금까지 ${s.total}문제</p>
+        <p class="settings-help">${s.next ? `${s.left}문제 더 풀면 ${s.next.emoji} ${s.next.name}(으)로 자라요` : "최고 단계예요!"} · 다음 스티커까지 ${s.toNextSticker}문제</p>
+      </section>
+      <div class="sticker-grid">
+        ${STICKERS.map((e, i) => `<span class="sticker${i < s.stickers ? " got" : ""}" aria-label="${i < s.stickers ? e : "아직 없는 스티커"}">${i < s.stickers ? e : "?"}</span>`).join("")}
+      </div>
+      <h2 class="section-title">자라는 순서</h2>
+      <p class="pet-stages">${PET_STAGES.map((p) => `<span class="${s.total >= p.min ? "got" : ""}">${p.emoji}<small>${p.min}</small></span>`).join("")}</p>
+    </div>`;
+  root.querySelector("#backBtn").addEventListener("click", back);
+}
+
+// ── 초1~2용 쉬운 홈: 큰 버튼 4개 ──
+let kidsShowFullHome = false;
+
+function renderKidsHome(root, { profileName, actions }) {
+  const profile = findMember(profileName);
+  const daily = getStats(profileName).dailyToday;
+  const next = nextStep(profileName);
+  const big = (id, emoji, title, desc, done) => `
+    <button class="kids-btn${done ? " done" : ""}" id="${id}">
+      <span class="kids-emoji">${done ? "✅" : emoji}</span>
+      <b>${title}</b>
+      <small>${desc}</small>
+    </button>`;
+  root.innerHTML = `
+    <div class="screen screen-home screen-kids" style="--accent:${profile.color}">
+      <div class="home-hello">
+        <span class="home-avatar">${profile.emoji}</span>
+        <h1 class="home-title">${profileName}, 안녕! 👋</h1>
+        ${getFamily().length > 1 ? `<button class="icon-btn" id="backBtn" aria-label="프로필 바꾸기">👥</button>` : ""}
+      </div>
+      ${petCardHtml(profileName)}
+      <div class="kids-grid">
+        ${big("kidsDaily", "☀️", "오늘 공부", daily ? "다 했어요! 한 번 더?" : "5분이면 끝!", !!daily)}
+        ${big("kidsPicture", "🎧", "듣고 고르기", "소리 듣고 그림 찾기")}
+        ${big("kidsPhonics", "🔤", "파닉스", "글자 소리 배우기")}
+        ${big("kidsMemory", "🃏", "짝 맞추기", "카드 뒤집기 게임")}
+      </div>
+      <button class="next-card" id="kidsNext">
+        <span class="next-emoji">${next.emoji}</span>
+        <span class="next-text"><span class="next-label">▶ 이어서 하기</span><span class="next-title">${next.title}</span></span>
+        <span class="next-go" aria-hidden="true">›</span>
+      </button>
+      <button class="link-btn kids-parent" id="fullHomeBtn">👨‍👩‍👧 전체 메뉴 보기 (부모님)</button>
+    </div>`;
+  const bind = (id, fn) => root.querySelector(`#${id}`)?.addEventListener("click", fn);
+  bind("backBtn", actions.backToProfile);
+  bind("stickerBtn", actions.openStickers);
+  bind("kidsDaily", actions.startDaily);
+  bind("kidsPicture", () => actions.startPicture("elementary-low", "listen"));
+  bind("kidsPhonics", actions.openPhonics);
+  bind("kidsMemory", () => actions.startMemory("elementary-low"));
+  bind("kidsNext", () => actions.openNext(next));
+  bind("fullHomeBtn", () => {
+    kidsShowFullHome = true;
+    actions.refresh();
+  });
+}

@@ -119,6 +119,10 @@ function mcSourceInfo(source) {
     const set = findIrregularSet(source.id);
     return { label: `🔁 ${set.title}`, level: levelById(set.levelId), quitTo: "irregular", listScreen: "irregular" };
   }
+  if (source.type === "picture") {
+    const [kind, levelId] = source.id.split(":");
+    return { label: kind === "listen" ? "🎧 듣고 그림 고르기" : "🖼️ 그림 보고 단어 고르기", level: levelById(levelId), quitTo: "pictureList", listScreen: "pictureList" };
+  }
   if (source.type === "email") return { label: "📧 업무 이메일", level: levelById("adult"), quitTo: "practiceList", listScreen: "practiceList" };
   if (source.type === "exam") {
     const grade = BASIC_GRADES.find((g) => g.id === source.id);
@@ -166,6 +170,7 @@ function nextMcQuestion() {
   if (mc.source.type === "grammar") isNewBest = recordSectionResult(currentProfile(), "grammar", mc.source.id, correct, total);
   if (mc.source.type === "reading") isNewBest = recordSectionResult(currentProfile(), "reading", mc.source.id, correct, total);
   if (mc.source.type === "irregular") isNewBest = recordSectionResult(currentProfile(), "irregular", mc.source.id, correct, total);
+  if (mc.source.type === "picture") isNewBest = recordSectionResult(currentProfile(), "picture", mc.source.id, correct, total);
   if (mc.source.type === "email") isNewBest = recordSectionResult(currentProfile(), "email", "all", correct, total);
   if (mc.source.type === "exam") isNewBest = recordSectionResult(currentProfile(), "exam", mc.source.id, correct, total);
   if (mc.source.type === "idiom" || mc.source.type === "affix") isNewBest = recordSectionResult(currentProfile(), mc.source.type, mc.source.id, correct, total);
@@ -208,6 +213,18 @@ function mcResultActions(source, hasWrong) {
         { ...retry, onClick: () => startIrregularTest(source.id) },
         { label: "🔁 변화표 다시 보기", onClick: () => set({ screen: "irregular" }) },
         ...(next ? [{ label: `다음 단계: ${next.emoji} ${next.title}`, onClick: () => startIrregularTest(next.id) }] : []),
+        { label: "🏠 홈으로", onClick: goHome },
+      ],
+    };
+  }
+  if (source.type === "picture") {
+    const [kind, levelId] = source.id.split(":");
+    const other = kind === "listen" ? "picture" : "listen";
+    return {
+      actions: [
+        { ...retry, onClick: () => startPicture(levelId, kind) },
+        { label: other === "listen" ? "🎧 듣고 그림 고르기" : "🖼️ 그림 보고 단어 고르기", onClick: () => startPicture(levelId, other) },
+        { label: "🃏 짝 맞추기 게임", onClick: () => startMemory(levelId) },
         { label: "🏠 홈으로", onClick: goHome },
       ],
     };
@@ -337,6 +354,48 @@ function nextChunk() {
   set({ chunk: { ...chunk, isNewBest }, screen: "chunkResult" });
   announceBadges(checkNewBadges(currentProfile()));
 }
+
+// ── 초등: 그림 퀴즈 · 짝 맞추기 ──
+const startPicture = (levelId, kind) => startMc({ type: "picture", id: `${kind}:${levelId}` }, buildPictureQuestions(levelId, kind));
+const startMemory = (levelId) => set({ memory: buildMemoryGame(levelId), screen: "memory" });
+
+let memoryBusy = false;
+const memoryActions = {
+  flip: (i) => {
+    const { memory } = store.getState();
+    if (memoryBusy || memory.done || memory.open.includes(i) || memory.matched.includes(i)) return;
+    const card = memory.cards[i];
+    if (card.kind === "word") speak(card.word.word, { rate: 0.85 });
+    memory.open.push(i);
+    if (memory.open.length === 2) {
+      memory.moves += 1;
+      const [a, b] = memory.open.map((k) => memory.cards[k]);
+      if (a.pair === b.pair) {
+        memory.matched.push(...memory.open);
+        memory.open = [];
+        playSound("correct");
+        speak(a.word.word, { rate: 0.85 });
+        recordActivity(currentProfile());
+        if (memory.matched.length === memory.cards.length) {
+          memory.done = true;
+          recordSectionResult(currentProfile(), "memory", memory.levelId, MEMORY_PAIRS, memory.moves);
+          burstConfetti(40);
+          announceBadges(checkNewBadges(currentProfile()));
+        }
+      } else {
+        memoryBusy = true;
+        setTimeout(() => {
+          memory.open = [];
+          memoryBusy = false;
+          set({});
+        }, 900);
+      }
+    }
+    set({});
+  },
+  again: () => startMemory(store.getState().memory.levelId),
+  quit: () => set({ screen: "home" }),
+};
 
 // ── 실전 연습: 회화 롤플레이 · 업무 이메일 ──
 const startRoleplay = (id) => set({ roleplay: buildRoleplaySession(id), screen: "roleplay" });
@@ -772,7 +831,8 @@ function parentScreen(state) {
     case "level": case "readingList": case "chunkIntro":
     case "settings": case "wrongNote": case "report": case "vocab": case "grammarNotes": case "phonics": case "talk":
     case "irregular": case "verbPattern": case "speakingList": case "listeningList": case "writingList":
-    case "idioms": case "affixes": case "examList": case "goals": case "crosswordList": case "family": case "practiceList": return "home";
+    case "idioms": case "affixes": case "examList": case "goals": case "crosswordList": case "family": case "practiceList":
+    case "pictureList": case "stickers": case "memory": return "home";
     case "roleplayResult": return "practiceList";
     case "crossword": return "crosswordList";
     case "speakingResult": return "speakingList";
@@ -818,7 +878,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -979,6 +1039,11 @@ function render() {
             });
           },
           openPractice: () => set({ screen: "practiceList" }),
+          openPicture: () => set({ screen: "pictureList" }),
+          openStickers: () => set({ screen: "stickers" }),
+          startPicture,
+          startMemory,
+          refresh: () => set({}),
           openNext: openNextStep,
           openAffixes: () => set({ screen: "affixes" }),
           openReadingPractice: () => set({ readingMode: "read", screen: "readingList" }),
@@ -1155,6 +1220,10 @@ function render() {
         openLesson: startBasic,
         back: goHome,
       }),
+
+    pictureList: () => renderPictureQuizListScreen(root, { profileName: state.profileName, start: startPicture, back: goHome }),
+    memory: () => renderMemoryScreen(root, { game: state.memory, actions: memoryActions }),
+    stickers: () => renderStickerScreen(root, { profileName: state.profileName, back: goHome }),
 
     practiceList: () => renderPracticeListScreen(root, { profileName: state.profileName, startRoleplay, startEmail, back: goHome }),
     roleplay: () => renderRoleplayScreen(root, { session: state.roleplay, actions: roleplayActions }),

@@ -29,7 +29,7 @@ function mcContext(ctx, open) {
 
 function renderMcQuestionPhase(root, ctx) {
   const { question, index, level, actions } = ctx;
-  const isLong = question.choices.some((c) => c.length > LONG_CHOICE_LENGTH);
+  const isLong = !question.bigChoices && question.choices.some((c) => c.length > LONG_CHOICE_LENGTH);
 
   root.innerHTML = `
     <div class="screen screen-quiz"${levelThemeStyle(level)}>
@@ -37,8 +37,16 @@ function renderMcQuestionPhase(root, ctx) {
       ${mcContext(ctx, true)}
       <div class="question-card">
         <p class="question-label">${question.label}</p>
-        <p class="${question.big ? "question-meaning" : "grammar-question"}">${withBlank(question.q)}</p>
+        <p class="${question.bigEmoji ? "question-emoji" : question.big ? "question-meaning" : "grammar-question"}">${withBlank(question.q)}</p>
         ${question.ko ? `<p class="grammar-question-ko">${question.ko}</p>` : ""}
+        ${
+          question.speakText
+            ? `<div class="listen-row">
+          <button class="listen-btn" id="wordSayBtn" ${speechSupported ? "" : "disabled"}>🔊 다시 듣기</button>
+          <button class="listen-btn" id="wordSlowBtn" ${speechSupported ? "" : "disabled"}>🐢 천천히</button>
+        </div>`
+            : ""
+        }
         ${
           question.dialog
             ? `<div class="listen-row">
@@ -48,7 +56,7 @@ function renderMcQuestionPhase(root, ctx) {
             : ""
         }
       </div>
-      <div class="choice-grid${isLong ? " choice-grid--list" : ""}">
+      <div class="choice-grid${question.bigChoices ? " choice-grid--emoji" : isLong ? " choice-grid--list" : ""}">
         ${question.choices
           .map((c, i) => `<button class="choice-btn${isLong ? " choice-btn--long" : ""}" data-index="${i}">${c}</button>`)
           .join("")}
@@ -60,6 +68,15 @@ function renderMcQuestionPhase(root, ctx) {
     stopSpeaking();
     actions.quit();
   });
+  if (question.speakText) {
+    root.querySelector("#wordSayBtn").addEventListener("click", () => speak(question.speakText, { rate: 0.85 }));
+    root.querySelector("#wordSlowBtn").addEventListener("click", () => speak(question.speakText, { rate: 0.55 }));
+    // 문제를 열면 한 번 자동으로 들려준다
+    if (!question.autoPlayed) {
+      question.autoPlayed = true;
+      setTimeout(() => speak(question.speakText, { rate: 0.85 }), 300);
+    }
+  }
   if (question.dialog) {
     root.querySelector("#dialogBtn").addEventListener("click", () => playDialog(question.dialog));
     root.querySelector("#dialogSlowBtn").addEventListener("click", () => playDialog(question.dialog, { rate: 0.65 }));
@@ -104,7 +121,7 @@ function renderMcDetailPhase(root, ctx) {
       </div>
 
       <div class="explain-card">
-        <p class="grammar-question">${question.big ? question.q : withBlank(question.q, question.correctAnswer)}</p>
+        <p class="${question.bigEmoji ? "question-emoji" : "grammar-question"}">${question.speakText ? `${question.correctAnswer} <b>${question.speakText}</b>` : question.big ? question.q : withBlank(question.q, question.correctAnswer)}</p>
         ${question.ko ? `<p class="grammar-question-ko">${question.ko}</p>` : ""}
         ${!isCorrect ? `<p class="explain-mine">내가 고른 답: <b>${question.selectedAnswer}</b></p>` : ""}
         <div class="explain-body">

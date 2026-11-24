@@ -149,6 +149,11 @@ function todayCardHtml(profileName, { daily, dueWrong, wrongTotal, next }) {
 
 function renderHomeScreen(root, ctx) {
   const { profileName, actions } = ctx;
+  // 초1~2는 큰 버튼 4개짜리 쉬운 홈 (부모님은 "전체 메뉴 보기"로 바꿀 수 있다)
+  if (getPreferredLevel(profileName) === "elementary-low" && !kidsShowFullHome) {
+    renderKidsHome(root, ctx);
+    return;
+  }
   const profile = findMember(profileName);
   const stats = getStats(profileName);
   const badgeCount = evaluateBadges(profileName).filter((b) => b.earned).length;
@@ -188,6 +193,8 @@ function renderHomeScreen(root, ctx) {
         </div>
       </div>
 
+      ${level === "elementary-low" ? `<button class="link-btn" id="kidsHomeBtn">🧸 아이용 쉬운 화면으로</button>` : ""}
+      ${isKid ? petCardHtml(profileName) : ""}
       ${levelProgressHtml(profileName)}
       ${todayCardHtml(profileName, { daily, dueWrong, wrongTotal, next })}
 
@@ -219,6 +226,8 @@ function renderHomeScreen(root, ctx) {
       <section class="group">
         <h2 class="group-title">✏️ 문제 풀기</h2>
         <div class="tile-grid">
+          ${isKid ? homeTile({ id: "pictureBtn", emoji: "🎧", title: "그림 퀴즈", meta: "듣고 · 보고 고르기" }) : ""}
+          ${isKid ? homeTile({ id: "memoryBtn", emoji: "🃏", title: "짝 맞추기", meta: "카드 뒤집기 게임" }) : ""}
           ${homeTile({ id: "wordsBtn", emoji: "✏️", title: "단어 시험", meta: wrongWords > 0 ? `오답 ${wrongWords}개` : wordBest !== null ? `최고 ${wordBest}점` : "고르기 · 철자 · 받아쓰기", warn: wrongWords > 0 })}
           ${homeTile({ id: "chunksBtn", emoji: "✂️", title: "끊어 읽기", meta: `${chunkDone} / ${CHUNK_SETS.length} 완료` })}
           ${homeTile({ id: "crosswordBtn", emoji: "🧩", title: "가로세로 낱말", meta: "매번 새 퍼즐" })}
@@ -240,6 +249,13 @@ function renderHomeScreen(root, ctx) {
   // 단계에 따라 숨긴 메뉴도 있어서 없으면 건너뛴다
   const bind = (id, fn) => root.querySelector(`#${id}`)?.addEventListener("click", fn);
   bind("backBtn", actions.backToProfile);
+  bind("kidsHomeBtn", () => {
+    kidsShowFullHome = false;
+    actions.refresh();
+  });
+  bind("stickerBtn", actions.openStickers);
+  bind("pictureBtn", actions.openPicture);
+  bind("memoryBtn", () => actions.startMemory(level && level.startsWith("elementary") ? level : "elementary-low"));
   bind("todayDaily", actions.startDaily);
   bind("todayReview", () => (daily ? actions.openWrongNote() : actions.startDaily()));
   bind("todayNext", () => actions.openNext(next));

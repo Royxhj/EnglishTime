@@ -1418,6 +1418,49 @@ button {
 .family-stats small { font-size: 11px; color: var(--muted); line-height: 1.3; }
 .family-line { margin: 0; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
 
+/* 그림 퀴즈 */
+.question-emoji { font-size: 84px; line-height: 1.15; margin: 6px 0; }
+.choice-grid--emoji .choice-btn { font-size: 52px; min-height: 104px; line-height: 1; }
+
+/* 짝 맞추기 */
+.memory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0; }
+.memory-card { aspect-ratio: 1 / 1; border: none; border-radius: 16px; background: var(--primary); color: #fff; font-size: 34px; font-weight: 800; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; padding: 6px; cursor: pointer; transition: transform 0.2s; overflow-wrap: anywhere; }
+.memory-card.open { background: var(--card-bg); color: var(--text); font-size: 20px; transform: rotateY(0); }
+.memory-card.open.pic { font-size: 46px; }
+.memory-card.matched { background: color-mix(in srgb, var(--correct) 20%, var(--card-bg)); outline: 3px solid var(--correct); }
+@media (prefers-reduced-motion: reduce) { .memory-card { transition: none; } }
+
+/* 자라는 캐릭터 · 스티커북 */
+.pet-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius); background: linear-gradient(135deg, #fff3c4, var(--card-bg)); box-shadow: var(--shadow); }
+:root[data-theme="dark"] .pet-card { background: linear-gradient(135deg, #4a3f1c, var(--card-bg)); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pet-card { background: linear-gradient(135deg, #4a3f1c, var(--card-bg)); } }
+.pet-emoji { font-size: 48px; line-height: 1; }
+.pet-text { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.pet-text small { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.pet-text .progress-track { height: 8px; }
+.pet-text .progress-fill { background: #f4a300; }
+.pet-sticker-btn { border: none; background: var(--card-bg); border-radius: 12px; padding: 8px 10px; font-size: 18px; box-shadow: var(--shadow); cursor: pointer; color: var(--text); }
+.pet-big { text-align: center; padding: 16px; border-radius: var(--radius); background: var(--card-bg); box-shadow: var(--shadow); margin-bottom: 14px; }
+.pet-big .pet-emoji { font-size: 90px; }
+.sticker-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 16px; }
+.sticker { aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: var(--surface-2); color: var(--muted); font-size: 26px; font-weight: 800; }
+.sticker.got { background: var(--card-bg); box-shadow: var(--shadow); }
+.pet-stages { display: flex; flex-wrap: wrap; gap: 10px; font-size: 30px; }
+.pet-stages span { display: flex; flex-direction: column; align-items: center; opacity: 0.35; }
+.pet-stages span.got { opacity: 1; }
+.pet-stages small { font-size: 11px; color: var(--muted); }
+
+/* 초1~2 쉬운 홈 */
+.screen-kids .home-hello { display: flex; align-items: center; gap: 10px; }
+.screen-kids .home-hello .icon-btn { margin-left: auto; }
+.kids-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.kids-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 150px; padding: 14px 8px; border: none; border-radius: 22px; background: var(--card-bg); box-shadow: var(--shadow); color: var(--text); cursor: pointer; text-align: center; }
+.kids-btn .kids-emoji { font-size: 54px; line-height: 1.1; }
+.kids-btn b { font-size: 20px; }
+.kids-btn small { font-size: 13px; color: var(--muted); }
+.kids-btn.done { background: color-mix(in srgb, var(--correct) 14%, var(--card-bg)); }
+.kids-parent { align-self: center; }
+
 /* 하단 탭 바 */
 #app.with-tabbar { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 .tab-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: grid; grid-template-columns: repeat(5, 1fr); padding: 4px 4px calc(4px + env(safe-area-inset-bottom)); background: var(--card-bg); border-top: 1px solid var(--border); box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06); }
