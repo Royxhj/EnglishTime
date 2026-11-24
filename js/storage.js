@@ -103,7 +103,7 @@ function removeFamilyMember(name) {
 
 // ── 기기 설정 ──
 function getSettings() {
-  return { sound: true, theme: "auto", cardDirection: "en-ko", voice: "auto", speechRate: "normal", ...readJson(SETTINGS_KEY, {}) };
+  return { sound: true, vibrate: true, theme: "auto", cardDirection: "en-ko", voice: "auto", speechRate: "normal", ...readJson(SETTINGS_KEY, {}) };
 }
 
 function updateSettings(patch) {
@@ -284,6 +284,7 @@ function getLastWordLevel(profileName) {
 // ── 문법 · 독해 · 끊어 읽기 (section별 정답률 최고 기록) ──
 function recordSectionResult(profileName, section, id, correct, total) {
   return updateProfile(profileName, (profile) => {
+    profile.lessonDay = dateKey(); // 홈 "오늘 할 일"의 '이어서 하기' 체크용
     const best = profile[section].best;
     const prev = best[id];
     const isNewBest = !prev || correct / total > prev.correct / prev.total;
@@ -558,6 +559,7 @@ function importBackup(data) {
     if (choices.includes(data.settings?.[key])) settings[key] = data.settings[key];
   }
   if (typeof data.settings?.sound === "boolean") settings.sound = data.settings.sound;
+  if (typeof data.settings?.vibrate === "boolean") settings.vibrate = data.settings.vibrate;
   if (typeof data.settings?.readingSlow === "boolean") settings.readingSlow = data.settings.readingSlow;
 
   writeJson(FAMILY_KEY, family);

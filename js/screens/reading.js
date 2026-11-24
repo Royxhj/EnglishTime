@@ -27,7 +27,8 @@ function glossedSentence(en, glossary) {
 }
 
 // mode: read(읽기 연습) | quiz(독해 문제)
-function renderReadingListScreen(root, { profileName, mode, openPassage, startQuiz, backToHome }) {
+// 📖 읽기: 같은 지문 목록에서 '읽기 연습'과 '독해 문제'를 바꿔 가며 쓴다.
+function renderReadingListScreen(root, { profileName, mode, openPassage, startQuiz, backToHome, setMode }) {
   const isRead = mode === "read";
   const doneCount = READING_PASSAGES.filter((p) =>
     isRead ? isPassageRead(profileName, p.id) : getSectionBest(profileName, "reading", p.id)
@@ -36,7 +37,11 @@ function renderReadingListScreen(root, { profileName, mode, openPassage, startQu
   root.innerHTML = `
     <div class="screen screen-reading-list">
       <button class="back-btn" id="backBtn">← 홈</button>
-      <h1 class="title">${isRead ? "📖 읽기 연습" : "📰 독해 문제"}</h1>
+      <h1 class="title">📖 읽기</h1>
+      <div class="segmented segmented--wide" role="tablist" aria-label="읽기 방식">
+        <button class="segmented-btn${isRead ? " active" : ""}" data-rmode="read" role="tab" aria-selected="${isRead}">🔊 읽기 연습</button>
+        <button class="segmented-btn${isRead ? "" : " active"}" data-rmode="quiz" role="tab" aria-selected="${!isRead}">📰 독해 문제</button>
+      </div>
       <p class="subtitle">${isRead ? "듣고 따라 읽으며 지문에 익숙해져요" : "글을 읽고 내용을 확인하는 문제를 풀어요"} · ${doneCount} / ${READING_PASSAGES.length} ${isRead ? "읽음" : "완료"}</p>
 
       ${(() => {
@@ -79,6 +84,7 @@ function renderReadingListScreen(root, { profileName, mode, openPassage, startQu
   `;
 
   root.querySelector("#backBtn").addEventListener("click", backToHome);
+  root.querySelectorAll("[data-rmode]").forEach((b) => b.addEventListener("click", () => setMode?.(b.dataset.rmode)));
   root.querySelectorAll(".passage-card").forEach((btn) => {
     btn.addEventListener("click", () => (isRead ? openPassage(btn.dataset.id) : startQuiz(btn.dataset.id)));
   });

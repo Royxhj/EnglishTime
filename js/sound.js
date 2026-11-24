@@ -7,7 +7,20 @@ const SOUND_NOTES = {
 
 let audioContext = null;
 
+// 휴대폰 진동: 정답은 짧게 한 번, 오답은 두 번. 소리를 꺼 둬도 반응이 느껴진다.
+const VIBRATE_PATTERNS = { correct: [30], wrong: [50, 60, 50], badge: [20, 40, 20, 40, 60] };
+
+function vibrate(name) {
+  if (getSettings().vibrate === false || !navigator.vibrate) return;
+  try {
+    navigator.vibrate(VIBRATE_PATTERNS[name] || 0);
+  } catch {
+    // 진동을 못 해도 학습에는 영향 없음
+  }
+}
+
 function playSound(name) {
+  vibrate(name);
   if (!getSettings().sound) return;
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   if (!AudioCtx) return;

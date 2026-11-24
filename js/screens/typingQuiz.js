@@ -1,7 +1,7 @@
 const TYPING_REVEAL_DELAY_MS = 600;
 
 const WORD_MODES = {
-  choice: { emoji: "📚", title: "단어 퀴즈", desc: "뜻을 보고 알맞은 단어 고르기" },
+  choice: { emoji: "📚", title: "뜻 보고 고르기", desc: "뜻을 보고 알맞은 단어 고르기" },
   spelling: { emoji: "⌨️", title: "철자 쓰기", desc: "뜻을 보고 영어 단어를 직접 쓰기" },
   dictation: { emoji: "🎧", title: "받아쓰기", desc: "발음을 듣고 영어 단어를 쓰기" },
 };

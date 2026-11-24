@@ -94,6 +94,16 @@ function renderSettingsScreen(root, { profileName, actions }) {
             <span class="switch-knob"></span>
           </button>
         </div>
+        ${
+          navigator.vibrate
+            ? `<div class="settings-line">
+          <span>진동 (정답 · 오답)</span>
+          <button class="switch${settings.vibrate ? " on" : ""}" id="vibrateSwitch" role="switch" aria-checked="${settings.vibrate}" aria-label="진동">
+            <span class="switch-knob"></span>
+          </button>
+        </div>`
+            : ""
+        }
       </section>
 
       <section class="settings-card">
@@ -180,6 +190,15 @@ function renderSettingsScreen(root, { profileName, actions }) {
     voiceTest();
   });
   voiceBtn.addEventListener("click", voiceTest);
+
+  const vibrateSwitch = root.querySelector("#vibrateSwitch");
+  vibrateSwitch?.addEventListener("click", () => {
+    const on = !getSettings().vibrate;
+    updateSettings({ vibrate: on });
+    vibrateSwitch.classList.toggle("on", on);
+    vibrateSwitch.setAttribute("aria-checked", String(on));
+    if (on) vibrate("correct");
+  });
 
   const soundSwitch = root.querySelector("#soundSwitch");
   soundSwitch.addEventListener("click", () => {

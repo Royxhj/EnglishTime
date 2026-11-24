@@ -81,7 +81,7 @@ function basicGradeToOpen(profileName) {
   return (BASIC_GRADES.find(unfinished) || BASIC_GRADES[0]).id;
 }
 
-function renderGrammarNotesScreen(root, { profileName, openNote, openBasic, back }) {
+function renderGrammarNotesScreen(root, { profileName, openNote, openBasic, back, openQuiz }) {
   const readCount = GRAMMAR_TOPICS.filter((t) => isNoteRead(profileName, t.id)).length;
   const basicDone = BASIC_TOPICS.filter((t) => getSectionBest(profileName, "basics", t.id)).length;
   const collapseAdvanced = isElementaryLearner(profileName);
@@ -90,8 +90,8 @@ function renderGrammarNotesScreen(root, { profileName, openNote, openBasic, back
   root.innerHTML = `
     <div class="screen screen-notes">
       <button class="back-btn" id="backBtn">← 홈</button>
-      <h1 class="title">📘 문법 노트</h1>
-      <p class="subtitle">쉬운 기초부터 차근차근 배워요</p>
+      <h1 class="title">📘 문법</h1>
+      <p class="subtitle">쉬운 기초부터 차근차근 배우고, 문제로 확인해요</p>
 
       <section class="group">
         <h2 class="group-title">🧸 단계별 문법 · 초등~성인 (${basicDone} / ${BASIC_TOPICS.length})</h2>
@@ -129,6 +129,7 @@ function renderGrammarNotesScreen(root, { profileName, openNote, openBasic, back
       <details class="advanced-notes" id="advancedNotes" ${collapseAdvanced ? "" : "open"}>
         <summary class="group-title">📘 독해 문법 요약 · 고등학교까지 (${readCount} / ${GRAMMAR_TOPICS.length} 이해함)</summary>
         ${collapseAdvanced ? `<p class="settings-help">기초 문법을 먼저 익힌 뒤에 보면 좋아요.</p>` : ""}
+      <button class="secondary-btn" id="grammarQuizBtn">✏️ 독해 문법 문제 풀기 (${GRAMMAR_TOPICS.length}주제 · 오답 복습)</button>
       <input class="text-input" id="noteSearch" type="search" placeholder="🔍 찾고 싶은 문법 (예: 관계대명사, which, 현재완료)" autocomplete="off" />
       <p class="settings-help" id="noteInfo" hidden></p>
       <div class="level-grid" id="noteList">
@@ -153,6 +154,7 @@ function renderGrammarNotesScreen(root, { profileName, openNote, openBasic, back
   `;
 
   root.querySelectorAll("[data-basic]").forEach((btn) => btn.addEventListener("click", () => openBasic(btn.dataset.basic)));
+  root.querySelector("#grammarQuizBtn")?.addEventListener("click", openQuiz);
   root.querySelectorAll(".basic-grade").forEach((el) =>
     el.addEventListener("toggle", () => {
       if (el.open) basicGradeChoice = el.dataset.grade;

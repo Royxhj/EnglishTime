@@ -5,7 +5,7 @@ const MEMBER_NAME_MAX = 8;
 // member가 null이면 새 가족 추가
 function renderMemberEditScreen(root, { member, onSave, onDelete, onCancel }) {
   const isNew = !member;
-  const draft = member ? { ...member } : { name: "", emoji: MEMBER_EMOJIS[4], color: MEMBER_COLORS[4] };
+  const draft = member ? { ...member } : { name: "", emoji: MEMBER_EMOJIS[4], color: MEMBER_COLORS[4], level: LEVELS[0].id };
   const canDelete = !isNew;
 
   root.innerHTML = `
@@ -29,6 +29,16 @@ function renderMemberEditScreen(root, { member, onSave, onDelete, onCancel }) {
         <div class="picker-grid picker-grid--colors" role="radiogroup" aria-label="색깔">
           ${MEMBER_COLORS.map((c) => `<button type="button" class="color-dot${c === draft.color ? " active" : ""}" data-color="${c}" style="--dot:${c}" role="radio" aria-checked="${c === draft.color}" aria-label="색 ${c}"></button>`).join("")}
         </div>
+
+        ${
+          isNew
+            ? `<p class="field-label">공부할 단계</p>
+        <p class="settings-help">고른 단계에 맞춰 오늘의 학습과 "오늘 할 일"이 정해져요. 나중에 설정에서 바꿀 수 있어요.</p>
+        <div class="level-pick" role="radiogroup" aria-label="공부할 단계">
+          ${LEVELS.map((lv) => `<button type="button" class="pick-chip${lv.id === draft.level ? " active" : ""}" data-level="${lv.id}" role="radio" aria-checked="${lv.id === draft.level}">${lv.emoji} ${shortLevelLabel(lv)}</button>`).join("")}
+        </div>`
+            : ""
+        }
 
         <button type="submit" class="primary-btn">${isNew ? "추가하기" : "저장하기"}</button>
       </form>
@@ -61,6 +71,7 @@ function renderMemberEditScreen(root, { member, onSave, onDelete, onCancel }) {
   };
   bindPicker("[data-emoji]", "emoji");
   bindPicker("[data-color]", "color");
+  bindPicker("[data-level]", "level");
 
   root.querySelector("#memberForm").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -74,7 +85,7 @@ function renderMemberEditScreen(root, { member, onSave, onDelete, onCancel }) {
       nameInput.focus();
       return;
     }
-    onSave({ name, emoji: draft.emoji, color: draft.color });
+    onSave({ name, emoji: draft.emoji, color: draft.color, ...(isNew ? { level: draft.level } : {}) });
   });
 
   root.querySelector("#backBtn").addEventListener("click", onCancel);

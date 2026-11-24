@@ -84,41 +84,96 @@ function weeklyRecordHtml(profileName) {
     </section>`;
 }
 
+// 단계 진행률 카드: 내 단계에서 문법 · 대화 · 읽기 · 듣기 · 단어를 얼마나 했는지 한 막대로 보여 준다.
+function levelProgressHtml(profileName) {
+  const prog = levelProgress(profileName);
+  if (!prog) return "";
+  const nextLevel = LEVELS[LEVELS.findIndex((lv) => lv.id === prog.level.id) + 1];
+  return `
+    <section class="progress-card" style="--accent:${prog.level.color}">
+      <div class="progress-head">
+        <span>${prog.level.emoji} <b>${shortLevelLabel(prog.level)} 단계</b></span>
+        <b class="progress-pct">${prog.percent}%</b>
+      </div>
+      <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${prog.percent}" aria-label="${shortLevelLabel(prog.level)} 단계 진행률">
+        <span class="progress-fill" style="width:${prog.percent}%"></span>
+      </div>
+      <p class="progress-parts">${prog.parts.map((p) => `${p.label} ${p.done}/${p.total}`).join(" · ")}</p>
+      ${prog.percent >= 80 && nextLevel ? `<button class="link-btn" id="levelUpBtn">🚀 거의 다 했어요! ${shortLevelLabel(nextLevel)} 단계로 올라가기</button>` : ""}
+    </section>`;
+}
+
+// 오늘 할 일: 오늘의 학습 → 틀린 문제 복습 → 이어서 하기를 체크리스트로 보여 준다.
+function todayCardHtml(profileName, { daily, dueWrong, wrongTotal, next }) {
+  const studiedToday = getProfileData(profileName).lessonDay === dateKey();
+  const items = [
+    {
+      id: "todayDaily",
+      done: !!daily,
+      emoji: "☀️",
+      title: "오늘의 학습",
+      desc: daily ? `${daily.correct} / ${daily.total} 정답 · 한 번 더 할 수 있어요` : `단어 ${DAILY_WORDS} + 문법 ${DAILY_GRAMMAR}문제 · 약 5분`,
+    },
+  ];
+  if (wrongTotal > 0) {
+    items.push({
+      id: "todayReview",
+      done: dueWrong === 0,
+      emoji: "🔁",
+      title: dueWrong > 0 ? `틀린 문제 복습 ${dueWrong}개` : "오늘 복습할 문제 끝",
+      desc: dueWrong > 0 ? (daily ? "오답노트에서 바로 풀어요" : "오늘의 학습에 섞여 나와요") : `남은 오답 ${wrongTotal}개는 날짜가 되면 다시 나와요`,
+    });
+  }
+  items.push({ id: "todayNext", done: studiedToday, emoji: next.emoji, title: `이어서 하기 · ${next.title}`, desc: next.desc });
+  const doneCount = items.filter((it) => it.done).length;
+  const allDone = doneCount === items.length;
+  return `
+    <section class="today-card${allDone ? " today-card--done" : ""}">
+      <h2 class="today-title">${allDone ? "🎉 오늘 할 일 완료! 대단해요" : `오늘 할 일 <small>${doneCount} / ${items.length}</small>`}</h2>
+      <ol class="today-list">
+        ${items
+          .map(
+            (it) => `
+          <li>
+            <button class="today-item${it.done ? " done" : ""}" id="${it.id}">
+              <span class="today-emoji" aria-label="${it.done ? "완료" : "할 일"}">${it.done ? "✅" : it.emoji}</span>
+              <span class="today-text"><b>${it.title}</b><small>${it.desc}</small></span>
+              <span class="today-go" aria-hidden="true">›</span>
+            </button>
+          </li>`
+          )
+          .join("")}
+      </ol>
+    </section>`;
+}
+
 function renderHomeScreen(root, ctx) {
   const { profileName, actions } = ctx;
   const profile = findMember(profileName);
   const stats = getStats(profileName);
   const badgeCount = evaluateBadges(profileName).filter((b) => b.earned).length;
   const wrongWords = getWrongWords(profileName).length;
-  const wrongGrammar = getGrammarWrongIds(profileName).length;
-  const grammarDone = GRAMMAR_TOPICS.filter((t) => getSectionBest(profileName, "grammar", t.id)).length;
-  const readingDone = READING_PASSAGES.filter((p) => getSectionBest(profileName, "reading", p.id)).length;
+  const wrongTotal = wrongWords + getGrammarWrongIds(profileName).length + getDrillWrongEntries(profileName).length;
   const chunkDone = CHUNK_SETS.filter((s) => getSectionBest(profileName, "chunks", s.id)).length;
   const wordBest = getOverallBest(profileName);
   const daily = stats.dailyToday;
   const vocab = getVocabStats(profileName);
-  const notesRead = GRAMMAR_TOPICS.filter((t) => isNoteRead(profileName, t.id)).length;
-  const passagesRead = READING_PASSAGES.filter((p) => isPassageRead(profileName, p.id)).length;
-  const goal = goalSummary(profileName);
   const next = nextStep(profileName);
   const dueWrongs = getDueWrongs(profileName);
   const dueWrong = dueWrongs.words.length + dueWrongs.grammar.length + dueWrongs.drill.length;
-  // 단계에 맞지 않는 타일은 숨긴다 (초등은 중학교 이상 내용, 중학교 이상은 파닉스)
+  // 단계에 맞지 않는 메뉴는 숨긴다 (초등은 중학교 이상 내용, 고등 · 성인은 파닉스)
   const level = getPreferredLevel(profileName);
   const isKid = !level || level.startsWith("elementary");
   const myGrades = BASIC_GRADES.filter((g) => g.levelId === level).map((g) => g.id);
   const myBasics = BASIC_TOPICS.filter((t) => myGrades.includes(t.grade));
   const myPassages = READING_PASSAGES.filter((p) => p.levelId === level);
   const myTalks = TALK_TOPICS.filter((t) => TALK_GROUP_LEVELS[t.group]?.includes(level));
-  const show = { phonics: !level || ["elementary-low", "elementary-mid", "elementary-high", "middle"].includes(level), advanced: !isKid };
+  const show = { phonics: !level || ["elementary-low", "elementary-mid", "elementary-high", "middle"].includes(level), advanced: !isKid, practice: ["high", "adult"].includes(level) };
+  const passagesDone = (list) => list.filter((p) => isPassageRead(profileName, p.id) || getSectionBest(profileName, "reading", p.id)).length;
 
   root.innerHTML = `
-    <div class="screen screen-home" style="--accent:${profile.color}">
+    <div class="screen screen-home has-tabbar" style="--accent:${profile.color}">
       <div class="home-header">
-        <div class="home-topline">
-          <button class="back-btn" id="backBtn">← 프로필 변경</button>
-          <button class="icon-btn" id="settingsBtn" aria-label="설정">⚙️ 설정</button>
-        </div>
         <div class="home-hello">
           <span class="home-avatar">${profile.emoji}</span>
           <div>
@@ -129,50 +184,24 @@ function renderHomeScreen(root, ctx) {
               ${badgeCount > 0 ? `<span class="chip">🏅 ${badgeCount}</span>` : ""}
             </p>
           </div>
+          ${getFamily().length > 1 ? `<button class="icon-btn" id="backBtn" aria-label="프로필 바꾸기">👥 바꾸기</button>` : ""}
         </div>
       </div>
 
-      <button class="daily-card${daily ? " daily-card--done" : ""}" id="dailyBtn">
-        <span class="daily-emoji">${daily ? "✅" : "☀️"}</span>
-        <span class="daily-text">
-          <span class="daily-title">${daily ? "오늘의 학습 완료!" : "오늘의 학습"}</span>
-          <span class="daily-desc">${daily ? `${daily.correct} / ${daily.total} 정답 · 한 번 더 할 수 있어요` : `${dueWrong > 0 ? `🔁 틀린 문제 복습 ${Math.min(dueWrong, 4)}개 포함 · ` : vocab.due > 0 ? "복습 단어 포함 · " : ""}단어 ${DAILY_WORDS} + 문법 ${DAILY_GRAMMAR}문제 · 약 5분`}</span>
-        </span>
-        <span class="daily-go" aria-hidden="true">›</span>
-      </button>
-
-      <button class="next-card" id="nextBtn">
-        <span class="next-emoji">${next.emoji}</span>
-        <span class="next-text">
-          <span class="next-label">▶ 이어서 하기</span>
-          <span class="next-title">${next.title}</span>
-          <span class="next-desc">${next.desc}</span>
-        </span>
-        <span class="next-go" aria-hidden="true">›</span>
-      </button>
-
-      <div class="quick-links">
-        <button class="quick-link" id="wrongNoteBtn">📝 오답노트 <b>${wrongWords + wrongGrammar + getDrillWrongEntries(profileName).length}</b></button>
-        <button class="quick-link" id="reportBtn">📊 학습 리포트</button>
-        <button class="quick-link${goal.total && goal.done === goal.total ? " quick-link--done" : ""}" id="goalsBtn">🎯 이번 주 목표 ${goal.total ? `<b>${goal.done}/${goal.total}</b>` : "정하기"}</button>
-      </div>
+      ${levelProgressHtml(profileName)}
+      ${todayCardHtml(profileName, { daily, dueWrong, wrongTotal, next })}
 
       <section class="group">
         <h2 class="group-title">📚 배우기</h2>
         <div class="tile-grid">
           ${show.phonics ? homeTile({ id: "phonicsBtn", emoji: "🔤", title: "파닉스", meta: `${lessonDoneCount(profileName, PHONICS_TOPICS)} / ${PHONICS_TOPICS.length}` }) : ""}
           ${homeTile({ id: "vocabBtn", emoji: "📇", title: "단어장", meta: vocab.due > 0 ? `복습 ${vocab.due}개` : vocab.learned > 0 ? `외운 단어 ${vocab.mastered}` : "카드로 외우기", warn: vocab.due > 0 })}
-          ${homeTile({
-            id: "notesBtn",
-            emoji: "📘",
-            title: "문법 노트",
-            meta: level ? `내 단계 ${lessonDoneCount(profileName, myBasics)} / ${myBasics.length}` : `단계별 ${lessonDoneCount(profileName, BASIC_TOPICS)} / ${BASIC_TOPICS.length}`,
-          })}
+          ${homeTile({ id: "notesBtn", emoji: "📘", title: "문법", meta: level ? `내 단계 ${lessonDoneCount(profileName, myBasics)} / ${myBasics.length}` : `${lessonDoneCount(profileName, BASIC_TOPICS)} / ${BASIC_TOPICS.length}` })}
           ${homeTile({ id: "talkBtn", emoji: "💬", title: "대화 표현", meta: level && myTalks.length ? `내 단계 ${lessonDoneCount(profileName, myTalks)} / ${myTalks.length}` : `${lessonDoneCount(profileName, TALK_TOPICS)} / ${TALK_TOPICS.length}` })}
-          ${homeTile({ id: "readPracticeBtn", emoji: "📖", title: "읽기 연습", meta: level ? `내 단계 ${myPassages.filter((p) => isPassageRead(profileName, p.id)).length} / ${myPassages.length} 읽음` : `${passagesRead} / ${READING_PASSAGES.length} 읽음` })}
+          ${homeTile({ id: "readBtn", emoji: "📖", title: "읽기", meta: level ? `내 단계 ${passagesDone(myPassages)} / ${myPassages.length}` : `${passagesDone(READING_PASSAGES)} / ${READING_PASSAGES.length}` })}
           ${homeTile({ id: "irregularBtn", emoji: "🔁", title: "불규칙 동사", meta: `${sectionCount(profileName, "irregular", IRREGULAR_SETS)} / ${IRREGULAR_SETS.length} 단계` })}
           ${show.advanced ? homeTile({ id: "verbPatternBtn", emoji: "🔀", title: "to부정사 · 동명사", meta: `${sectionCount(profileName, "verbPattern", VERB_PATTERN_GROUPS)} / ${VERB_PATTERN_GROUPS.length} 묶음` }) : ""}
-          ${show.advanced ? homeTile({ id: "idiomsBtn", emoji: "🧩", title: "숙어 · 구동사", meta: `${sectionCount(profileName, "idiom", IDIOM_SETS)} / ${IDIOM_SETS.length} 단계` }) : ""}
+          ${show.advanced ? homeTile({ id: "idiomsBtn", emoji: "🔗", title: "숙어 · 구동사", meta: `${sectionCount(profileName, "idiom", IDIOM_SETS)} / ${IDIOM_SETS.length} 단계` }) : ""}
           ${show.advanced ? homeTile({ id: "affixesBtn", emoji: "🔠", title: "접두사 · 접미사", meta: `${sectionCount(profileName, "affix", AFFIX_SETS)} / ${AFFIX_SETS.length} 묶음` }) : ""}
         </div>
       </section>
@@ -180,24 +209,20 @@ function renderHomeScreen(root, ctx) {
       <section class="group">
         <h2 class="group-title">🗣️ 말하기 · 듣기 · 쓰기</h2>
         <div class="tile-grid">
-          ${["high", "adult"].includes(level) ? homeTile({ id: "practiceBtn", emoji: "💼", title: "실전 연습", meta: "롤플레이 · 이메일" }) : ""}
+          ${show.practice ? homeTile({ id: "practiceBtn", emoji: "💼", title: "실전 연습", meta: "롤플레이 · 이메일" }) : ""}
           ${homeTile({ id: "speakingBtn", emoji: "🎙️", title: "따라 말하기", meta: `${sectionCount(profileName, "speaking", TALK_GROUPS)} / ${TALK_GROUPS.length} 묶음` })}
           ${homeTile({ id: "listeningBtn", emoji: "🎧", title: "듣기 평가", meta: `${LISTENING_SETS.filter((s) => getSectionBest(profileName, "listening", s.levelId)).length} / ${LISTENING_SETS.length} 단계` })}
           ${homeTile({ id: "writingBtn", emoji: "✍️", title: "영작 연습", meta: "뜻 보고 문장 만들기" })}
-          ${homeTile({ id: "dictationBtn", emoji: "🖊️", title: "받아쓰기", meta: speechSupported ? "듣고 쓰기" : "소리 미지원", disabled: !speechSupported })}
         </div>
       </section>
 
       <section class="group">
         <h2 class="group-title">✏️ 문제 풀기</h2>
         <div class="tile-grid">
-          ${homeTile({ id: "wordsBtn", emoji: "📚", title: "단어 퀴즈", meta: wrongWords > 0 ? `오답 ${wrongWords}개` : wordBest !== null ? `최고 ${wordBest}점` : "4지선다", warn: wrongWords > 0 })}
-          ${homeTile({ id: "spellingBtn", emoji: "⌨️", title: "철자 쓰기", meta: "직접 입력" })}
-          ${homeTile({ id: "grammarBtn", emoji: "✏️", title: "문법 문제", meta: wrongGrammar > 0 ? `오답 ${wrongGrammar}개` : `${grammarDone} / ${GRAMMAR_TOPICS.length} 완료`, warn: wrongGrammar > 0 })}
+          ${homeTile({ id: "wordsBtn", emoji: "✏️", title: "단어 시험", meta: wrongWords > 0 ? `오답 ${wrongWords}개` : wordBest !== null ? `최고 ${wordBest}점` : "고르기 · 철자 · 받아쓰기", warn: wrongWords > 0 })}
           ${homeTile({ id: "chunksBtn", emoji: "✂️", title: "끊어 읽기", meta: `${chunkDone} / ${CHUNK_SETS.length} 완료` })}
-          ${homeTile({ id: "readingBtn", emoji: "📰", title: "독해 문제", meta: level ? `내 단계 ${myPassages.filter((p) => getSectionBest(profileName, "reading", p.id)).length} / ${myPassages.length} 완료` : `${readingDone} / ${READING_PASSAGES.length} 완료` })}
           ${homeTile({ id: "crosswordBtn", emoji: "🧩", title: "가로세로 낱말", meta: "매번 새 퍼즐" })}
-          ${homeTile({ id: "examBtn", emoji: "📝", title: "단원 모의고사", meta: "20문제 · 100점" })}
+          ${homeTile({ id: "examBtn", emoji: "📋", title: "단원 모의고사", meta: "20문제 · 100점" })}
         </div>
       </section>
       ${
@@ -212,35 +237,29 @@ function renderHomeScreen(root, ctx) {
     </div>
   `;
 
-  // 단계에 따라 숨긴 타일도 있어서 없으면 건너뛴다
+  // 단계에 따라 숨긴 메뉴도 있어서 없으면 건너뛴다
   const bind = (id, fn) => root.querySelector(`#${id}`)?.addEventListener("click", fn);
-  bind("nextBtn", () => actions.openNext(next));
+  bind("backBtn", actions.backToProfile);
+  bind("todayDaily", actions.startDaily);
+  bind("todayReview", () => (daily ? actions.openWrongNote() : actions.startDaily()));
+  bind("todayNext", () => actions.openNext(next));
+  bind("levelUpBtn", actions.levelUp);
   bind("familyBtn", actions.openFamily);
   bind("practiceBtn", actions.openPractice);
-  bind("backBtn", actions.backToProfile);
-  bind("settingsBtn", actions.openSettings);
-  bind("wrongNoteBtn", actions.openWrongNote);
-  bind("reportBtn", actions.openReport);
-  bind("dailyBtn", actions.startDaily);
   bind("wordsBtn", () => actions.openWords("choice"));
-  bind("spellingBtn", () => actions.openWords("spelling"));
-  bind("dictationBtn", () => actions.openWords("dictation"));
   bind("vocabBtn", actions.openVocab);
   bind("notesBtn", actions.openGrammarNotes);
   bind("phonicsBtn", actions.openPhonics);
   bind("talkBtn", actions.openTalk);
+  bind("readBtn", actions.openReadingPractice);
   bind("irregularBtn", actions.openIrregular);
   bind("speakingBtn", actions.openSpeaking);
   bind("listeningBtn", actions.openListening);
   bind("writingBtn", actions.openWriting);
   bind("idiomsBtn", actions.openIdioms);
   bind("examBtn", actions.openExam);
-  bind("goalsBtn", actions.openGoals);
   bind("crosswordBtn", actions.openCrossword);
   bind("affixesBtn", actions.openAffixes);
   bind("verbPatternBtn", actions.openVerbPattern);
-  bind("readPracticeBtn", actions.openReadingPractice);
-  bind("grammarBtn", actions.openGrammar);
   bind("chunksBtn", actions.openChunks);
-  bind("readingBtn", actions.openReadingQuiz);
 }

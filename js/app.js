@@ -739,12 +739,14 @@ function reviewFromWrongNote(kind) {
 
 function saveMember(member) {
   const { editMember, memberReturn, profileName } = store.getState();
+  const { level, ...info } = member;
   if (editMember === null) {
-    addFamilyMember(member);
-    set({ profileName: member.name, screen: "home" });
+    addFamilyMember(info);
+    if (level) setPreferredLevel(info.name, level);
+    set({ profileName: info.name, screen: "home" });
     return;
   }
-  updateFamilyMember(editMember, member);
+  updateFamilyMember(editMember, info);
   set({ profileName: profileName === editMember ? member.name : profileName, screen: memberReturn });
 }
 
@@ -766,7 +768,8 @@ const QUIZ_QUIT_TARGET = {
 function parentScreen(state) {
   switch (state.screen) {
     case "home": return "profile";
-    case "level": case "grammarList": case "readingList": case "chunkIntro":
+    case "grammarList": return "grammarNotes";
+    case "level": case "readingList": case "chunkIntro":
     case "settings": case "wrongNote": case "report": case "vocab": case "grammarNotes": case "phonics": case "talk":
     case "irregular": case "verbPattern": case "speakingList": case "listeningList": case "writingList":
     case "idioms": case "affixes": case "examList": case "goals": case "crosswordList": case "family": case "practiceList": return "home";
@@ -960,6 +963,21 @@ function render() {
           openGoals: () => set({ screen: "goals" }),
           openCrossword: () => set({ screen: "crosswordList" }),
           openFamily: () => set({ screen: "family" }),
+          levelUp: () => {
+            const i = LEVELS.findIndex((lv) => lv.id === getPreferredLevel(state.profileName));
+            const nextLevel = LEVELS[i + 1];
+            if (!nextLevel) return;
+            showConfirmModal({
+              message: `${shortLevelLabel(nextLevel)} 단계로 올라갈까요? 오늘의 학습과 "오늘 할 일"이 새 단계에 맞춰져요. 설정에서 언제든 바꿀 수 있어요.`,
+              confirmText: "올라가기",
+              cancelText: "나중에",
+              onConfirm: () => {
+                setPreferredLevel(state.profileName, nextLevel.id);
+                set({});
+                showToast(`<span class="toast-emoji">🚀</span><span>${shortLevelLabel(nextLevel)} 단계 시작!</span>`);
+              },
+            });
+          },
           openPractice: () => set({ screen: "practiceList" }),
           openNext: openNextStep,
           openAffixes: () => set({ screen: "affixes" }),
@@ -1010,6 +1028,7 @@ function render() {
         selectLevel: startWordQuiz,
         backToHome: goHome,
         startReview: startWordReview,
+        setMode: (wordMode) => set({ wordMode }),
       }),
 
     quiz: () => {
@@ -1098,7 +1117,7 @@ function render() {
         profileName: state.profileName,
         startQuiz: startGrammarQuiz,
         startReview: startGrammarReview,
-        backToHome: goHome,
+        backToHome: () => set({ screen: "grammarNotes" }),
       }),
 
     grammarNotes: () =>
@@ -1107,6 +1126,7 @@ function render() {
         openNote: (topicId) => set({ grammarTopicId: topicId, screen: "grammarNote" }),
         openBasic: startBasic,
         back: goHome,
+        openQuiz: () => set({ screen: "grammarList" }),
       }),
 
     basicLesson: () => renderBasicLessonScreen(root, { session: state.basic, actions: basicActions }),
@@ -1248,6 +1268,7 @@ function render() {
       renderReadingListScreen(root, {
         profileName: state.profileName,
         mode: state.readingMode,
+        setMode: (readingMode) => set({ readingMode }),
         openPassage: (passageId) => set({ passageId, screen: "passage" }),
         startQuiz: startReadingQuiz,
         backToHome: goHome,
@@ -1342,6 +1363,44 @@ function render() {
   };
 
   screens[state.screen]();
+  renderTabBar(state);
+}
+
+// ── 하단 탭 바: 홈 · 복습 · 목표 · 기록 · 설정 사이를 어디서든 한 번에 오간다 ──
+const TAB_ITEMS = [
+  { screen: "home", emoji: "🏠", label: "홈" },
+  { screen: "wrongNote", emoji: "🔁", label: "복습" },
+  { screen: "goals", emoji: "🎯", label: "목표" },
+  { screen: "report", emoji: "📊", label: "기록" },
+  { screen: "settings", emoji: "⚙️", label: "설정" },
+];
+
+function renderTabBar(state) {
+  const show = !!state.profileName && TAB_ITEMS.some((t) => t.screen === state.screen);
+  root.classList.toggle("with-tabbar", show);
+  if (!show) return;
+  const wrong = getWrongWords(state.profileName).length + getGrammarWrongIds(state.profileName).length + getDrillWrongEntries(state.profileName).length;
+  const goal = goalSummary(state.profileName);
+  const badge = (t) => {
+    if (t.screen === "wrongNote" && wrong > 0) return `<span class="tab-badge">${wrong > 99 ? "99+" : wrong}</span>`;
+    if (t.screen === "goals" && goal.total) return `<span class="tab-badge${goal.done === goal.total ? " tab-badge--ok" : ""}">${goal.done}/${goal.total}</span>`;
+    return "";
+  };
+  root.insertAdjacentHTML(
+    "beforeend",
+    `<nav class="tab-bar" aria-label="주요 메뉴">
+      ${TAB_ITEMS.map(
+        (t) => `<button class="tab-item${t.screen === state.screen ? " active" : ""}" data-tab-screen="${t.screen}" ${t.screen === state.screen ? 'aria-current="page"' : ""}>
+          <span class="tab-emoji" aria-hidden="true">${t.emoji}</span><span class="tab-label">${t.label}</span>${badge(t)}
+        </button>`
+      ).join("")}
+    </nav>`
+  );
+  root.querySelectorAll("[data-tab-screen]").forEach((b) =>
+    b.addEventListener("click", () => {
+      if (b.dataset.tabScreen !== store.getState().screen) set({ screen: b.dataset.tabScreen });
+    })
+  );
 }
 
 applyTextScale(getTextScale());

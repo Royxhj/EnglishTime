@@ -4,7 +4,7 @@ function renderGrammarListScreen(root, { profileName, startQuiz, startReview, ba
 
   root.innerHTML = `
     <div class="screen screen-grammar-list">
-      <button class="back-btn" id="backBtn">← 홈</button>
+      <button class="back-btn" id="backBtn">← 문법</button>
       <h1 class="title">✏️ 문법 문제</h1>
       <p class="subtitle">주제를 고르면 바로 문제가 나와요. 개념은 📘 문법 노트에서 봐요 · ${doneCount} / ${GRAMMAR_TOPICS.length} 완료</p>
 

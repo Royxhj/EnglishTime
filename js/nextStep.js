@@ -42,6 +42,31 @@ function nextStep(profileName) {
   return { emoji: "🧩", title: "가로세로 낱말", desc: "내 단계를 다 끝냈어요! 퍼즐로 단어를 다져요", type: "crossword", id: level };
 }
 
+// 내 단계 진행률: 문법 · 대화 · 읽기 · 듣기 · 단어 각각의 진행 비율을 평균 낸다.
+function levelProgress(profileName) {
+  const levelId = getPreferredLevel(profileName);
+  if (!levelId) return null;
+  const level = levelById(levelId);
+  const best = (section, id) => getSectionBest(profileName, section, id);
+  const grades = BASIC_GRADES.filter((g) => g.levelId === levelId).map((g) => g.id);
+  const basics = BASIC_TOPICS.filter((t) => grades.includes(t.grade));
+  const talks = TALK_TOPICS.filter((t) => TALK_GROUP_LEVELS[t.group]?.includes(levelId));
+  const passages = READING_PASSAGES.filter((p) => p.levelId === levelId);
+  const listening = LISTENING_SETS.find((s) => s.levelId === levelId);
+  const words = WORD_BANK[levelId] || [];
+  const vocab = getVocabEntries(profileName);
+  const listenBest = best("listening", levelId);
+  const parts = [
+    basics.length && { label: "문법", done: basics.filter((t) => best("basics", t.id)).length, total: basics.length },
+    talks.length && { label: "대화", done: talks.filter((t) => best("basics", t.id)).length, total: talks.length },
+    passages.length && { label: "읽기", done: passages.filter((p) => best("reading", p.id) || isPassageRead(profileName, p.id)).length, total: passages.length },
+    listening && { label: "듣기", done: listenBest ? Math.round((listenBest.correct / listenBest.total) * 5) : 0, total: 5 },
+    words.length && { label: "단어", done: words.filter((w) => vocab[w.id]).length, total: words.length },
+  ].filter(Boolean);
+  const percent = parts.length ? Math.round((parts.reduce((sum, p) => sum + p.done / p.total, 0) / parts.length) * 100) : 0;
+  return { level, percent, parts };
+}
+
 // 목록을 내 단계 / 다른 단계로 나눈다. levelsOf(item) → 그 항목이 속한 단계 id 배열
 function splitByMyLevel(items, levelsOf, myLevel) {
   if (!myLevel) return { mine: items, others: [] };

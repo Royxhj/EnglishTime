@@ -33,11 +33,16 @@ function renderScoreResultScreen(root, ctx) {
           .join("")}
       </div>
 
+      ${(() => {
+        // 주요 버튼 하나만 크게, 나머지는 작은 링크 줄로
+        const mainIndex = Math.max(0, actions.findIndex((a) => a.primary));
+        const rest = actions.map((a, i) => ({ a, i })).filter(({ i }) => i !== mainIndex);
+        return `
       <div class="result-actions">
-        ${actions
-          .map((a, i) => `<button class="${a.primary ? "primary-btn" : "secondary-btn"}" data-action="${i}">${a.label}</button>`)
-          .join("")}
-      </div>
+        <button class="primary-btn" data-action="${mainIndex}">${actions[mainIndex].label}</button>
+        ${rest.length ? `<div class="result-links">${rest.map(({ a, i }) => `<button class="link-btn" data-action="${i}">${a.label}</button>`).join("")}</div>` : ""}
+      </div>`;
+      })()}
     </div>
   `;
 
