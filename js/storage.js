@@ -1,0 +1,512 @@
+const STORAGE_KEY = "englishword:profiles";
+const FAMILY_KEY = "englishword:family";
+const SETTINGS_KEY = "englishword:settings";
+const ACTIVITY_KEEP_DAYS = 60;
+// 오답은 연속으로 이 횟수만큼 맞혀야 오답노트에서 빠진다.
+const WRONG_CLEAR_STREAK = 2;
+
+function readJson(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJson(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // localStorage unavailable (private mode, etc.) — fail silently
+  }
+}
+
+// 화면 하나를 그릴 때도 기록을 수십 번 조회하므로, 한 번 읽은 기록을 메모리에 두고 저장할 때 함께 갱신한다.
+let profilesCache = null;
+
+function readAll() {
+  if (!profilesCache) profilesCache = readJson(STORAGE_KEY, {});
+  return profilesCache;
+}
+
+function writeAll(data) {
+  profilesCache = data;
+  writeJson(STORAGE_KEY, data);
+}
+
+// 같은 기기의 다른 탭에서 기록이 바뀌면 다시 읽는다.
+window.addEventListener("storage", (e) => {
+  if (e.key === STORAGE_KEY || e.key === null) profilesCache = null;
+});
+
+function dateKey(date = new Date()) {
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${m}-${d}`;
+}
+
+function daysAgoKey(days) {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return dateKey(d);
+}
+
+function daysFromTodayKey(days) {
+  return daysAgoKey(-days);
+}
+
+// ── 가족 구성 (이 기기에만 저장. 코드에는 가족 정보를 두지 않는다) ──
+const RESTORED_EMOJIS = ["🧑", "👩", "🧒", "👦", "👧", "👴", "👵", "👶"];
+const RESTORED_COLORS = ["#4d96ff", "#ff6b81", "#ffb703", "#38b26b", "#8338ec", "#16a3a3", "#ff8b3d", "#3a5a78"];
+
+function getFamily() {
+  const family = readJson(FAMILY_KEY, null);
+  if (Array.isArray(family)) return family;
+  // 가족 목록이 따로 저장되기 전부터 쓰던 기기: 학습 기록이 있는 이름으로 목록을 되살린다.
+  const restored = Object.keys(readAll()).map((name, i) => ({
+    name,
+    emoji: RESTORED_EMOJIS[i % RESTORED_EMOJIS.length],
+    color: RESTORED_COLORS[i % RESTORED_COLORS.length],
+  }));
+  if (restored.length > 0) writeJson(FAMILY_KEY, restored);
+  return restored;
+}
+
+function findMember(name) {
+  return getFamily().find((m) => m.name === name) || null;
+}
+
+function addFamilyMember(member) {
+  writeJson(FAMILY_KEY, [...getFamily(), member]);
+}
+
+// 기록은 이름을 키로 저장되므로, 이름을 바꾸면 기록도 새 이름으로 옮긴다.
+function updateFamilyMember(oldName, member) {
+  writeJson(FAMILY_KEY, getFamily().map((m) => (m.name === oldName ? member : m)));
+  if (oldName !== member.name) {
+    const all = readAll();
+    if (all[oldName]) {
+      all[member.name] = all[oldName];
+      delete all[oldName];
+      writeAll(all);
+    }
+  }
+}
+
+function removeFamilyMember(name) {
+  writeJson(FAMILY_KEY, getFamily().filter((m) => m.name !== name));
+  const all = readAll();
+  delete all[name];
+  writeAll(all);
+}
+
+// ── 기기 설정 ──
+function getSettings() {
+  return { sound: true, theme: "auto", cardDirection: "en-ko", ...readJson(SETTINGS_KEY, {}) };
+}
+
+function updateSettings(patch) {
+  writeJson(SETTINGS_KEY, { ...getSettings(), ...patch });
+}
+
+// ── 프로필 기록 ──
+function normalizeProfile(profile) {
+  const p = profile || {};
+  p.history ||= [];
+  p.bestByLevel ||= {};
+  p.wrongWords ||= {};
+  p.activity ||= {};
+  p.daily ||= {};
+  p.badges ||= {};
+  p.totalAnswered ||= 0;
+  p.bestStreak ||= 0;
+  p.bestDay ||= 0;
+  p.vocab ||= {};
+  p.starred ||= {};
+  p.customWords ||= {};
+  p.readingRead ||= {};
+  p.notesRead ||= {};
+  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword"]) {
+    p[section] ||= { best: {}, wrong: {} };
+    p[section].best ||= {};
+    p[section].wrong ||= {};
+  }
+  return p;
+}
+
+function getProfileData(profileName) {
+  return normalizeProfile(readAll()[profileName]);
+}
+
+function updateProfile(profileName, mutate) {
+  const all = readAll();
+  const profile = normalizeProfile(all[profileName]);
+  const result = mutate(profile);
+  all[profileName] = profile;
+  writeAll(all);
+  return result;
+}
+
+function getPreferredLevel(profileName) {
+  return getProfileData(profileName).preferredLevel || null;
+}
+
+function setPreferredLevel(profileName, levelId) {
+  updateProfile(profileName, (profile) => {
+    profile.preferredLevel = levelId;
+  });
+}
+
+// ── 오답 (연속 정답 규칙) ──
+function updateWrongEntry(entries, id, isCorrect, base) {
+  const entry = entries[id];
+  if (isCorrect) {
+    if (!entry) return;
+    const hits = (entry.hits || 0) + 1;
+    if (hits >= WRONG_CLEAR_STREAK) delete entries[id];
+    else entries[id] = { ...entry, hits };
+  } else {
+    entries[id] = { ...base, hits: 0, missed: (entry?.missed || 0) + 1, lastMissed: dateKey() };
+  }
+}
+
+function recordAnswerOutcome(profileName, wordId, levelId, isCorrect) {
+  updateProfile(profileName, (profile) => {
+    updateWrongEntry(profile.wrongWords, wordId, isCorrect, { id: wordId, levelId });
+    // 퀴즈에서 틀린 단어는 단어장의 '헷갈려요' 단계로 보내 내일 다시 복습하게 한다.
+    if (!isCorrect) profile.vocab[wordId] = { ...profile.vocab[wordId], levelId, box: 0, due: daysFromTodayKey(VOCAB_INTERVALS[0]) };
+  });
+}
+
+function getWrongWords(profileName) {
+  return Object.values(getProfileData(profileName).wrongWords);
+}
+
+function removeWrongWord(profileName, wordId) {
+  updateProfile(profileName, (profile) => {
+    delete profile.wrongWords[wordId];
+  });
+}
+
+function recordGrammarAnswer(profileName, questionId, isCorrect) {
+  updateProfile(profileName, (profile) => updateWrongEntry(profile.grammar.wrong, questionId, isCorrect, { id: questionId }));
+}
+
+function getGrammarWrongEntries(profileName) {
+  const wrong = getProfileData(profileName).grammar.wrong;
+  // 예전 형식(true)도 읽을 수 있게 맞춘다.
+  return Object.entries(wrong).map(([id, v]) => (v === true ? { id, hits: 0 } : { ...v, id }));
+}
+
+function getGrammarWrongIds(profileName) {
+  return getGrammarWrongEntries(profileName).map((e) => e.id);
+}
+
+function removeGrammarWrong(profileName, questionId) {
+  updateProfile(profileName, (profile) => {
+    delete profile.grammar.wrong[questionId];
+  });
+}
+
+// 기초 문법 · 불규칙 동사 · to/-ing처럼 문제를 id로 다시 만들 수 있는 연습 문제 오답
+function recordDrillAnswer(profileName, questionId, isCorrect) {
+  updateProfile(profileName, (profile) => updateWrongEntry(profile.drill.wrong, questionId, isCorrect, { id: questionId }));
+}
+
+function getDrillWrongEntries(profileName) {
+  return Object.values(getProfileData(profileName).drill.wrong);
+}
+
+function removeDrillWrong(profileName, questionId) {
+  updateProfile(profileName, (profile) => {
+    delete profile.drill.wrong[questionId];
+  });
+}
+
+// ── 단어 퀴즈 점수 (mode: choice | spelling | dictation) ──
+function bestKey(levelId, mode = "choice") {
+  return mode === "choice" ? levelId : `${mode}:${levelId}`;
+}
+
+function recordResult(profileName, levelId, score, mode = "choice") {
+  return updateProfile(profileName, (profile) => {
+    profile.history.unshift({ date: dateKey(), level: levelId, mode, score });
+    profile.history = profile.history.slice(0, 20);
+
+    const key = bestKey(levelId, mode);
+    const prevBest = profile.bestByLevel[key] || 0;
+    const isNewBest = score > prevBest;
+    if (isNewBest) profile.bestByLevel[key] = score;
+    return { isNewBest, hadPriorAttempt: prevBest > 0 };
+  });
+}
+
+function getBestScore(profileName, levelId, mode = "choice") {
+  return getProfileData(profileName).bestByLevel[bestKey(levelId, mode)] || null;
+}
+
+function getOverallBest(profileName) {
+  const best = getProfileData(profileName).bestByLevel;
+  const values = Object.entries(best).filter(([key]) => !key.includes(":")).map(([, v]) => v);
+  return values.length ? Math.max(...values) : null;
+}
+
+function getLastWordLevel(profileName) {
+  return getProfileData(profileName).history[0]?.level || null;
+}
+
+// ── 문법 · 독해 · 끊어 읽기 (section별 정답률 최고 기록) ──
+function recordSectionResult(profileName, section, id, correct, total) {
+  return updateProfile(profileName, (profile) => {
+    const best = profile[section].best;
+    const prev = best[id];
+    const isNewBest = !prev || correct / total > prev.correct / prev.total;
+    if (isNewBest) best[id] = { correct, total };
+    // 첫 도전의 낮은 점수에는 "신기록" 축하를 띄우지 않는다.
+    const hadPriorScore = !!prev && prev.correct > 0;
+    return isNewBest && (hadPriorScore || correct / total >= 0.6);
+  });
+}
+
+function getSectionBest(profileName, section, id) {
+  return getProfileData(profileName)[section].best[id] || null;
+}
+
+// ── 학습 기록: 연속 학습일 · 주간 문제 수 · 오늘의 학습 ──
+function streakFrom(activity) {
+  let streak = 0;
+  // 오늘 아직 안 했어도 어제까지 이어졌다면 연속 기록은 살아 있다.
+  for (let i = activity[dateKey()] > 0 ? 0 : 1; activity[daysAgoKey(i)] > 0; i++) streak++;
+  return streak;
+}
+
+function recordActivity(profileName) {
+  updateProfile(profileName, (profile) => {
+    const today = dateKey();
+    profile.activity[today] = (profile.activity[today] || 0) + 1;
+    profile.totalAnswered += 1;
+    profile.bestDay = Math.max(profile.bestDay, profile.activity[today]);
+    profile.bestStreak = Math.max(profile.bestStreak, streakFrom(profile.activity));
+    const cutoff = daysAgoKey(ACTIVITY_KEEP_DAYS);
+    for (const key of Object.keys(profile.activity)) {
+      if (key < cutoff) delete profile.activity[key];
+    }
+  });
+}
+
+function getStats(profileName) {
+  const { activity, daily } = getProfileData(profileName);
+  let week = 0;
+  for (let i = 0; i < 7; i++) week += activity[daysAgoKey(i)] || 0;
+  return { today: activity[dateKey()] || 0, streak: streakFrom(activity), week, dailyToday: daily[dateKey()] || null };
+}
+
+// ── 이번 주 목표 (월요일~일요일) ──
+function weekDateKeys() {
+  const today = new Date();
+  const sinceMonday = (today.getDay() + 6) % 7;
+  return Array.from({ length: sinceMonday + 1 }, (_, i) => daysAgoKey(sinceMonday - i));
+}
+
+function getWeekProgress(profileName) {
+  const { activity, daily } = getProfileData(profileName);
+  const keys = weekDateKeys();
+  return {
+    answers: keys.reduce((sum, k) => sum + (activity[k] || 0), 0),
+    days: keys.filter((k) => activity[k] > 0).length,
+    daily: keys.filter((k) => daily[k]).length,
+  };
+}
+
+function getGoals(profileName) {
+  const g = getProfileData(profileName).goals || {};
+  return { counts: { answers: 0, days: 0, daily: 0, ...(g.counts || {}) }, tasks: g.tasks || [] };
+}
+
+function setGoals(profileName, goals) {
+  updateProfile(profileName, (profile) => {
+    profile.goals = goals;
+  });
+}
+
+function getRecentActivity(profileName, days) {
+  const { activity } = getProfileData(profileName);
+  return Array.from({ length: days }, (_, i) => {
+    const key = daysAgoKey(days - 1 - i);
+    return { key, count: activity[key] || 0 };
+  });
+}
+
+function recordDaily(profileName, correct, total) {
+  updateProfile(profileName, (profile) => {
+    const prev = profile.daily[dateKey()];
+    if (!prev || correct > prev.correct) profile.daily[dateKey()] = { correct, total };
+  });
+}
+
+// ── 단어장 (간격 반복) ──
+// box 단계별 다음 복습까지의 날짜. 0단계(헷갈려요)는 내일, 5단계는 한 달 뒤.
+const VOCAB_INTERVALS = [1, 1, 3, 7, 14, 30];
+const VOCAB_MASTERED_BOX = 3;
+
+function recordVocabReview(profileName, wordId, levelId, known) {
+  updateProfile(profileName, (profile) => {
+    const prev = profile.vocab[wordId];
+    // 처음 보는데 이미 아는 단어는 바로 2단계(3일 뒤)로 보낸다.
+    const box = known ? (prev ? Math.min(prev.box + 1, VOCAB_INTERVALS.length - 1) : 2) : 0;
+    profile.vocab[wordId] = { levelId, box, due: daysFromTodayKey(VOCAB_INTERVALS[box]), seen: (prev?.seen || 0) + 1 };
+  });
+}
+
+function getVocabEntries(profileName) {
+  return getProfileData(profileName).vocab;
+}
+
+function getDueVocabIds(profileName) {
+  const today = dateKey();
+  return Object.entries(getVocabEntries(profileName))
+    .filter(([, v]) => v.due <= today)
+    .map(([id]) => id);
+}
+
+function getVocabStats(profileName) {
+  const entries = Object.values(getVocabEntries(profileName));
+  const today = dateKey();
+  return {
+    learned: entries.length,
+    mastered: entries.filter((v) => v.box >= VOCAB_MASTERED_BOX).length,
+    due: entries.filter((v) => v.due <= today).length,
+  };
+}
+
+function toggleStar(profileName, wordId) {
+  return updateProfile(profileName, (profile) => {
+    if (profile.starred[wordId]) delete profile.starred[wordId];
+    else profile.starred[wordId] = true;
+    return !!profile.starred[wordId];
+  });
+}
+
+function getStarredIds(profileName) {
+  return Object.keys(getProfileData(profileName).starred);
+}
+
+// 지문에서 고른 단어 중 단어장에 없는 단어. 바로 오늘 복습 목록에 넣는다.
+function addCustomWord(profileName, word) {
+  updateProfile(profileName, (profile) => {
+    profile.customWords[word.id] = word;
+    profile.vocab[word.id] ||= { levelId: word.levelId, box: 0, due: dateKey(), seen: 0 };
+  });
+}
+
+function getCustomWords(profileName) {
+  return getProfileData(profileName).customWords;
+}
+
+function removeCustomWord(profileName, wordId) {
+  updateProfile(profileName, (profile) => {
+    delete profile.customWords[wordId];
+    delete profile.vocab[wordId];
+    delete profile.starred[wordId];
+  });
+}
+
+// ── 읽기 연습 · 문법 노트 읽음 표시 ──
+function markPassageRead(profileName, passageId) {
+  updateProfile(profileName, (profile) => {
+    profile.readingRead[passageId] ||= dateKey();
+  });
+}
+
+function isPassageRead(profileName, passageId) {
+  return !!getProfileData(profileName).readingRead[passageId];
+}
+
+function markNoteRead(profileName, topicId) {
+  updateProfile(profileName, (profile) => {
+    profile.notesRead[topicId] ||= dateKey();
+  });
+}
+
+function isNoteRead(profileName, topicId) {
+  return !!getProfileData(profileName).notesRead[topicId];
+}
+
+function saveBadges(profileName, ids) {
+  updateProfile(profileName, (profile) => {
+    for (const id of ids) profile.badges[id] ||= dateKey();
+  });
+}
+
+// ── 백업 ──
+function exportBackup() {
+  return {
+    app: "englishword",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    family: getFamily(),
+    profiles: readAll(),
+    settings: getSettings(),
+  };
+}
+
+// 백업 파일은 외부에서 온 데이터라, 화면에 그대로 그려지는 글자에서 HTML 특수문자를 빼고 형식을 확인한다.
+const cleanText = (value, max = 80) => String(value ?? "").replace(/[<>&"'`]/g, "").trim().slice(0, max);
+const cleanColor = (value) => (/^#[0-9a-f]{3,8}$/i.test(value) ? value : RESTORED_COLORS[0]);
+const SETTING_CHOICES = { theme: ["auto", "light", "dark"], cardDirection: ["en-ko", "ko-en"] };
+
+function cleanCustomWords(words) {
+  const out = {};
+  for (const [id, w] of Object.entries(words || {})) {
+    if (!/^c:[\w-]+:\d+$/.test(id) || !w) continue;
+    out[id] = {
+      id,
+      word: cleanText(w.word, 40),
+      meaningKo: cleanText(w.meaningKo, 60),
+      sentence: cleanText(w.sentence, 300),
+      sentenceKo: cleanText(w.sentenceKo, 300),
+      levelId: levelById(w.levelId) ? w.levelId : LEVELS[0].id,
+      sourceTitle: cleanText(w.sourceTitle, 40),
+    };
+  }
+  return out;
+}
+
+function importBackup(data) {
+  if (!data || data.app !== "englishword" || typeof data.profiles !== "object" || data.profiles === null || !Array.isArray(data.family)) {
+    throw new Error("이 앱의 백업 파일이 아니에요.");
+  }
+  const renamed = {};
+  const family = [];
+  for (const m of data.family) {
+    const name = cleanText(m?.name, 8);
+    if (!name || family.some((f) => f.name === name)) continue;
+    renamed[m.name] = name;
+    family.push({ name, emoji: cleanText(m.emoji, 8) || RESTORED_EMOJIS[0], color: cleanColor(m.color) });
+  }
+
+  const profiles = {};
+  for (const [key, profile] of Object.entries(data.profiles)) {
+    const name = renamed[key] ?? cleanText(key, 8);
+    if (!name || typeof profile !== "object" || profile === null) continue;
+    const p = normalizeProfile({ ...profile });
+    p.customWords = cleanCustomWords(p.customWords);
+    if (p.preferredLevel && !levelById(p.preferredLevel)) delete p.preferredLevel;
+    p.wrongWords = Object.fromEntries(Object.entries(p.wrongWords).filter(([id, e]) => findWordById(id) && levelById(e?.levelId)));
+    p.vocab = Object.fromEntries(Object.entries(p.vocab).filter(([id, e]) => (findWordById(id) || p.customWords[id]) && typeof e?.due === "string"));
+    p.starred = Object.fromEntries(Object.keys(p.starred).filter((id) => findWordById(id) || p.customWords[id]).map((id) => [id, true]));
+    profiles[name] = p;
+  }
+
+  const settings = {};
+  for (const [key, choices] of Object.entries(SETTING_CHOICES)) {
+    if (choices.includes(data.settings?.[key])) settings[key] = data.settings[key];
+  }
+  if (typeof data.settings?.sound === "boolean") settings.sound = data.settings.sound;
+  if (typeof data.settings?.readingSlow === "boolean") settings.readingSlow = data.settings.readingSlow;
+
+  writeJson(FAMILY_KEY, family);
+  writeAll(profiles);
+  writeJson(SETTINGS_KEY, settings);
+}

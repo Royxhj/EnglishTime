@@ -1,0 +1,1255 @@
+const root = document.getElementById("app");
+
+const store = createStore({
+  screen: "profile",
+  profileName: null,
+
+  // 단어 (choice | spelling | dictation)
+  wordMode: "choice",
+  levelId: null,
+  mode: "normal", // normal | review
+  questions: [],
+  currentIndex: 0,
+  isNewBest: false,
+
+  // 문법 · 독해 · 오늘의 학습이 함께 쓰는 4지선다 세션. source.type: grammar | grammarReview | reading | daily
+  mc: null,
+  grammarTopicId: null,
+  passageId: null,
+  readingMode: "read", // read(읽기 연습) | quiz(독해 문제)
+
+  // 끊어 읽기
+  chunk: null,
+
+  // 프로필 편집 (editMember가 null이면 새 가족 추가), 오답노트 탭
+  editMember: null,
+  memberReturn: "profile",
+  wrongTab: "words",
+
+  // 단어장: 보고 있는 탭(단계 id | starred | custom)과 카드 공부 세션
+  vocabTab: null,
+  vocabSession: null,
+
+  // 기초 문법 (배우기 → 해 보기 → 결과)
+  basic: null,
+});
+
+const set = (patch) => store.setState(patch);
+const currentProfile = () => store.getState().profileName;
+const goHome = () => set({ screen: "home" });
+
+// ── 단어 ──
+function currentScore() {
+  const correct = store.getState().questions.filter((q) => q.selectedAnswer === q.correctAnswer).length;
+  return scoreFromCorrectCount(correct);
+}
+
+function startWordQuiz(levelId) {
+  set({ levelId, mode: "normal", questions: buildQuestions(levelId), currentIndex: 0, screen: "quiz" });
+}
+
+function startWordReview() {
+  const refs = getWrongWords(currentProfile());
+  if (refs.length === 0) return;
+  set({ mode: "review", levelId: null, questions: buildReviewQuestions(refs), currentIndex: 0, screen: "quiz" });
+}
+
+function recordWordAnswer(question, isCorrect) {
+  if (isCorrect && getVocabEntries(currentProfile())[question.data.id]) recordVocabReview(currentProfile(), question.data.id, question.levelId, true);
+  recordAnswerOutcome(currentProfile(), question.data.id, question.levelId, isCorrect);
+  recordActivity(currentProfile());
+}
+
+function nextWordQuestion() {
+  const state = store.getState();
+  if (state.currentIndex + 1 < state.questions.length) {
+    set({ currentIndex: state.currentIndex + 1 });
+    return;
+  }
+  const finalScore = currentScore();
+  const { isNewBest, hadPriorAttempt } =
+    state.mode === "normal"
+      ? recordResult(state.profileName, state.levelId, finalScore, state.wordMode)
+      : { isNewBest: false, hadPriorAttempt: false };
+  // 첫 도전은 이전 기록이 없어 무조건 "신기록"이 되므로, 점수가 낮으면 축하 뱃지를 띄우지 않는다.
+  set({ isNewBest: isNewBest && (hadPriorAttempt || finalScore >= 60), screen: "result" });
+  announceBadges(checkNewBadges(currentProfile()));
+}
+
+// ── 4지선다 세션 (문법 · 독해 · 오늘의 학습) ──
+function startMc(source, questions) {
+  if (questions.length === 0) return;
+  set({ mc: { source, questions, index: 0, isNewBest: false }, screen: "mcQuiz" });
+}
+
+function startGrammarQuiz(topicId) {
+  set({ grammarTopicId: topicId });
+  startMc({ type: "grammar", id: topicId }, buildGrammarQuestions(topicId));
+}
+const startGrammarReview = () => startMc({ type: "grammarReview" }, buildGrammarReviewQuestions(getGrammarWrongIds(currentProfile())));
+function startReadingQuiz(passageId) {
+  set({ passageId });
+  startMc({ type: "reading", id: passageId }, buildReadingQuestions(findPassage(passageId)));
+}
+const startDaily = () => startMc({ type: "daily" }, buildDailyQuestions(currentProfile()));
+const startExam = (gradeId) => startMc({ type: "exam", id: gradeId }, buildExamQuestions(gradeId));
+const startIdiomTest = (setId) => startMc({ type: "idiom", id: setId }, buildIdiomQuestions(setId));
+const startAffixTest = (setId) => startMc({ type: "affix", id: setId }, buildAffixQuestions(setId));
+const startListening = (levelId) => startMc({ type: "listening", id: levelId }, buildListeningQuestions(levelId));
+const startDrillReview = () => startMc({ type: "drillReview" }, buildDrillReviewQuestions(currentProfile()));
+const startVerbPatternTest = (id) => startMc({ type: "verbPattern", id }, buildVerbPatternQuestions(id));
+const startIrregularTest = (setId) => startMc({ type: "irregular", id: setId }, buildIrregularQuestions(setId));
+
+function mcSourceInfo(source) {
+  if (source.type === "grammar") {
+    const topic = findGrammarTopic(source.id);
+    return { label: `${topic.emoji} ${topic.title}`, level: levelById(topic.levelId), quitTo: "grammarList", listScreen: "grammarList" };
+  }
+  if (source.type === "reading") {
+    const passage = findPassage(source.id);
+    return {
+      label: `${passage.emoji} ${passage.title}`,
+      level: levelById(passage.levelId),
+      contextHtml: passageContextHtml(passage),
+      quitTo: "readingList",
+      listScreen: "readingList",
+    };
+  }
+  if (source.type === "irregular") {
+    const set = findIrregularSet(source.id);
+    return { label: `🔁 ${set.title}`, level: levelById(set.levelId), quitTo: "irregular", listScreen: "irregular" };
+  }
+  if (source.type === "exam") {
+    const grade = BASIC_GRADES.find((g) => g.id === source.id);
+    return { label: `📝 ${grade.label} 모의고사`, level: levelById(grade.levelId), quitTo: "examList", listScreen: "examList" };
+  }
+  if (source.type === "idiom" || source.type === "affix") {
+    const set = (source.type === "idiom" ? IDIOM_SETS : AFFIX_SETS).find((s) => s.id === source.id);
+    const screen = source.type === "idiom" ? "idioms" : "affixes";
+    return { label: `${set.emoji} ${set.title}`, level: levelById(set.levelId), quitTo: screen, listScreen: screen };
+  }
+  if (source.type === "listening") {
+    const level = levelById(source.id);
+    return { label: `🎧 듣기 평가 · ${shortLevelLabel(level)}`, level, quitTo: "listeningList", listScreen: "listeningList" };
+  }
+  if (source.type === "drillReview") return { label: "📝 기초 · 동사 오답 복습", level: null, quitTo: "wrongNote", listScreen: "wrongNote" };
+  if (source.type === "verbPattern") return { label: vpTestLabel(source.id), level: null, quitTo: "verbPattern", listScreen: "verbPattern" };
+  if (source.type === "daily") return { label: "☀️ 오늘의 학습", level: null, quitTo: "home", listScreen: "home" };
+  return { label: "📝 문법 오답 복습", level: null, quitTo: "grammarList", listScreen: "grammarList" };
+}
+
+function selectMcAnswer(question, choice) {
+  if (question.selectedAnswer !== null) return;
+  question.selectedAnswer = choice;
+  const isCorrect = choice === question.correctAnswer;
+  if (question.kind === "word") {
+    // 단어장에서 공부 중인 단어라면, 맞힌 경우 다음 복습을 뒤로 미룬다 (틀리면 recordAnswerOutcome이 처리).
+    if (isCorrect && getVocabEntries(currentProfile())[question.id]) recordVocabReview(currentProfile(), question.id, question.levelId, true);
+    recordAnswerOutcome(currentProfile(), question.id, question.levelId, isCorrect);
+  }
+  if (question.kind === "grammar") recordGrammarAnswer(currentProfile(), question.id, isCorrect);
+  if (question.drill) recordDrillAnswer(currentProfile(), question.id, isCorrect);
+  recordActivity(currentProfile());
+  set({});
+}
+
+function nextMcQuestion() {
+  const { mc } = store.getState();
+  if (mc.index + 1 < mc.questions.length) {
+    set({ mc: { ...mc, index: mc.index + 1 } });
+    return;
+  }
+  const correct = mc.questions.filter((q) => q.selectedAnswer === q.correctAnswer).length;
+  const total = mc.questions.length;
+  let isNewBest = false;
+  if (mc.source.type === "grammar") isNewBest = recordSectionResult(currentProfile(), "grammar", mc.source.id, correct, total);
+  if (mc.source.type === "reading") isNewBest = recordSectionResult(currentProfile(), "reading", mc.source.id, correct, total);
+  if (mc.source.type === "irregular") isNewBest = recordSectionResult(currentProfile(), "irregular", mc.source.id, correct, total);
+  if (mc.source.type === "exam") isNewBest = recordSectionResult(currentProfile(), "exam", mc.source.id, correct, total);
+  if (mc.source.type === "idiom" || mc.source.type === "affix") isNewBest = recordSectionResult(currentProfile(), mc.source.type, mc.source.id, correct, total);
+  if (mc.source.type === "listening") isNewBest = recordSectionResult(currentProfile(), "listening", mc.source.id, correct, total);
+  if (mc.source.type === "verbPattern") isNewBest = recordSectionResult(currentProfile(), "verbPattern", mc.source.id, correct, total);
+  if (mc.source.type === "daily") recordDaily(currentProfile(), correct, total);
+  set({ mc: { ...mc, isNewBest }, screen: "mcResult" });
+  announceBadges(checkNewBadges(currentProfile()));
+}
+
+function mcResultActions(source, hasWrong) {
+  const retry = { label: "🔁 다시 풀기", primary: true };
+  if (source.type === "grammar") {
+    return {
+      actions: [
+        { ...retry, onClick: () => startGrammarQuiz(source.id) },
+        { label: "📘 문법 노트 보기", onClick: () => set({ grammarTopicId: source.id, screen: "grammarNote" }) },
+        { label: "문법 목록으로", onClick: () => set({ screen: "grammarList" }) },
+      ],
+      reviewCta: hasWrong && getGrammarWrongIds(currentProfile()).length > 0 ? { label: "📝 문법 오답노트로 복습하기", onClick: startGrammarReview } : null,
+    };
+  }
+  if (source.type === "reading") {
+    const i = READING_PASSAGES.findIndex((p) => p.id === source.id);
+    const next = READING_PASSAGES[i + 1];
+    return {
+      actions: [
+        { ...retry, onClick: () => startReadingQuiz(source.id) },
+        { label: "📖 지문 다시 읽기", onClick: () => set({ passageId: source.id, readingMode: "read", screen: "passage" }) },
+        ...(next ? [{ label: `다음 지문: ${next.emoji} ${next.title}`, onClick: () => startReadingQuiz(next.id) }] : []),
+        { label: "목록으로", onClick: () => set({ screen: "readingList" }) },
+      ],
+    };
+  }
+  if (source.type === "irregular") {
+    const i = IRREGULAR_SETS.findIndex((s) => s.id === source.id);
+    const next = IRREGULAR_SETS[i + 1];
+    return {
+      actions: [
+        { ...retry, onClick: () => startIrregularTest(source.id) },
+        { label: "🔁 변화표 다시 보기", onClick: () => set({ screen: "irregular" }) },
+        ...(next ? [{ label: `다음 단계: ${next.emoji} ${next.title}`, onClick: () => startIrregularTest(next.id) }] : []),
+        { label: "🏠 홈으로", onClick: goHome },
+      ],
+    };
+  }
+  if (source.type === "exam") {
+    const hasDrill = getDrillWrongEntries(currentProfile()).length > 0;
+    return {
+      actions: [
+        { ...retry, onClick: () => startExam(source.id) },
+        ...(hasWrong && hasDrill ? [{ label: "📝 틀린 문제 복습하기", onClick: startDrillReview }] : []),
+        { label: "다른 학년 고르기", onClick: () => set({ screen: "examList" }) },
+        { label: "🏠 홈으로", onClick: goHome },
+      ],
+    };
+  }
+  if (source.type === "idiom" || source.type === "affix") {
+    const sets = source.type === "idiom" ? IDIOM_SETS : AFFIX_SETS;
+    const start = source.type === "idiom" ? startIdiomTest : startAffixTest;
+    const screen = source.type === "idiom" ? "idioms" : "affixes";
+    const next = sets[sets.findIndex((s) => s.id === source.id) + 1];
+    return {
+      actions: [
+        { ...retry, onClick: () => start(source.id) },
+        { label: "📖 다시 공부하기", onClick: () => set({ screen }) },
+        ...(next ? [{ label: `다음: ${next.emoji} ${next.title}`, onClick: () => start(next.id) }] : []),
+        { label: "🏠 홈으로", onClick: goHome },
+      ],
+    };
+  }
+  if (source.type === "listening") {
+    const i = LISTENING_SETS.findIndex((s) => s.levelId === source.id);
+    const next = LISTENING_SETS[i + 1];
+    return {
+      actions: [
+        { ...retry, onClick: () => startListening(source.id) },
+        ...(next ? [{ label: `다음 단계: ${levelById(next.levelId).label}`, onClick: () => startListening(next.levelId) }] : []),
+        { label: "단계 고르기", onClick: () => set({ screen: "listeningList" }) },
+        { label: "🏠 홈으로", onClick: goHome },
+      ],
+    };
+  }
+  if (source.type === "drillReview") {
+    const left = getDrillWrongEntries(currentProfile()).length;
+    return {
+      actions: [
+        ...(left > 0 ? [{ label: "🔁 남은 오답 다시 풀기", primary: true, onClick: startDrillReview }] : []),
+        { label: "📝 오답노트로", primary: left === 0, onClick: () => set({ screen: "wrongNote" }) },
+        { label: "🏠 홈으로", onClick: goHome },
+      ],
+    };
+  }
+  if (source.type === "verbPattern") {
+    const ids = [...VERB_PATTERN_GROUPS.map((g) => g.id), "all"];
+    const next = ids[ids.indexOf(source.id) + 1];
+    return {
+      actions: [
+        { ...retry, onClick: () => startVerbPatternTest(source.id) },
+        { label: "📖 설명 다시 보기", onClick: () => set({ screen: "verbPattern" }) },
+        ...(next ? [{ label: `다음 테스트: ${vpTestLabel(next)}`, onClick: () => startVerbPatternTest(next) }] : []),
+        { label: "🏠 홈으로", onClick: goHome },
+      ],
+    };
+  }
+  if (source.type === "daily") {
+    return {
+      actions: [
+        { label: "🏠 홈으로", primary: true, onClick: goHome },
+        { label: "☀️ 한 번 더 하기", onClick: startDaily },
+      ],
+    };
+  }
+  return {
+    actions: [
+      ...(getGrammarWrongIds(currentProfile()).length > 0 ? [{ label: "🔁 남은 오답 다시 풀기", primary: true, onClick: startGrammarReview }] : []),
+      { label: "문법 목록으로", primary: getGrammarWrongIds(currentProfile()).length === 0, onClick: () => set({ screen: "grammarList" }) },
+    ],
+  };
+}
+
+// ── 끊어 읽기 ──
+function startChunkSet(setId) {
+  set({ chunk: { setId, items: buildChunkSession(setId), index: 0, isNewBest: false }, screen: "chunkSession" });
+}
+
+function tapChunk(chunkIndex) {
+  const { chunk } = store.getState();
+  const item = chunk.items[chunk.index];
+  const expected = CHUNK_STEPS[item.step].role;
+  if (item.sentence.chunks[chunkIndex].role === expected) {
+    item.step += 1;
+    item.wrongChunk = null;
+    if (item.step >= CHUNK_STEPS.length) {
+      recordActivity(currentProfile());
+      if (item.mistakes === 0) burstConfetti();
+    }
+    playSound("correct");
+  } else {
+    item.mistakes += 1;
+    item.wrongChunk = chunkIndex;
+    playSound("wrong");
+  }
+  set({});
+}
+
+function nextChunk() {
+  const { chunk } = store.getState();
+  if (chunk.index + 1 < chunk.items.length) {
+    set({ chunk: { ...chunk, index: chunk.index + 1 } });
+    return;
+  }
+  const correct = chunk.items.filter((it) => it.mistakes === 0).length;
+  const isNewBest = recordSectionResult(currentProfile(), "chunks", chunk.setId, correct, chunk.items.length);
+  set({ chunk: { ...chunk, isNewBest }, screen: "chunkResult" });
+  announceBadges(checkNewBadges(currentProfile()));
+}
+
+// ── 가로세로 낱말 퀴즈 ──
+function startCrossword(levelId) {
+  const puzzle = buildCrossword(levelId);
+  if (!puzzle) {
+    showToast(`<span class="toast-emoji">🧩</span><span>퍼즐을 만들지 못했어요. 다시 눌러 주세요.</span>`);
+    return;
+  }
+  set({ crossword: puzzle, screen: "crossword" });
+}
+
+const crosswordActions = {
+  finish: (puzzle) => {
+    const clean = puzzle.entries.filter((e) => entrySolved(puzzle, e) && entryCells(e).every(([r, c]) => !puzzle.grid[r][c].hinted)).length;
+    recordSectionResult(currentProfile(), "crossword", puzzle.levelId, clean, puzzle.entries.length);
+    recordActivity(currentProfile());
+    if (!puzzle.revealed) {
+      playSound("correct");
+      burstConfetti(40);
+      showToast(`<span class="toast-emoji">🧩</span><span>퍼즐 완성! 힌트 없이 맞힌 단어 ${clean} / ${puzzle.entries.length}</span>`);
+    }
+    set({});
+    announceBadges(checkNewBadges(currentProfile()));
+  },
+  newPuzzle: startCrossword,
+  quit: () => set({ screen: "crosswordList" }),
+};
+
+// ── 영작 연습 ──
+const startWriting = (gradeId, mode) => set({ writing: buildWritingSession(gradeId, mode), screen: "writingSession" });
+
+function writingItem() {
+  const { writing } = store.getState();
+  return writing.items[writing.index];
+}
+
+function settleWriting(item, ok) {
+  if (item.firstTry === undefined) {
+    item.firstTry = ok;
+    recordActivity(currentProfile());
+  }
+}
+
+const writingActions = {
+  tapPool: (w) => {
+    const item = writingItem();
+    if (item.solved || item.revealed) return;
+    item.pool = item.pool.filter((x) => x !== w);
+    item.built.push(w);
+    item.wrong = false;
+    if (item.built.length === item.words.length) {
+      if (item.built.map((x) => item.words[x]).join(" ") === item.words.join(" ")) {
+        item.solved = true;
+        settleWriting(item, true);
+        answerFeedback(true);
+        speak(item.en, { rate: 0.85 });
+      } else {
+        item.wrong = true;
+        settleWriting(item, false);
+        playSound("wrong");
+      }
+    }
+    set({});
+  },
+  tapBuilt: (w) => {
+    const item = writingItem();
+    if (item.solved || item.revealed) return;
+    item.built = item.built.filter((x) => x !== w);
+    item.pool.push(w);
+    item.wrong = false;
+    set({});
+  },
+  checkTyped: (text) => {
+    const item = writingItem();
+    if (item.solved || item.revealed || !text.trim()) return;
+    item.typed = text;
+    if (writingNormalize(text) === writingNormalize(item.en)) {
+      item.solved = true;
+      item.wrong = false;
+      settleWriting(item, !item.hint);
+      answerFeedback(true);
+      speak(item.en, { rate: 0.85 });
+    } else {
+      item.wrong = true;
+      settleWriting(item, false);
+      playSound("wrong");
+    }
+    set({});
+  },
+  hint: (text) => {
+    const item = writingItem();
+    item.typed = text;
+    item.hint = true;
+    set({});
+  },
+  reveal: () => {
+    const item = writingItem();
+    item.revealed = true;
+    settleWriting(item, false);
+    set({});
+  },
+  next: () => {
+    const { writing } = store.getState();
+    if (writing.index + 1 < writing.items.length) {
+      writing.index += 1;
+      set({});
+      return;
+    }
+    const correct = writing.items.filter((it) => it.firstTry).length;
+    writing.isNewBest = recordSectionResult(currentProfile(), "writing", `${writing.mode}:${writing.gradeId}`, correct, writing.items.length);
+    set({ screen: "writingResult" });
+    announceBadges(checkNewBadges(currentProfile()));
+  },
+  quit: () => set({ screen: "writingList" }),
+};
+
+// ── 따라 말하기 ──
+const startSpeaking = (groupId) => set({ speaking: buildSpeakingSession(groupId), screen: "speakingSession" });
+
+const speakingActions = {
+  heard: (text, score) => {
+    const { speaking } = store.getState();
+    const item = speaking.items[speaking.index];
+    const wasPassed = item.best >= SPEAKING_PASS;
+    item.heard = text;
+    item.tries += 1;
+    item.best = Math.max(item.best, score);
+    recordActivity(currentProfile());
+    if (score >= SPEAKING_PASS) {
+      playSound("correct");
+      if (!wasPassed) burstConfetti(20);
+    }
+    set({});
+  },
+  selfCheck: (ok) => {
+    const { speaking } = store.getState();
+    const item = speaking.items[speaking.index];
+    item.tries += 1;
+    if (ok) {
+      item.best = 1;
+      recordActivity(currentProfile());
+      playSound("correct");
+    }
+    set({});
+  },
+  next: () => {
+    const { speaking } = store.getState();
+    if (speaking.index + 1 < speaking.items.length) {
+      speaking.index += 1;
+      set({});
+      return;
+    }
+    const passed = speaking.items.filter((it) => it.best >= SPEAKING_PASS).length;
+    speaking.isNewBest = recordSectionResult(currentProfile(), "speaking", speaking.groupId, passed, speaking.items.length);
+    set({ screen: "speakingResult" });
+    announceBadges(checkNewBadges(currentProfile()));
+  },
+  quit: () => set({ screen: "speakingList" }),
+};
+
+// ── 단어장 카드 공부 ──
+function openVocab() {
+  const { vocabTab, profileName } = store.getState();
+  set({ vocabTab: vocabTab || getPreferredLevel(profileName) || getLastWordLevel(profileName) || LEVELS[0].id, screen: "vocab" });
+}
+
+function startVocabSession(source) {
+  const cards = buildVocabSession(currentProfile(), source);
+  if (cards.length === 0) {
+    showToast(`<span class="toast-emoji">📇</span><span>지금 공부할 카드가 없어요</span>`);
+    return;
+  }
+  set({
+    vocabSession: {
+      source,
+      queue: cards.map((c) => c.id),
+      cards: Object.fromEntries(cards.map((c) => [c.id, c])),
+      index: 0,
+      flipped: false,
+      spoken: false,
+      first: {},
+      requeued: {},
+    },
+    screen: "vocabSession",
+  });
+}
+
+function flipCard() {
+  store.getState().vocabSession.flipped = true;
+  set({});
+}
+
+function answerCard(known) {
+  const session = store.getState().vocabSession;
+  if (!session.flipped) return;
+  const id = session.queue[session.index];
+  // 처음 답한 것만 기록하고, 헷갈리는 카드는 이번 공부 끝에 한 번 더 보여 준다.
+  if (session.first[id] === undefined) {
+    session.first[id] = known;
+    recordVocabReview(currentProfile(), id, session.cards[id].levelId, known);
+    recordActivity(currentProfile());
+  }
+  if (!known && !session.requeued[id]) {
+    session.requeued[id] = true;
+    session.queue.push(id);
+  }
+  if (known) playSound("correct");
+  session.index += 1;
+  session.flipped = false;
+  session.spoken = false;
+  if (session.index >= session.queue.length) {
+    set({ screen: "vocabSummary" });
+    announceBadges(checkNewBadges(currentProfile()));
+  } else {
+    set({});
+  }
+}
+
+document.addEventListener("keydown", (e) => {
+  const state = store.getState();
+  if (state.screen !== "vocabSession" || !state.vocabSession?.flipped || document.querySelector(".modal-overlay")) return;
+  if (e.key === "ArrowRight") answerCard(true);
+  if (e.key === "ArrowLeft") answerCard(false);
+});
+
+// ── 기초 문법 ──
+const startBasic = (topicId) => set({ basic: newBasicSession(topicId), screen: "basicLesson" });
+
+function basicCurrent() {
+  const { basic } = store.getState();
+  const topic = findBasicTopic(basic.topicId);
+  return { basic, topic, item: topic.practice[basic.pIndex], state: basic.items[basic.pIndex] };
+}
+
+// 문제마다 첫 시도만 기록한다 (맞히면 한 번에 맞힌 것으로 셈).
+function settleBasicAttempt(state, correct) {
+  if (state.firstTry !== undefined) return;
+  state.firstTry = correct;
+  recordActivity(currentProfile());
+}
+
+function solveBasic(state, item) {
+  state.solved = true;
+  settleBasicAttempt(state, true);
+  answerFeedback(true);
+  speak(basicAnswerText(item), { rate: 0.8 });
+}
+
+const toLessonList = () => set({ screen: lessonCollectionOf(store.getState().basic.topicId).listScreen });
+
+const basicActions = {
+  quit: toLessonList,
+  toList: toLessonList,
+  restart: () => startBasic(store.getState().basic.topicId),
+  prevSlide: () => {
+    const { basic } = store.getState();
+    basic.slide = Math.max(0, basic.slide - 1);
+    stopSpeaking();
+    set({});
+  },
+  nextSlide: () => {
+    const { basic, topic } = basicCurrent();
+    stopSpeaking();
+    if (basic.slide < topic.slides.length - 1) basic.slide += 1;
+    else basic.phase = "practice";
+    set({});
+  },
+  choose: (choiceIndex) => {
+    const { item, state } = basicCurrent();
+    if (state.solved || state.wrongPicks.includes(choiceIndex)) return;
+    if (choiceIndex === item.answer) {
+      solveBasic(state, item);
+    } else {
+      state.wrongPicks.push(choiceIndex);
+      settleBasicAttempt(state, false);
+      playSound("wrong");
+    }
+    set({});
+  },
+  tapPool: (wordIndex) => {
+    const { item, state } = basicCurrent();
+    if (state.solved) return;
+    state.pool = state.pool.filter((w) => w !== wordIndex);
+    state.built.push(wordIndex);
+    state.wrongOrder = false;
+    if (state.built.length === item.words.length) {
+      if (state.built.map((w) => item.words[w]).join(" ") === item.words.join(" ")) {
+        solveBasic(state, item);
+      } else {
+        state.wrongOrder = true;
+        settleBasicAttempt(state, false);
+        playSound("wrong");
+      }
+    }
+    set({});
+  },
+  tapBuilt: (wordIndex) => {
+    const { state } = basicCurrent();
+    if (state.solved) return;
+    state.built = state.built.filter((w) => w !== wordIndex);
+    state.pool.push(wordIndex);
+    state.wrongOrder = false;
+    set({});
+  },
+  resetOrder: () => {
+    const { state } = basicCurrent();
+    state.pool = [...state.pool, ...state.built];
+    state.built = [];
+    state.wrongOrder = false;
+    set({});
+  },
+  nextPractice: () => {
+    const { basic, topic } = basicCurrent();
+    if (basic.pIndex < topic.practice.length - 1) {
+      basic.pIndex += 1;
+      set({});
+      return;
+    }
+    basic.phase = "done";
+    const correct = basic.items.filter((s) => s.firstTry).length;
+    recordSectionResult(currentProfile(), "basics", topic.id, correct, topic.practice.length);
+    set({});
+    if (basicStars(correct, topic.practice.length) === 3) burstConfetti(36);
+    announceBadges(checkNewBadges(currentProfile()));
+  },
+  practiceAgain: () => {
+    const { basic, topic } = basicCurrent();
+    basic.items = topic.practice.map(newBasicItem);
+    basic.pIndex = 0;
+    basic.phase = "practice";
+    basic.spokenKey = null;
+    set({});
+  },
+};
+
+// ── 오답노트 · 가족 편집 ──
+function reviewFromWrongNote(kind) {
+  if (kind === "grammar") {
+    startGrammarReview();
+    return;
+  }
+  if (kind === "drill") {
+    startDrillReview();
+    return;
+  }
+  set({ wordMode: kind });
+  startWordReview();
+}
+
+function saveMember(member) {
+  const { editMember, memberReturn, profileName } = store.getState();
+  if (editMember === null) {
+    addFamilyMember(member);
+    set({ profileName: member.name, screen: "home" });
+    return;
+  }
+  updateFamilyMember(editMember, member);
+  set({ profileName: profileName === editMember ? member.name : profileName, screen: memberReturn });
+}
+
+function deleteMember() {
+  removeFamilyMember(store.getState().editMember);
+  set({ profileName: null, screen: "profile" });
+}
+
+// ── 뒤로가기: 휴대폰 뒤로 버튼이 앱을 닫지 않고 한 단계 위 화면으로 가게 한다 ──
+const QUIZ_QUIT_TARGET = {
+  quiz: () => "level",
+  mcQuiz: (s) => mcSourceInfo(s.mc.source).quitTo,
+  chunkSession: () => "chunkIntro",
+  speakingSession: () => "speakingList",
+  writingSession: () => "writingList",
+};
+
+function parentScreen(state) {
+  switch (state.screen) {
+    case "home": return "profile";
+    case "level": case "grammarList": case "readingList": case "chunkIntro":
+    case "settings": case "wrongNote": case "report": case "vocab": case "grammarNotes": case "phonics": case "talk":
+    case "irregular": case "verbPattern": case "speakingList": case "listeningList": case "writingList":
+    case "idioms": case "affixes": case "examList": case "goals": case "crosswordList": return "home";
+    case "crossword": return "crosswordList";
+    case "speakingResult": return "speakingList";
+    case "writingResult": return "writingList";
+    case "grammarNote": return "grammarNotes";
+    case "basicLesson": return lessonCollectionOf(state.basic.topicId).listScreen;
+    case "vocabSession": case "vocabSummary": return "vocab";
+    case "memberEdit": return state.memberReturn;
+    case "passage": return "readingList";
+    case "result": return "level";
+    case "mcResult": return mcSourceInfo(state.mc.source).listScreen;
+    case "chunkResult": return "chunkIntro";
+    default: return null;
+  }
+}
+
+let hasBackBuffer = false;
+
+window.addEventListener("popstate", () => {
+  hasBackBuffer = false;
+  const state = store.getState();
+  const openModal = document.querySelector(".modal-overlay");
+
+  if (openModal || QUIZ_QUIT_TARGET[state.screen]) {
+    history.pushState({ englishword: true }, "");
+    hasBackBuffer = true;
+    if (openModal) openModal.querySelector("#modalCancelBtn").click();
+    else
+      showConfirmModal({
+        message: "지금 그만두면 이번 기록은 저장되지 않아요. 그만할까요?",
+        confirmText: "그만하기",
+        cancelText: "계속 풀기",
+        onConfirm: () => set({ screen: QUIZ_QUIT_TARGET[state.screen](state) }),
+      });
+    return;
+  }
+
+  const target = parentScreen(state);
+  if (target === "profile") set({ screen: "profile", profileName: null });
+  else if (target) set({ screen: target });
+});
+
+// ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
+const RELOAD_SAFE_SCREENS = new Set([
+  "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList",
+]);
+const RESUME_KEY = "englishword:resume";
+
+function reloadForUpdate() {
+  const s = store.getState();
+  try {
+    sessionStorage.setItem(
+      RESUME_KEY,
+      JSON.stringify({ profileName: s.profileName, screen: s.screen, wordMode: s.wordMode, readingMode: s.readingMode, vocabTab: s.vocabTab, wrongTab: s.wrongTab })
+    );
+  } catch {
+    // 저장 못 하면 첫 화면부터 다시 시작
+  }
+  location.reload();
+}
+
+document.addEventListener("pwa-update-ready", () => {
+  if (RELOAD_SAFE_SCREENS.has(store.getState().screen)) reloadForUpdate();
+});
+
+function restoreAfterUpdate() {
+  let saved = null;
+  try {
+    saved = JSON.parse(sessionStorage.getItem(RESUME_KEY));
+    sessionStorage.removeItem(RESUME_KEY);
+  } catch {
+    return false;
+  }
+  if (!saved || !RELOAD_SAFE_SCREENS.has(saved.screen)) return false;
+  const { screen, profileName, wordMode, readingMode, vocabTab, wrongTab } = saved;
+  store.setState({ screen, profileName, wordMode, readingMode, vocabTab, wrongTab });
+  return true;
+}
+
+// ── 렌더링 ──
+let lastViewKey = null;
+let lastScreen = null;
+
+function render() {
+  const state = store.getState();
+
+  // 문제를 푸는 동안 새 버전이 준비됐다면, 안전한 화면으로 돌아온 지금 반영한다.
+  if (appUpdateReady && RELOAD_SAFE_SCREENS.has(state.screen)) {
+    reloadForUpdate();
+    return;
+  }
+
+  const needsProfile = !["profile", "memberEdit"].includes(state.screen);
+  if (needsProfile && !findMember(state.profileName)) {
+    set({ profileName: null, screen: "profile" });
+    return;
+  }
+
+  if (state.screen !== "profile" && !hasBackBuffer) {
+    history.pushState({ englishword: true }, "");
+    hasBackBuffer = true;
+  }
+
+  // 지문 듣기 중에 다른 화면으로 가면 소리를 멈춘다.
+  if ((lastScreen === "passage" || lastScreen === "basicLesson") && state.screen !== lastScreen) stopSpeaking();
+  lastScreen = state.screen;
+
+  const viewKey = [state.screen, state.currentIndex, state.mc?.index, state.chunk?.index, state.passageId, state.grammarTopicId, state.vocabSession?.index, state.vocabTab, state.basic?.phase, state.basic?.slide, state.basic?.pIndex].join(":");
+  if (viewKey !== lastViewKey) {
+    window.scrollTo(0, 0);
+    lastViewKey = viewKey;
+  }
+
+  const screens = {
+    profile: () =>
+      renderProfileScreen(root, {
+        selectProfile: (name) => set({ profileName: name, screen: "home" }),
+        addMember: () => set({ editMember: null, memberReturn: "profile", screen: "memberEdit" }),
+      }),
+
+    memberEdit: () =>
+      renderMemberEditScreen(root, {
+        member: state.editMember === null ? null : findMember(state.editMember),
+        onSave: saveMember,
+        onDelete: deleteMember,
+        onCancel: () => set({ screen: state.memberReturn }),
+      }),
+
+    settings: () =>
+      renderSettingsScreen(root, {
+        profileName: state.profileName,
+        actions: {
+          back: goHome,
+          editMember: () => set({ editMember: state.profileName, memberReturn: "settings", screen: "memberEdit" }),
+          afterImport: () => {
+            applyTheme(getSettings().theme);
+            set({ profileName: null, screen: "profile" });
+            showToast(`<span class="toast-emoji">📂</span><span>기록을 불러왔어요</span>`);
+          },
+        },
+      }),
+
+    wrongNote: () =>
+      renderWrongNoteScreen(root, {
+        profileName: state.profileName,
+        tab: state.wrongTab,
+        actions: {
+          back: goHome,
+          setTab: (wrongTab) => set({ wrongTab }),
+          review: reviewFromWrongNote,
+          refresh: () => set({}),
+        },
+      }),
+
+    report: () =>
+      renderReportScreen(root, {
+        profileName: state.profileName,
+        actions: {
+          back: goHome,
+          openWrongNote: () => set({ screen: "wrongNote" }),
+          openTopic: (topicId) => set({ grammarTopicId: topicId, screen: "grammarNote" }),
+          openVocab,
+        },
+      }),
+
+    home: () =>
+      renderHomeScreen(root, {
+        profileName: state.profileName,
+        actions: {
+          backToProfile: () => set({ profileName: null, screen: "profile" }),
+          openSettings: () => set({ screen: "settings" }),
+          openWrongNote: () => set({ screen: "wrongNote" }),
+          openReport: () => set({ screen: "report" }),
+          startDaily,
+          openWords: (wordMode) => set({ wordMode, screen: "level" }),
+          openVocab,
+          openGrammarNotes: () => set({ screen: "grammarNotes" }),
+          openPhonics: () => set({ screen: "phonics" }),
+          openTalk: () => set({ screen: "talk" }),
+          openIrregular: () => set({ screen: "irregular" }),
+          openVerbPattern: () => set({ screen: "verbPattern" }),
+          openSpeaking: () => set({ screen: "speakingList" }),
+          openListening: () => set({ screen: "listeningList" }),
+          openWriting: () => set({ screen: "writingList" }),
+          openIdioms: () => set({ screen: "idioms" }),
+          openExam: () => set({ screen: "examList" }),
+          openGoals: () => set({ screen: "goals" }),
+          openCrossword: () => set({ screen: "crosswordList" }),
+          openAffixes: () => set({ screen: "affixes" }),
+          openReadingPractice: () => set({ readingMode: "read", screen: "readingList" }),
+          openGrammar: () => set({ screen: "grammarList" }),
+          openChunks: () => set({ screen: "chunkIntro" }),
+          openReadingQuiz: () => set({ readingMode: "quiz", screen: "readingList" }),
+        },
+      }),
+
+    vocab: () =>
+      renderVocabScreen(root, {
+        profileName: state.profileName,
+        view: { tab: state.vocabTab },
+        actions: {
+          back: goHome,
+          setTab: (vocabTab) => set({ vocabTab }),
+          study: startVocabSession,
+        },
+      }),
+
+    vocabSession: () =>
+      renderFlashcardScreen(root, {
+        session: state.vocabSession,
+        profileName: state.profileName,
+        actions: {
+          flip: flipCard,
+          answer: answerCard,
+          quit: () => set({ screen: "vocab" }),
+        },
+      }),
+
+    vocabSummary: () =>
+      renderVocabSummaryScreen(root, {
+        session: state.vocabSession,
+        profileName: state.profileName,
+        actions: {
+          more: () => startVocabSession(state.vocabSession.source),
+          toVocab: () => set({ screen: "vocab" }),
+          home: goHome,
+        },
+      }),
+
+    level: () =>
+      renderLevelScreen(root, {
+        profileName: state.profileName,
+        wordMode: state.wordMode,
+        selectLevel: startWordQuiz,
+        backToHome: goHome,
+        startReview: startWordReview,
+      }),
+
+    quiz: () => {
+      const question = state.questions[state.currentIndex];
+      const level = state.mode === "normal" ? levelById(state.levelId) : null;
+      const quit = () => set({ screen: "level" });
+
+      if (state.wordMode === "choice") {
+        renderQuizScreen(root, {
+          question,
+          index: state.currentIndex,
+          total: state.questions.length,
+          score: currentScore(),
+          levelColor: level?.color,
+          levelColorDark: level?.colorDark,
+          actions: {
+            quitQuiz: quit,
+            useHint: (type) => {
+              if (question.selectedAnswer !== null) return;
+              question[`${type}HintUsed`] = true;
+              set({});
+            },
+            selectAnswer: (choice) => {
+              if (question.selectedAnswer !== null) return;
+              question.selectedAnswer = choice;
+              recordWordAnswer(question, choice === question.correctAnswer);
+              set({});
+            },
+            nextQuestion: nextWordQuestion,
+          },
+        });
+        return;
+      }
+
+      renderTypingQuizScreen(root, {
+        mode: state.wordMode,
+        question,
+        index: state.currentIndex,
+        total: state.questions.length,
+        score: currentScore(),
+        level,
+        actions: {
+          quit,
+          submit: (typed, isCorrect) => {
+            if (question.selectedAnswer !== null) return;
+            question.typedAnswer = typed;
+            question.selectedAnswer = isCorrect ? question.correctAnswer : typed;
+            recordWordAnswer(question, isCorrect);
+            set({});
+          },
+          next: nextWordQuestion,
+        },
+      });
+    },
+
+    result: () => {
+      const level = levelById(state.levelId);
+      const levelIndex = LEVELS.findIndex((lv) => lv.id === state.levelId);
+      renderResultScreen(root, {
+        score: currentScore(),
+        questions: state.questions,
+        levelLabel: level ? level.label : "",
+        modeTitle: WORD_MODES[state.wordMode].title,
+        profileName: state.profileName,
+        isNewBest: state.isNewBest,
+        isReview: state.mode === "review",
+        nextLevel: levelIndex >= 0 ? LEVELS[levelIndex + 1] || null : null,
+        levelColor: state.mode === "normal" ? level?.color : null,
+        actions: {
+          playAgain: () =>
+            set({
+              questions: state.mode === "review" ? buildReviewQuestions(getWrongWords(state.profileName)) : buildQuestions(state.levelId),
+              currentIndex: 0,
+              screen: "quiz",
+            }),
+          changeLevel: () => set({ screen: "level" }),
+          goHome,
+          selectLevel: startWordQuiz,
+          startReview: startWordReview,
+        },
+      });
+    },
+
+    grammarList: () =>
+      renderGrammarListScreen(root, {
+        profileName: state.profileName,
+        startQuiz: startGrammarQuiz,
+        startReview: startGrammarReview,
+        backToHome: goHome,
+      }),
+
+    grammarNotes: () =>
+      renderGrammarNotesScreen(root, {
+        profileName: state.profileName,
+        openNote: (topicId) => set({ grammarTopicId: topicId, screen: "grammarNote" }),
+        openBasic: startBasic,
+        back: goHome,
+      }),
+
+    basicLesson: () => renderBasicLessonScreen(root, { session: state.basic, actions: basicActions }),
+
+    phonics: () =>
+      renderLessonListScreen(root, {
+        profileName: state.profileName,
+        title: "🔤 파닉스",
+        subtitle: "글자와 소리 연결하기",
+        help: "글자가 내는 소리를 배우면 처음 보는 단어도 읽을 수 있어요. 문제를 열면 소리가 나와요. 위에서부터 차례로 해 봐요.",
+        groups: PHONICS_GROUPS,
+        topics: PHONICS_TOPICS,
+        openLesson: startBasic,
+        back: goHome,
+      }),
+
+    talk: () =>
+      renderLessonListScreen(root, {
+        profileName: state.profileName,
+        title: "💬 대화 표현",
+        subtitle: "교과서에 나오는 상황별 말하기",
+        help: "예문을 누르면 영어로 들려줘요. 따라 말해 보고, 친구나 가족과 역할을 바꿔 가며 말해 봐요.",
+        groups: TALK_GROUPS,
+        topics: TALK_TOPICS,
+        openLesson: startBasic,
+        back: goHome,
+      }),
+
+    crosswordList: () => renderCrosswordListScreen(root, { profileName: state.profileName, start: startCrossword, back: goHome }),
+    crossword: () => renderCrosswordScreen(root, { puzzle: state.crossword, actions: crosswordActions }),
+
+    goals: () => renderGoalsScreen(root, { profileName: state.profileName, back: goHome }),
+
+    examList: () => renderExamListScreen(root, { profileName: state.profileName, start: startExam, back: goHome }),
+
+    idioms: () => renderWordPartsScreen(root, { profileName: state.profileName, config: IDIOM_SCREEN, startTest: startIdiomTest, back: goHome }),
+    affixes: () => renderWordPartsScreen(root, { profileName: state.profileName, config: AFFIX_SCREEN, startTest: startAffixTest, back: goHome }),
+
+    writingList: () => renderWritingListScreen(root, { profileName: state.profileName, start: startWriting, back: goHome }),
+
+    writingSession: () =>
+      renderWritingSessionScreen(root, {
+        session: state.writing,
+        grade: BASIC_GRADES.find((g) => g.id === state.writing.gradeId),
+        actions: writingActions,
+      }),
+
+    writingResult: () => {
+      const { writing } = state;
+      const grade = BASIC_GRADES.find((g) => g.id === writing.gradeId);
+      renderScoreResultScreen(root, {
+        subtitle: `${state.profileName}님 · ✍️ ${grade.label} · ${writing.mode === "order" ? "단어 배열" : "직접 쓰기"}`,
+        correct: writing.items.filter((it) => it.firstTry).length,
+        total: writing.items.length,
+        level: levelById(grade.levelId),
+        isNewBest: writing.isNewBest,
+        rows: writing.items.map((it) => ({ html: `${it.en} <small>${it.ko}</small>`, ok: !!it.firstTry })),
+        actions: [
+          { label: "🔁 다시 하기", primary: true, onClick: () => startWriting(writing.gradeId, writing.mode) },
+          ...(writing.mode === "order" ? [{ label: "⌨️ 직접 쓰기로 도전", onClick: () => startWriting(writing.gradeId, "type") }] : []),
+          { label: "다른 학년 고르기", onClick: () => set({ screen: "writingList" }) },
+          { label: "홈으로", onClick: goHome },
+        ],
+      });
+    },
+
+    listeningList: () => renderListeningListScreen(root, { profileName: state.profileName, start: startListening, back: goHome }),
+
+    speakingList: () => renderSpeakingListScreen(root, { profileName: state.profileName, start: startSpeaking, back: goHome }),
+
+    speakingSession: () =>
+      renderSpeakingSessionScreen(root, {
+        session: state.speaking,
+        group: TALK_GROUPS.find((g) => g.id === state.speaking.groupId),
+        actions: speakingActions,
+      }),
+
+    speakingResult: () => {
+      const { speaking } = state;
+      const group = TALK_GROUPS.find((g) => g.id === speaking.groupId);
+      renderScoreResultScreen(root, {
+        subtitle: `${state.profileName}님 · 🎙️ ${group.label}`,
+        correct: speaking.items.filter((it) => it.best >= SPEAKING_PASS).length,
+        total: speaking.items.length,
+        level: null,
+        isNewBest: speaking.isNewBest,
+        rows: speaking.items.map((it) => ({ html: `${it.en}${it.tries && SpeechRecognitionApi ? ` <small>(${Math.round(it.best * 100)}%)</small>` : ""}`, ok: it.best >= SPEAKING_PASS })),
+        actions: [
+          { label: "🔁 다시 하기", primary: true, onClick: () => startSpeaking(speaking.groupId) },
+          { label: "다른 묶음 고르기", onClick: () => set({ screen: "speakingList" }) },
+          { label: "홈으로", onClick: goHome },
+        ],
+      });
+    },
+
+    verbPattern: () => renderVerbPatternScreen(root, { profileName: state.profileName, startTest: startVerbPatternTest, back: goHome }),
+
+    irregular: () => renderIrregularScreen(root, { profileName: state.profileName, startTest: startIrregularTest, back: goHome }),
+
+    grammarNote: () =>
+      renderGrammarNoteScreen(root, {
+        profileName: state.profileName,
+        topic: findGrammarTopic(state.grammarTopicId),
+        actions: {
+          back: () => set({ screen: "grammarNotes" }),
+          home: goHome,
+          goTopic: (topicId) => set({ grammarTopicId: topicId }),
+          startQuiz: () => startGrammarQuiz(state.grammarTopicId),
+        },
+      }),
+
+    readingList: () =>
+      renderReadingListScreen(root, {
+        profileName: state.profileName,
+        mode: state.readingMode,
+        openPassage: (passageId) => set({ passageId, screen: "passage" }),
+        startQuiz: startReadingQuiz,
+        backToHome: goHome,
+      }),
+
+    passage: () =>
+      renderPassageScreen(root, {
+        profileName: state.profileName,
+        passage: findPassage(state.passageId),
+        startQuiz: () => startReadingQuiz(state.passageId),
+        backToList: () => set({ screen: "readingList" }),
+        goHome,
+      }),
+
+    mcQuiz: () => {
+      const { mc } = state;
+      const info = mcSourceInfo(mc.source);
+      const question = mc.questions[mc.index];
+      renderMcQuizScreen(root, {
+        question,
+        index: mc.index,
+        total: mc.questions.length,
+        correctCount: mc.questions.filter((q) => q.selectedAnswer === q.correctAnswer).length,
+        label: info.label,
+        level: info.level,
+        contextHtml: info.contextHtml,
+        actions: {
+          select: (choice) => selectMcAnswer(question, choice),
+          next: nextMcQuestion,
+          quit: () => set({ screen: info.quitTo }),
+        },
+      });
+    },
+
+    mcResult: () => {
+      const { mc } = state;
+      const info = mcSourceInfo(mc.source);
+      const correct = mc.questions.filter((q) => q.selectedAnswer === q.correctAnswer).length;
+      const { actions, reviewCta } = mcResultActions(mc.source, correct < mc.questions.length);
+      renderScoreResultScreen(root, {
+        subtitle: `${state.profileName}님 · ${info.label}${mc.source.type === "exam" ? `<br><b>${Math.round((correct / mc.questions.length) * 100)}점</b> · ${examAreaReport(mc.questions)}` : ""}`,
+        correct,
+        total: mc.questions.length,
+        level: info.level,
+        isNewBest: mc.isNewBest,
+        rows: mc.questions.map((q) => ({ html: q.summary, ok: q.selectedAnswer === q.correctAnswer })),
+        reviewCta,
+        actions,
+      });
+    },
+
+    chunkIntro: () =>
+      renderChunkIntroScreen(root, {
+        profileName: state.profileName,
+        startSet: startChunkSet,
+        backToHome: goHome,
+      }),
+
+    chunkSession: () => {
+      const { chunk } = state;
+      renderChunkSessionScreen(root, {
+        set: findChunkSet(chunk.setId),
+        item: chunk.items[chunk.index],
+        index: chunk.index,
+        total: chunk.items.length,
+        correctCount: chunk.items.filter((it) => it.step >= CHUNK_STEPS.length && it.mistakes === 0).length,
+        actions: {
+          tapChunk,
+          next: nextChunk,
+          quit: () => set({ screen: "chunkIntro" }),
+        },
+      });
+    },
+
+    chunkResult: () => {
+      const { chunk } = state;
+      const chunkSet = findChunkSet(chunk.setId);
+      renderScoreResultScreen(root, {
+        subtitle: `${state.profileName}님 · ✂️ 끊어 읽기 ${chunkSet.title}`,
+        correct: chunk.items.filter((it) => it.mistakes === 0).length,
+        total: chunk.items.length,
+        level: levelById(chunkSet.levelId),
+        isNewBest: chunk.isNewBest,
+        rows: chunk.items.map((it) => ({ html: it.sentence.chunks.map((c) => c.en).join(" / "), ok: it.mistakes === 0 })),
+        actions: [
+          { label: "🔁 다시 하기", primary: true, onClick: () => startChunkSet(chunk.setId) },
+          { label: "다른 단계 고르기", onClick: () => set({ screen: "chunkIntro" }) },
+          { label: "홈으로", onClick: goHome },
+        ],
+      });
+    },
+  };
+
+  screens[state.screen]();
+}
+
+applyTextScale(getTextScale());
+applyTheme(getSettings().theme);
+registerServiceWorker();
+const resumedAfterUpdate = restoreAfterUpdate();
+store.subscribe(render);
+render();
+if (resumedAfterUpdate) showToast(`<span class="toast-emoji">✨</span><span>새 버전으로 업데이트했어요</span>`);
