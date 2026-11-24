@@ -607,7 +607,7 @@ const BASIC_TOPICS = [
     ],
     practice: [
       { type: "choose", q: "___ is this?", ko: "이건 뭐예요?", choices: ["What", "Who"], answer: 0, hint: "'무엇'은 What이에요." },
-      { type: "choose", q: "What is this? — ___ is a cup.", ko: "이건 뭐예요? 그건 컵이에요.", choices: ["It", "This", "He"], answer: 0, hint: "대답할 때는 It is ~로 말해요." },
+      { type: "choose", q: "What is this? — ___ is a cup.", ko: "이건 뭐예요? 그건 컵이에요.", choices: ["It", "He", "She"], answer: 0, hint: "물건은 It으로 대답해요. He · She는 사람이에요." },
       { type: "choose", q: "What ___ is it? — It's red.", ko: "무슨 색이에요? 빨간색이에요.", choices: ["color", "name"], answer: 0, hint: "'무슨 색'은 What color예요." },
       { type: "choose", q: "What's your ___? — My name is Jiho.", ko: "이름이 뭐니? 내 이름은 지호야.", choices: ["name", "color"], answer: 0, hint: "이름은 name이에요." },
       { type: "order", words: ["What", "is", "that?"], ko: "저건 뭐예요?" },

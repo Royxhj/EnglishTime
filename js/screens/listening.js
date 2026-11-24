@@ -39,8 +39,8 @@ function renderListeningListScreen(root, { profileName, start, back }) {
         <div class="lesson-point"><span class="lesson-point-num">2</span><p class="lesson-point-text">대화는 문제를 열면 한 번 나와요. ▶로 다시 듣고, 🐢로 천천히 들을 수 있어요.</p></div>
         <div class="lesson-point"><span class="lesson-point-num">3</span><p class="lesson-point-text">답을 고르면 대화 대본과 해설을 볼 수 있어요. 👩 여자, 👨 남자예요.</p></div>
       </section>
-      <div class="level-grid">
-        ${LISTENING_SETS.map((s) => {
+      ${(() => {
+        const card = (s) => {
           const level = levelById(s.levelId);
           const best = getSectionBest(profileName, "listening", s.levelId);
           return `
@@ -52,8 +52,10 @@ function renderListeningListScreen(root, { profileName, start, back }) {
             </span>
             <span class="level-best${best ? "" : " level-best-empty"}">${ratioLabel(best)}</span>
           </button>`;
-        }).join("")}
-      </div>
+        };
+        const { mine, others } = splitByMyLevel(LISTENING_SETS, (s) => [s.levelId], myLevel);
+        return levelSplitHtml(mine.map(card).join(""), others.map(card).join(""), others.length);
+      })()}
     </div>
   `;
   root.querySelector("#backBtn").addEventListener("click", back);

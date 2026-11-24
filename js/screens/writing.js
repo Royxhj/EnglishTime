@@ -63,8 +63,8 @@ function renderWritingListScreen(root, { profileName, start, back }) {
           <button class="segmented-btn${writingMode === "type" ? " active" : ""}" data-mode="type" role="tab" aria-selected="${writingMode === "type"}">⌨️ 직접 쓰기</button>
         </div>
       </section>
-      <div class="level-grid">
-        ${BASIC_GRADES.map((g) => {
+      ${(() => {
+        const card = (g) => {
           const count = writingSentences(g.id).length;
           if (!count) return "";
           const best = getSectionBest(profileName, "writing", `${writingMode}:${g.id}`);
@@ -77,8 +77,10 @@ function renderWritingListScreen(root, { profileName, start, back }) {
             </span>
             <span class="level-best${best ? "" : " level-best-empty"}">${ratioLabel(best)}</span>
           </button>`;
-        }).join("")}
-      </div>
+        };
+        const { mine, others } = splitByMyLevel(BASIC_GRADES, (g) => [g.levelId], myLevel);
+        return levelSplitHtml(mine.map(card).join(""), others.map(card).join(""), others.length);
+      })()}
     </div>
   `;
   root.querySelector("#backBtn").addEventListener("click", back);

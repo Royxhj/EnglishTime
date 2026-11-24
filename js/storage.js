@@ -103,7 +103,7 @@ function removeFamilyMember(name) {
 
 // ── 기기 설정 ──
 function getSettings() {
-  return { sound: true, theme: "auto", cardDirection: "en-ko", ...readJson(SETTINGS_KEY, {}) };
+  return { sound: true, theme: "auto", cardDirection: "en-ko", voice: "auto", speechRate: "normal", ...readJson(SETTINGS_KEY, {}) };
 }
 
 function updateSettings(patch) {
@@ -454,7 +454,7 @@ function exportBackup() {
 // 백업 파일은 외부에서 온 데이터라, 화면에 그대로 그려지는 글자에서 HTML 특수문자를 빼고 형식을 확인한다.
 const cleanText = (value, max = 80) => String(value ?? "").replace(/[<>&"'`]/g, "").trim().slice(0, max);
 const cleanColor = (value) => (/^#[0-9a-f]{3,8}$/i.test(value) ? value : RESTORED_COLORS[0]);
-const SETTING_CHOICES = { theme: ["auto", "light", "dark"], cardDirection: ["en-ko", "ko-en"] };
+const SETTING_CHOICES = { theme: ["auto", "light", "dark"], cardDirection: ["en-ko", "ko-en"], voice: ["auto", "female", "male"], speechRate: ["slow", "normal", "fast"] };
 
 function cleanCustomWords(words) {
   const out = {};

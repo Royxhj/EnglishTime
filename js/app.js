@@ -701,7 +701,7 @@ function parentScreen(state) {
     case "level": case "grammarList": case "readingList": case "chunkIntro":
     case "settings": case "wrongNote": case "report": case "vocab": case "grammarNotes": case "phonics": case "talk":
     case "irregular": case "verbPattern": case "speakingList": case "listeningList": case "writingList":
-    case "idioms": case "affixes": case "examList": case "goals": case "crosswordList": return "home";
+    case "idioms": case "affixes": case "examList": case "goals": case "crosswordList": case "family": return "home";
     case "crossword": return "crosswordList";
     case "speakingResult": return "speakingList";
     case "writingResult": return "writingList";
@@ -746,7 +746,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -890,6 +890,15 @@ function render() {
           openExam: () => set({ screen: "examList" }),
           openGoals: () => set({ screen: "goals" }),
           openCrossword: () => set({ screen: "crosswordList" }),
+          openFamily: () => set({ screen: "family" }),
+          openNext: (step) => {
+            if (step.type === "lesson") startBasic(step.id);
+            else if (step.type === "listening") startListening(step.id);
+            else if (step.type === "exam") startExam(step.id);
+            else if (step.type === "crossword") startCrossword(step.id);
+            else if (step.type === "screen") set({ screen: step.screen });
+            else set({ screen: "settings" });
+          },
           openAffixes: () => set({ screen: "affixes" }),
           openReadingPractice: () => set({ readingMode: "read", screen: "readingList" }),
           openGrammar: () => set({ screen: "grammarList" }),
@@ -1059,9 +1068,12 @@ function render() {
         help: "예문을 누르면 영어로 들려줘요. 따라 말해 보고, 친구나 가족과 역할을 바꿔 가며 말해 봐요.",
         groups: TALK_GROUPS,
         topics: TALK_TOPICS,
+        groupLevels: TALK_GROUP_LEVELS,
         openLesson: startBasic,
         back: goHome,
       }),
+
+    family: () => renderFamilyScreen(root, { openMember: (name) => set({ profileName: name, screen: "home" }), back: goHome }),
 
     crosswordList: () => renderCrosswordListScreen(root, { profileName: state.profileName, start: startCrossword, back: goHome }),
     crossword: () => renderCrosswordScreen(root, { puzzle: state.crossword, actions: crosswordActions }),

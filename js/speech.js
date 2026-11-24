@@ -21,6 +21,20 @@ if (speechSupported) {
   };
 }
 
+// 설정의 말하기 속도 (느리게 · 보통 · 빠르게)
+const SPEECH_RATE_SCALE = { slow: 0.8, normal: 1, fast: 1.15 };
+function speechRateScale() {
+  return SPEECH_RATE_SCALE[getSettings().speechRate] || 1;
+}
+
+// 설정의 영어 목소리: 자동이면 기본 목소리, 여자 · 남자를 고르면 그 목소리(없으면 기본)
+function preferredEnglishVoice() {
+  const pref = getSettings().voice;
+  if (pref === "female") return dialogVoice("W");
+  if (pref === "male") return dialogVoice("M");
+  return null;
+}
+
 // onEnd는 끝까지 읽었을 때만 부른다 (중간에 다른 소리로 끊기면 부르지 않음).
 function speak(text, { rate = 0.9, onEnd, lang = "en-US" } = {}) {
   if (!speechSupported || !text) return;
@@ -28,8 +42,8 @@ function speak(text, { rate = 0.9, onEnd, lang = "en-US" } = {}) {
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = lang;
-  utter.rate = rate;
-  const voice = pickVoice(lang);
+  utter.rate = Math.min(2, rate * (lang.startsWith("en") ? speechRateScale() : 1));
+  const voice = (lang.startsWith("en") && preferredEnglishVoice()) || pickVoice(lang);
   if (voice) utter.voice = voice;
   if (onEnd) utter.onend = onEnd;
   window.speechSynthesis.speak(utter);
@@ -55,7 +69,7 @@ function playDialog(lines, { rate = 0.9 } = {}) {
     const [speaker, text] = lines[i];
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = "en-US";
-    utter.rate = rate;
+    utter.rate = Math.min(2, rate * speechRateScale());
     const voice = dialogVoice(speaker) || pickVoice("en-US");
     if (voice) utter.voice = voice;
     const sameVoice = !dialogVoice("W") || !dialogVoice("M");

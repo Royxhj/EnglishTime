@@ -45,7 +45,7 @@ TALK_TOPICS.push(
       },
     ],
     practice: [
-      { type: "choose", q: "What do you ___ about this movie?", ko: "이 영화에 대해 어떻게 생각해?", choices: ["think", "like", "know"], answer: 0, hint: "'어떻게 생각해?'는 What do you think about ~?예요." },
+      { type: "choose", q: "What do you ___ about this movie?", ko: "이 영화에 대해 어떻게 생각해?", choices: ["think", "know", "look"], answer: 0, hint: "'어떻게 생각해?'는 What do you think about ~?예요." },
       { type: "choose", q: "In my ___, the plan is good.", ko: "내 생각에는 그 계획이 좋아.", choices: ["opinion", "idea"], answer: 0, hint: "'내 생각에는'은 In my opinion이에요." },
       { type: "choose", q: "I think it's useful ___ it saves time.", ko: "시간을 아껴 주니까 유용하다고 생각해.", choices: ["because", "but"], answer: 0, hint: "이유는 because예요." },
       { type: "choose", q: "How do you ___ about the new rule?", ko: "새 규칙에 대해 어떻게 생각해?", choices: ["feel", "think of"], answer: 0, hint: "How do you feel about ~?예요." },
@@ -98,7 +98,7 @@ TALK_TOPICS.push(
     practice: [
       { type: "choose", q: "I ___ with you.", ko: "네 말에 동의해.", choices: ["agree", "think"], answer: 0, hint: "'동의하다'는 agree예요." },
       { type: "choose", q: "Math is fun. — I don't think ___.", ko: "수학은 재미있어. / 나는 그렇게 생각 안 해.", choices: ["so", "it"], answer: 0, hint: "I don't think so.예요." },
-      { type: "choose", q: "That's a good ___, but I disagree.", ko: "좋은 지적이지만 나는 반대야.", choices: ["point", "idea"], answer: 0, hint: "'좋은 지적'은 a good point예요." },
+      { type: "choose", q: "That's a good ___, but I disagree.", ko: "좋은 지적이지만 나는 반대야.", choices: ["point", "pointing"], answer: 0, hint: "'좋은 지적'은 a good point예요. a 뒤에는 명사가 와요." },
       { type: "choose", q: "We need more trees in our city. — You can say that ___.", ko: "우리 도시에 나무가 더 필요해. / 정말 그래.", choices: ["again", "too"], answer: 0, hint: "You can say that again.이에요." },
       { type: "order", words: ["You're", "right."], ko: "네 말이 맞아." },
       { type: "order", words: ["I", "don't", "agree", "with", "you."], ko: "나는 네 말에 동의하지 않아." },

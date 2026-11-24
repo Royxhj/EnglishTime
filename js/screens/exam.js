@@ -73,8 +73,8 @@ function renderExamListScreen(root, { profileName, start, back }) {
       <section class="lesson-section">
         <p class="lesson-point-text">중간 · 기말고사처럼 <b>듣기 → 문법 · 어휘 · 동사 · 숙어</b>를 섞어 20문제를 풀어요. 한 문제에 5점이에요. 끝나면 영역별 점수를 보여 주고, 틀린 문제는 오답노트에 모여요.</p>
       </section>
-      <div class="level-grid">
-        ${BASIC_GRADES.map((g) => {
+      ${(() => {
+        const card = (g) => {
           const best = getSectionBest(profileName, "exam", g.id);
           return `
           <button class="level-card" data-grade="${g.id}" style="--accent:${g.color}">
@@ -85,8 +85,10 @@ function renderExamListScreen(root, { profileName, start, back }) {
             </span>
             <span class="level-best${best ? "" : " level-best-empty"}">${best ? `${Math.round((best.correct / best.total) * 100)}점` : "시작"}</span>
           </button>`;
-        }).join("")}
-      </div>
+        };
+        const { mine, others } = splitByMyLevel(BASIC_GRADES, (g) => [g.levelId], myLevel);
+        return levelSplitHtml(mine.map(card).join(""), others.map(card).join(""), others.length);
+      })()}
     </div>
   `;
   root.querySelector("#backBtn").addEventListener("click", back);

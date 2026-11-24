@@ -39,7 +39,8 @@ function renderReadingListScreen(root, { profileName, mode, openPassage, startQu
       <h1 class="title">${isRead ? "📖 읽기 연습" : "📰 독해 문제"}</h1>
       <p class="subtitle">${isRead ? "듣고 따라 읽으며 지문에 익숙해져요" : "글을 읽고 내용을 확인하는 문제를 풀어요"} · ${doneCount} / ${READING_PASSAGES.length} ${isRead ? "읽음" : "완료"}</p>
 
-      ${LEVELS.map((level) => {
+      ${(() => {
+        const levelSection = (level) => {
         const passages = READING_PASSAGES.filter((p) => p.levelId === level.id);
         if (passages.length === 0) return "";
         return `
@@ -67,7 +68,13 @@ function renderReadingListScreen(root, { profileName, mode, openPassage, startQu
             </div>
           </section>
         `;
-      }).join("")}
+        };
+        // 내 단계를 먼저 펼치고, 다른 단계는 접어 둔다
+        const { mine, others } = splitByMyLevel(LEVELS, (lv) => [lv.id], myLevelOf(profileName));
+        return `${mine.map(levelSection).join("")}${
+          others.length ? `<details class="other-levels"><summary class="basic-grade-title">다른 단계 보기 <span class="basic-grade-count">${others.length}단계</span></summary>${others.map(levelSection).join("")}</details>` : ""
+        }`;
+      })()}
     </div>
   `;
 

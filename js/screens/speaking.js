@@ -66,8 +66,8 @@ function renderSpeakingListScreen(root, { profileName, start, back }) {
         <div class="lesson-point"><span class="lesson-point-num">3</span><p class="lesson-point-text">알아들은 단어는 초록색, 놓친 단어는 빨간색으로 보여요. <b>80% 이상</b>이면 통과!</p></div>
         ${SpeechRecognitionApi ? "" : `<p class="vp-tip">📱 이 기기·브라우저에서는 음성 인식이 되지 않아요. 듣고 따라 말한 뒤 스스로 ✅를 눌러 체크해요. (안드로이드 크롬, PC 크롬·엣지에서는 자동 채점이 돼요)</p>`}
       </section>
-      <div class="level-grid">
-        ${TALK_GROUPS.map((g) => {
+      ${(() => {
+        const card = (g) => {
           const best = getSectionBest(profileName, "speaking", g.id);
           const count = new Set(speakingSentences(g.id).map((s) => s.en)).size;
           return `
@@ -79,8 +79,10 @@ function renderSpeakingListScreen(root, { profileName, start, back }) {
             </span>
             <span class="level-best${best ? "" : " level-best-empty"}">${best ? `${best.correct}/${best.total}` : "시작"}</span>
           </button>`;
-        }).join("")}
-      </div>
+        };
+        const { mine, others } = splitByMyLevel(TALK_GROUPS, (g) => TALK_GROUP_LEVELS[g.id] || [], myLevelOf(profileName));
+        return levelSplitHtml(mine.map(card).join(""), others.map(card).join(""), others.length);
+      })()}
     </div>
   `;
   root.querySelector("#backBtn").addEventListener("click", back);

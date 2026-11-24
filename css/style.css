@@ -1402,6 +1402,33 @@ button {
 .vp-verb-head span { color: var(--muted); font-size: 14px; margin-left: 6px; }
 .vp-why { margin: 2px 0 0; font-size: 13px; font-weight: 700; color: var(--accent); }
 
+.transfer-input { width: 100%; min-height: 72px; margin: 10px 0; font-size: 13px; font-family: monospace; resize: vertical; word-break: break-all; }
+
+/* 가족 한눈에 보기 */
+.family-card { border-left: 5px solid var(--accent); display: flex; flex-direction: column; gap: 10px; }
+.family-head { display: flex; align-items: center; gap: 10px; }
+.family-name { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.family-name b { font-size: 18px; }
+.family-name small { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.family-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.family-stats > div { display: flex; flex-direction: column; align-items: center; padding: 8px 4px; border-radius: 10px; background: var(--surface); text-align: center; }
+.family-stats b { font-size: 18px; }
+.family-stats small { font-size: 11px; color: var(--muted); line-height: 1.3; }
+.family-line { margin: 0; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+
+/* 내 단계 / 다른 단계 */
+.other-levels { display: block; margin-top: 14px; }
+.other-levels[open] > .level-grid { margin-top: 10px; }
+
+/* 이어서 하기 */
+.next-card { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; border: 2px solid var(--accent, var(--primary)); border-radius: var(--radius); background: color-mix(in srgb, var(--accent, var(--primary)) 10%, var(--card-bg)); color: var(--text); text-align: left; box-shadow: var(--shadow); }
+.next-card .next-emoji { font-size: 30px; flex-shrink: 0; }
+.next-card .next-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.next-card .next-label { font-size: 12px; font-weight: 800; color: var(--accent, var(--primary)); }
+.next-card .next-title { font-size: 17px; font-weight: 800; line-height: 1.35; overflow-wrap: anywhere; }
+.next-card .next-desc { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.next-card .next-go { font-size: 26px; color: var(--accent, var(--primary)); }
+
 /* 가로세로 낱말 퀴즈 */
 .cw-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .cw-progress { font-weight: 800; color: var(--accent, var(--primary)); }

@@ -50,6 +50,15 @@ function renderHomeScreen(root, ctx) {
   const notesRead = GRAMMAR_TOPICS.filter((t) => isNoteRead(profileName, t.id)).length;
   const passagesRead = READING_PASSAGES.filter((p) => isPassageRead(profileName, p.id)).length;
   const goal = goalSummary(profileName);
+  const next = nextStep(profileName);
+  // 단계에 맞지 않는 타일은 숨긴다 (초등은 중학교 이상 내용, 중학교 이상은 파닉스)
+  const level = getPreferredLevel(profileName);
+  const isKid = !level || level.startsWith("elementary");
+  const myGrades = BASIC_GRADES.filter((g) => g.levelId === level).map((g) => g.id);
+  const myBasics = BASIC_TOPICS.filter((t) => myGrades.includes(t.grade));
+  const myPassages = READING_PASSAGES.filter((p) => p.levelId === level);
+  const myTalks = TALK_TOPICS.filter((t) => TALK_GROUP_LEVELS[t.group]?.includes(level));
+  const show = { phonics: !level || ["elementary-low", "elementary-mid", "elementary-high", "middle"].includes(level), advanced: !isKid };
 
   root.innerHTML = `
     <div class="screen screen-home" style="--accent:${profile.color}">
@@ -80,6 +89,16 @@ function renderHomeScreen(root, ctx) {
         <span class="daily-go" aria-hidden="true">›</span>
       </button>
 
+      <button class="next-card" id="nextBtn">
+        <span class="next-emoji">${next.emoji}</span>
+        <span class="next-text">
+          <span class="next-label">▶ 이어서 하기</span>
+          <span class="next-title">${next.title}</span>
+          <span class="next-desc">${next.desc}</span>
+        </span>
+        <span class="next-go" aria-hidden="true">›</span>
+      </button>
+
       <div class="quick-links">
         <button class="quick-link" id="wrongNoteBtn">📝 오답노트 <b>${wrongWords + wrongGrammar + getDrillWrongEntries(profileName).length}</b></button>
         <button class="quick-link" id="reportBtn">📊 학습 리포트</button>
@@ -89,22 +108,20 @@ function renderHomeScreen(root, ctx) {
       <section class="group">
         <h2 class="group-title">📚 배우기</h2>
         <div class="tile-grid">
-          ${homeTile({ id: "phonicsBtn", emoji: "🔤", title: "파닉스", meta: `${lessonDoneCount(profileName, PHONICS_TOPICS)} / ${PHONICS_TOPICS.length}` })}
+          ${show.phonics ? homeTile({ id: "phonicsBtn", emoji: "🔤", title: "파닉스", meta: `${lessonDoneCount(profileName, PHONICS_TOPICS)} / ${PHONICS_TOPICS.length}` }) : ""}
           ${homeTile({ id: "vocabBtn", emoji: "📇", title: "단어장", meta: vocab.due > 0 ? `복습 ${vocab.due}개` : vocab.learned > 0 ? `외운 단어 ${vocab.mastered}` : "카드로 외우기", warn: vocab.due > 0 })}
           ${homeTile({
             id: "notesBtn",
             emoji: "📘",
             title: "문법 노트",
-            meta: isElementaryLearner(profileName) || ["middle", "high", "adult"].includes(getPreferredLevel(profileName))
-              ? `단계별 ${lessonDoneCount(profileName, BASIC_TOPICS)} / ${BASIC_TOPICS.length}`
-              : `${notesRead} / ${GRAMMAR_TOPICS.length} 읽음`,
+            meta: level ? `내 단계 ${lessonDoneCount(profileName, myBasics)} / ${myBasics.length}` : `단계별 ${lessonDoneCount(profileName, BASIC_TOPICS)} / ${BASIC_TOPICS.length}`,
           })}
-          ${homeTile({ id: "talkBtn", emoji: "💬", title: "대화 표현", meta: `${lessonDoneCount(profileName, TALK_TOPICS)} / ${TALK_TOPICS.length}` })}
-          ${homeTile({ id: "readPracticeBtn", emoji: "📖", title: "읽기 연습", meta: `${passagesRead} / ${READING_PASSAGES.length} 읽음` })}
+          ${homeTile({ id: "talkBtn", emoji: "💬", title: "대화 표현", meta: level && myTalks.length ? `내 단계 ${lessonDoneCount(profileName, myTalks)} / ${myTalks.length}` : `${lessonDoneCount(profileName, TALK_TOPICS)} / ${TALK_TOPICS.length}` })}
+          ${homeTile({ id: "readPracticeBtn", emoji: "📖", title: "읽기 연습", meta: level ? `내 단계 ${myPassages.filter((p) => isPassageRead(profileName, p.id)).length} / ${myPassages.length} 읽음` : `${passagesRead} / ${READING_PASSAGES.length} 읽음` })}
           ${homeTile({ id: "irregularBtn", emoji: "🔁", title: "불규칙 동사", meta: `${sectionCount(profileName, "irregular", IRREGULAR_SETS)} / ${IRREGULAR_SETS.length} 단계` })}
-          ${homeTile({ id: "verbPatternBtn", emoji: "🔀", title: "to부정사 · 동명사", meta: `${sectionCount(profileName, "verbPattern", VERB_PATTERN_GROUPS)} / ${VERB_PATTERN_GROUPS.length} 묶음` })}
-          ${homeTile({ id: "idiomsBtn", emoji: "🧩", title: "숙어 · 구동사", meta: `${sectionCount(profileName, "idiom", IDIOM_SETS)} / ${IDIOM_SETS.length} 단계` })}
-          ${homeTile({ id: "affixesBtn", emoji: "🔠", title: "접두사 · 접미사", meta: `${sectionCount(profileName, "affix", AFFIX_SETS)} / ${AFFIX_SETS.length} 묶음` })}
+          ${show.advanced ? homeTile({ id: "verbPatternBtn", emoji: "🔀", title: "to부정사 · 동명사", meta: `${sectionCount(profileName, "verbPattern", VERB_PATTERN_GROUPS)} / ${VERB_PATTERN_GROUPS.length} 묶음` }) : ""}
+          ${show.advanced ? homeTile({ id: "idiomsBtn", emoji: "🧩", title: "숙어 · 구동사", meta: `${sectionCount(profileName, "idiom", IDIOM_SETS)} / ${IDIOM_SETS.length} 단계` }) : ""}
+          ${show.advanced ? homeTile({ id: "affixesBtn", emoji: "🔠", title: "접두사 · 접미사", meta: `${sectionCount(profileName, "affix", AFFIX_SETS)} / ${AFFIX_SETS.length} 묶음` }) : ""}
         </div>
       </section>
 
@@ -125,7 +142,7 @@ function renderHomeScreen(root, ctx) {
           ${homeTile({ id: "spellingBtn", emoji: "⌨️", title: "철자 쓰기", meta: "직접 입력" })}
           ${homeTile({ id: "grammarBtn", emoji: "✏️", title: "문법 문제", meta: wrongGrammar > 0 ? `오답 ${wrongGrammar}개` : `${grammarDone} / ${GRAMMAR_TOPICS.length} 완료`, warn: wrongGrammar > 0 })}
           ${homeTile({ id: "chunksBtn", emoji: "✂️", title: "끊어 읽기", meta: `${chunkDone} / ${CHUNK_SETS.length} 완료` })}
-          ${homeTile({ id: "readingBtn", emoji: "📰", title: "독해 문제", meta: `${readingDone} / ${READING_PASSAGES.length} 완료` })}
+          ${homeTile({ id: "readingBtn", emoji: "📰", title: "독해 문제", meta: level ? `내 단계 ${myPassages.filter((p) => getSectionBest(profileName, "reading", p.id)).length} / ${myPassages.length} 완료` : `${readingDone} / ${READING_PASSAGES.length} 완료` })}
           ${homeTile({ id: "crosswordBtn", emoji: "🧩", title: "가로세로 낱말", meta: "매번 새 퍼즐" })}
           ${homeTile({ id: "examBtn", emoji: "📝", title: "단원 모의고사", meta: "20문제 · 100점" })}
         </div>
@@ -133,11 +150,15 @@ function renderHomeScreen(root, ctx) {
       <section class="group">
         <h2 class="group-title">이번 주 가족 순위</h2>
         <ol class="rank-list">${leaderboardHtml(profileName)}</ol>
+        ${getFamily().length > 1 ? `<button class="secondary-btn" id="familyBtn">👨‍👩‍👧 가족 한눈에 보기</button>` : ""}
       </section>
     </div>
   `;
 
-  const bind = (id, fn) => root.querySelector(`#${id}`).addEventListener("click", fn);
+  // 단계에 따라 숨긴 타일도 있어서 없으면 건너뛴다
+  const bind = (id, fn) => root.querySelector(`#${id}`)?.addEventListener("click", fn);
+  bind("nextBtn", () => actions.openNext(next));
+  bind("familyBtn", actions.openFamily);
   bind("backBtn", actions.backToProfile);
   bind("settingsBtn", actions.openSettings);
   bind("wrongNoteBtn", actions.openWrongNote);

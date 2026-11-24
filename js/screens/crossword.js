@@ -137,8 +137,8 @@ function renderCrosswordListScreen(root, { profileName, start, back }) {
       <section class="lesson-section">
         <p class="lesson-point-text">단계를 고르면 그 단계 단어장에서 단어를 무작위로 뽑아 퍼즐을 만들어요. 힌트(한국어 뜻)를 보고 영어 철자를 칸에 써요. 칸이나 힌트를 누르면 그 단어가 선택되고, 같은 칸을 한 번 더 누르면 가로 ↔ 세로가 바뀌어요.</p>
       </section>
-      <div class="level-grid">
-        ${LEVELS.map((lv) => {
+      ${(() => {
+        const card = (lv) => {
           const best = getSectionBest(profileName, "crossword", lv.id);
           return `
           <button class="level-card" data-level="${lv.id}" style="--accent:${lv.color}">
@@ -149,8 +149,10 @@ function renderCrosswordListScreen(root, { profileName, start, back }) {
             </span>
             <span class="level-best${best ? "" : " level-best-empty"}">${ratioLabel(best)}</span>
           </button>`;
-        }).join("")}
-      </div>
+        };
+        const { mine, others } = splitByMyLevel(LEVELS, (lv) => [lv.id], myLevel);
+        return levelSplitHtml(mine.map(card).join(""), others.map(card).join(""), others.length);
+      })()}
     </div>
   `;
   root.querySelector("#backBtn").addEventListener("click", back);
