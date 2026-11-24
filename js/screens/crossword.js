@@ -308,7 +308,10 @@ function renderCrosswordScreen(root, { puzzle, actions }) {
     el.addEventListener("keydown", (e) => {
       if (e.key === "Backspace" && !el.value) {
         e.preventDefault();
-        if (sel.r !== r || sel.c !== c) sel = { r, c, dir: sel.dir };
+        if (sel.r !== r || sel.c !== c) {
+          sel = { r, c, dir: sel.dir };
+          puzzle.sel = sel;
+        }
         step(-1);
         const prev = input(sel.r, sel.c);
         if (prev) {

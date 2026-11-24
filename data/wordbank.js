@@ -3241,10 +3241,10 @@ const WORD_BANK = {
       { en: "The surplus was saved.", ko: "그 잉여금은 저축됐어요." },
       { en: "A budget surplus is good news.", ko: "예산 흑자는 좋은 소식이에요." },
     ]},
-    { id: "adult-44", word: "capital", ipa: "/ˈkæp.ɪ.təl/", meaningKo: "자본", emoji: "💵", desc: "사업에 쓰이는 돈이에요.", examples: [
-      { en: "We need more capital.", ko: "우리는 자본이 더 필요해요." },
-      { en: "The company raised capital.", ko: "그 회사는 자본을 모았어요." },
-      { en: "Capital funds the business.", ko: "자본은 사업에 자금을 대요." },
+    { id: "adult-44", word: "investor", ipa: "/ɪnˈves.tər/", meaningKo: "투자자", emoji: "💵", desc: "돈을 대고 이익을 기대하는 사람이에요.", examples: [
+      { en: "The startup found a new investor.", ko: "그 스타트업은 새 투자자를 찾았어요." },
+      { en: "Investors were worried about the market.", ko: "투자자들은 시장을 걱정했어요." },
+      { en: "She is a careful investor.", ko: "그녀는 신중한 투자자예요." },
     ]},
     { id: "adult-45", word: "dividend", ipa: "/ˈdɪv.ɪ.dend/", meaningKo: "배당금", emoji: "💴", desc: "회사가 주주에게 나눠주는 돈이에요.", examples: [
       { en: "The company paid a dividend.", ko: "그 회사는 배당금을 지급했어요." },

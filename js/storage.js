@@ -487,6 +487,7 @@ function importBackup(data) {
   }
 
   const profiles = {};
+  const taskIds = new Set(goalTaskCatalog().map((t) => t.id));
   for (const [key, profile] of Object.entries(data.profiles)) {
     const name = renamed[key] ?? cleanText(key, 8);
     if (!name || typeof profile !== "object" || profile === null) continue;
@@ -496,6 +497,17 @@ function importBackup(data) {
     p.wrongWords = Object.fromEntries(Object.entries(p.wrongWords).filter(([id, e]) => findWordById(id) && levelById(e?.levelId)));
     p.vocab = Object.fromEntries(Object.entries(p.vocab).filter(([id, e]) => (findWordById(id) || p.customWords[id]) && typeof e?.due === "string"));
     p.starred = Object.fromEntries(Object.keys(p.starred).filter((id) => findWordById(id) || p.customWords[id]).map((id) => [id, true]));
+    // 연습 오답은 지금 앱에서 다시 만들 수 있는 문제만 남긴다
+    p.drill.wrong = Object.fromEntries(
+      Object.entries(p.drill.wrong)
+        .filter(([id]) => drillQuestionById(id))
+        .map(([id, e]) => [id, { id, hits: Number(e?.hits) || 0, missed: Number(e?.missed) || 1, lastMissed: cleanText(e?.lastMissed, 10) }])
+    );
+    const goals = p.goals || {};
+    p.goals = {
+      counts: Object.fromEntries(GOAL_COUNTS.map((c) => [c.key, c.options.includes(Number(goals.counts?.[c.key])) ? Number(goals.counts[c.key]) : 0])),
+      tasks: Array.isArray(goals.tasks) ? goals.tasks.filter((id) => taskIds.has(id)).slice(0, 30) : [],
+    };
     profiles[name] = p;
   }
 

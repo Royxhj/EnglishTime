@@ -19,6 +19,20 @@ const BADGES = [
   { id: "mastered50", emoji: "🧠", title: "단어 50개 외우기", desc: "단어장에서 50개 외우기", test: (p) => Object.values(p.vocab).filter((v) => v.box >= VOCAB_MASTERED_BOX).length >= 50 },
   { id: "reader10", emoji: "🗣️", title: "소리 내어 읽기", desc: "읽기 연습 지문 10개 읽기", test: (p) => Object.keys(p.readingRead).length >= 10 },
   { id: "notesAll", emoji: "📘", title: "문법 노트 완독", desc: `문법 노트 ${GRAMMAR_TOPICS.length}주제 모두 이해하기`, test: (p) => GRAMMAR_TOPICS.every((t) => p.notesRead[t.id]) },
+  { id: "basics10", emoji: "🧸", title: "차근차근", desc: "단계별 문법 · 파닉스 · 대화 10주제 끝내기", test: (p) => Object.keys(p.basics.best).length >= 10 },
+  { id: "basics50", emoji: "🏫", title: "꾸준한 학생", desc: "단계별 문법 · 파닉스 · 대화 50주제 끝내기", test: (p) => Object.keys(p.basics.best).length >= 50 },
+  { id: "irregularAll", emoji: "🔁", title: "불규칙 동사 정복", desc: "불규칙 동사 3단계 모두 80점 이상", test: (p) => IRREGULAR_SETS.every((s) => ratioAtLeast(p.irregular.best[s.id], 0.8)) },
+  { id: "verbPatternAll", emoji: "🔀", title: "to · ing 달인", desc: "to부정사 · 동명사 종합 테스트 80점 이상", test: (p) => ratioAtLeast(p.verbPattern.best.all, 0.8) },
+  { id: "idiomFirst", emoji: "🧩", title: "숙어 첫걸음", desc: "숙어 · 접사 테스트 하나 80점 이상", test: (p) => [...Object.values(p.idiom.best), ...Object.values(p.affix.best)].some((b) => ratioAtLeast(b, 0.8)) },
+  { id: "speaker", emoji: "🎙️", title: "또박또박", desc: "따라 말하기 한 묶음에서 6문장 통과", test: (p) => Object.values(p.speaking.best).some((b) => ratioAtLeast(b, 0.75)) },
+  { id: "listener", emoji: "🎧", title: "귀 쫑긋", desc: "듣기 평가 한 단계 만점", test: (p) => perfectCount(p.listening.best) >= 1 },
+  { id: "writer", emoji: "✍️", title: "문장 장인", desc: "영작 연습 직접 쓰기 80점 이상", test: (p) => Object.entries(p.writing.best).some(([k, b]) => k.startsWith("type:") && ratioAtLeast(b, 0.8)) },
+  { id: "crossword", emoji: "🧩", title: "퍼즐 해결사", desc: "가로세로 낱말 힌트 없이 완성", test: (p) => perfectCount(p.crossword.best) >= 1 },
+  { id: "exam100", emoji: "🏆", title: "모의고사 만점", desc: "단원 모의고사 100점", test: (p) => perfectCount(p.exam.best) >= 1 },
+  { id: "goalWeek", emoji: "🎯", title: "목표 달성", desc: "이번 주 목표 모두 이루기", test: (p, name) => {
+      const s = goalSummary(name);
+      return s.total > 0 && s.done === s.total;
+    } },
   {
     id: "allModes", emoji: "🌈", title: "골고루 학습", desc: "6가지 학습 모두 해보기",
     test: (p) =>
@@ -33,18 +47,22 @@ function wordBests(profile, mode) {
     .map(([, v]) => v);
 }
 
+function ratioAtLeast(best, ratio) {
+  return !!best && best.correct / best.total >= ratio;
+}
+
 function perfectCount(bests) {
   return Object.values(bests).filter((b) => b.correct === b.total).length;
 }
 
 function evaluateBadges(profileName) {
   const profile = getProfileData(profileName);
-  return BADGES.map((b) => ({ ...b, earned: !!profile.badges[b.id] || b.test(profile), date: profile.badges[b.id] || null }));
+  return BADGES.map((b) => ({ ...b, earned: !!profile.badges[b.id] || b.test(profile, profileName), date: profile.badges[b.id] || null }));
 }
 
 function checkNewBadges(profileName) {
   const profile = getProfileData(profileName);
-  const fresh = BADGES.filter((b) => !profile.badges[b.id] && b.test(profile));
+  const fresh = BADGES.filter((b) => !profile.badges[b.id] && b.test(profile, profileName));
   if (fresh.length > 0) saveBadges(profileName, fresh.map((b) => b.id));
   return fresh;
 }

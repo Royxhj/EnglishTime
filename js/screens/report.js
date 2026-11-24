@@ -130,6 +130,27 @@ function renderReportScreen(root, { profileName, actions }) {
       </section>
 
       <section class="settings-card">
+        <h2 class="section-title">말하기 · 듣기 · 쓰기 · 시험</h2>
+        <ul class="bar-list">
+          ${[
+            { name: "📘 단계별 문법 · 파닉스 · 대화", done: sectionDone("basics", [...BASIC_TOPICS, ...PHONICS_TOPICS, ...TALK_TOPICS]), total: BASIC_TOPICS.length + PHONICS_TOPICS.length + TALK_TOPICS.length },
+            { name: "🎙️ 따라 말하기 묶음", done: sectionDone("speaking", TALK_GROUPS), total: TALK_GROUPS.length },
+            { name: "🎧 듣기 평가 단계", done: LISTENING_SETS.filter((s) => getSectionBest(profileName, "listening", s.levelId)).length, total: LISTENING_SETS.length },
+            { name: "✍️ 영작 연습 학년", done: BASIC_GRADES.filter((g) => getSectionBest(profileName, "writing", `order:${g.id}`) || getSectionBest(profileName, "writing", `type:${g.id}`)).length, total: BASIC_GRADES.length },
+            { name: "🧩 숙어 · 🔠 접사", done: sectionDone("idiom", IDIOM_SETS) + sectionDone("affix", AFFIX_SETS), total: IDIOM_SETS.length + AFFIX_SETS.length },
+            { name: "🧩 가로세로 낱말 단계", done: LEVELS.filter((lv) => getSectionBest(profileName, "crossword", lv.id)).length, total: LEVELS.length },
+            { name: "📝 단원 모의고사 학년", done: sectionDone("exam", BASIC_GRADES), total: BASIC_GRADES.length },
+          ]
+            .map((r) => `<li><span class="bar-name">${r.name}</span>${barHtml((r.done / r.total) * 100, "var(--primary)")}<span class="bar-value">${r.done}/${r.total}</span></li>`)
+            .join("")}
+        </ul>
+        ${(() => {
+          const exams = BASIC_GRADES.map((g) => ({ g, b: getSectionBest(profileName, "exam", g.id) })).filter((x) => x.b);
+          return exams.length ? `<p class="settings-help">모의고사 최고 점수: ${exams.map((x) => `${x.g.id} ${Math.round((x.b.correct / x.b.total) * 100)}점`).join(" · ")}</p>` : "";
+        })()}
+      </section>
+
+      <section class="settings-card">
         <h2 class="section-title">배지 ${earnedCount} / ${BADGES.length}</h2>
         <div class="badge-grid">
           ${badges

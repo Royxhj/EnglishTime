@@ -504,7 +504,7 @@ BASIC_TOPICS.push(
     ],
     practice: [
       { type: "choose", q: "She ___ to be upset about something.", ko: "그녀는 뭔가에 속상한 것 같아요.", choices: ["seems", "seem"], answer: 0, hint: "주어가 She라 seems예요." },
-      { type: "choose", q: "It ___ that the flight has been delayed.", ko: "비행기가 지연된 것 같아요.", choices: ["seems", "is likely"], answer: 0, hint: "It seems that + 문장이에요." },
+      { type: "choose", q: "It ___ that the flight has been delayed.", ko: "비행기가 지연된 것 같아요.", choices: ["seems", "seem", "seeming"], answer: 0, hint: "It seems that + 문장이에요." },
       { type: "choose", q: "Older people tend ___ up earlier.", ko: "나이 든 사람들은 더 일찍 일어나는 경향이 있다.", choices: ["to get", "getting"], answer: 0, hint: "tend to + 동사원형이에요." },
       { type: "choose", q: "It is ___ to rain this afternoon.", ko: "오늘 오후에 비가 올 가능성이 높다.", choices: ["likely", "like"], answer: 0, hint: "be likely to = ~할 가능성이 높다." },
       { type: "choose", q: "The project is ___ to finish on time. We're too far behind.", ko: "프로젝트가 제때 끝날 것 같지 않아요. 너무 뒤처졌어요.", choices: ["unlikely", "likely"], answer: 0, hint: "뒤처져서 가능성이 낮아요." },

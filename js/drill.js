@@ -29,6 +29,7 @@ function drillQuestionById(id) {
     return topic ? basicChooseQuestion(topic, Number(b)) : null;
   }
   if (type === "irr") {
+    if (!["past", "pp", "base"].includes(c)) return null;
     const set = findIrregularSet(a);
     const v = set?.verbs.find((x) => x.base === b);
     return v ? irregularQuestion(v, set, c) : null;
