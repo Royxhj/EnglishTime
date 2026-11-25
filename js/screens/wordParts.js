@@ -142,7 +142,7 @@ const speakBtnHtml = (text) => `<button class="speak-btn" data-speak="${encodeUR
 
 const IDIOM_SCREEN = {
   key: "idiom",
-  title: "🧩 숙어 · 구동사",
+  title: "🧩 숙어 · 생활 표현",
   subtitle: "덩어리로 외우는 표현",
   section: "idiom",
   sets: IDIOM_SETS,

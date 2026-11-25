@@ -202,7 +202,7 @@ function renderHomeScreen(root, ctx) {
           ${homeTile({ id: "readBtn", emoji: "📖", title: "읽기", meta: level ? `내 단계 ${passagesDone(myPassages)} / ${myPassages.length}` : `${passagesDone(READING_PASSAGES)} / ${READING_PASSAGES.length}` })}
           ${homeTile({ id: "irregularBtn", emoji: "🔁", title: "불규칙 동사", meta: `${sectionCount(profileName, "irregular", IRREGULAR_SETS)} / ${IRREGULAR_SETS.length} 단계` })}
           ${show.advanced ? homeTile({ id: "verbPatternBtn", emoji: "🔀", title: "to부정사 · 동명사", meta: `${sectionCount(profileName, "verbPattern", VERB_PATTERN_GROUPS)} / ${VERB_PATTERN_GROUPS.length} 묶음` }) : ""}
-          ${show.advanced ? homeTile({ id: "idiomsBtn", emoji: "🔗", title: "숙어 · 구동사", meta: `${sectionCount(profileName, "idiom", IDIOM_SETS)} / ${IDIOM_SETS.length} 단계` }) : ""}
+          ${homeTile({ id: "idiomsBtn", emoji: "🔗", title: "숙어 · 표현", meta: `${sectionCount(profileName, "idiom", IDIOM_SETS)} / ${IDIOM_SETS.length} 단계` })}
           ${show.advanced ? homeTile({ id: "affixesBtn", emoji: "🔠", title: "접두사 · 접미사", meta: `${sectionCount(profileName, "affix", AFFIX_SETS)} / ${AFFIX_SETS.length} 묶음` }) : ""}
         </div>
       </section>
