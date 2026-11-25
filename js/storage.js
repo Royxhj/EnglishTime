@@ -139,9 +139,12 @@ function normalizeProfile(profile) {
   if (!Array.isArray(p.wordLists)) p.wordLists = [];
   if (!Array.isArray(p.missionWeeks)) p.missionWeeks = [];
   p.bonusStars ||= 0;
+  if (!Array.isArray(p.advent)) p.advent = [];
+  if (!p.care || typeof p.care !== "object") p.care = {};
+  p.care = { day: typeof p.care.day === "string" ? p.care.day : "", pets: Number(p.care.pets) || 0, snacks: Number(p.care.snacks) || 0, bond: Math.max(0, Math.floor(Number(p.care.bond) || 0)) };
   if (p.petKind !== undefined && !(typeof p.petKind === "string" && /^[a-z]{2,10}$/.test(p.petKind))) delete p.petKind;
   if (p.diag && !(typeof p.diag === "object" && levelById(p.diag.levelId) && /^\d{4}-\d{2}-\d{2}$/.test(p.diag.date))) delete p.diag;
-  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster", "wordrain"]) {
+  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster", "wordrain", "xmas", "pairs", "chant", "culture", "drawgame"]) {
     p[section] ||= { best: {}, wrong: {} };
     p[section].best ||= {};
     p[section].wrong ||= {};
@@ -367,6 +370,42 @@ function deleteWordList(profileName, id) {
   updateProfile(profileName, (profile) => {
     profile.wordLists = profile.wordLists.filter((l) => l.id !== id);
     for (const m of ["choice", "spell", "dict"]) delete profile.wordlist.best[`${id}:${m}`];
+  });
+}
+
+// 🎄 어드벤트 달력 도장: 처음 찍으면 보너스 별을 주고 true
+function stampAdvent(profileName, key, stars) {
+  return updateProfile(profileName, (profile) => {
+    if (profile.advent.includes(key)) return false;
+    profile.advent.push(key);
+    profile.advent = profile.advent.slice(-60);
+    profile.bonusStars += stars;
+    return true;
+  });
+}
+
+// 🍎 친구 돌보기: 하루에 쓰다듬기 · 간식 횟수가 정해져 있다. 간식은 별 1개.
+function getPetCare(profileName) {
+  const care = getProfileData(profileName).care;
+  return care.day === dateKey() ? care : { ...care, pets: 0, snacks: 0 };
+}
+
+function petCareAction(profileName, kind, { petMax, snackMax }) {
+  return updateProfile(profileName, (profile) => {
+    if (profile.care.day !== dateKey()) Object.assign(profile.care, { day: dateKey(), pets: 0, snacks: 0 });
+    const c = profile.care;
+    if (kind === "pet") {
+      if (c.pets >= petMax) return { ok: false };
+      c.pets += 1;
+      c.bond += 2;
+      return { ok: true };
+    }
+    const stars = Math.floor(profile.totalAnswered / STAR_EVERY) + profile.bonusStars - profile.shop.spent;
+    if (c.snacks >= snackMax || stars < 1) return { ok: false };
+    c.snacks += 1;
+    c.bond += 5;
+    profile.shop.spent += 1;
+    return { ok: true };
   });
 }
 
@@ -737,6 +776,8 @@ function importBackup(data) {
       .map((l) => ({ id: l.id, title: cleanText(l.title, 20) || "단어장", words: l.words.map((w) => ({ w: cleanText(w?.w, 40), ko: cleanText(w?.ko, 60) })).filter((w) => w.w && w.ko).slice(0, 100) }));
     p.missionWeeks = p.missionWeeks.filter((d) => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)).slice(-60);
     p.bonusStars = Math.max(0, Math.floor(Number(p.bonusStars) || 0));
+    p.advent = [...new Set(p.advent.filter((k) => typeof k === "string" && /^\d{4}-12-\d{2}$/.test(k)))].slice(-60);
+    if (!/^(\d{4}-\d{2}-\d{2})?$/.test(p.care.day)) p.care.day = "";
     const owned = p.shop.owned.filter((id) => shopItem(id));
     p.shop = {
       spent: Math.max(0, Number(p.shop.spent) || 0),

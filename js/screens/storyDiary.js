@@ -191,11 +191,18 @@ const SHOP_ITEMS = [
   { id: "pal-panda", cat: "pal", emoji: "🐼", name: "판다", price: 50 },
   { id: "pal-dragon", cat: "pal", emoji: "🐲", name: "아기 용", price: 100 },
   { id: "pal-trophy", cat: "pal", emoji: "🏆", name: "개근 트로피", price: 0, perfect: 1 },
+  { id: "hat-santa", cat: "hat", emoji: "🎅", name: "산타 모자", price: 0, advent: 5 },
+  { id: "pal-snowman", cat: "pal", emoji: "⛄", name: "눈사람 친구", price: 0, advent: 12 },
+  { id: "bg-snow", cat: "bg", emoji: "❄️", name: "눈 내리는 밤", price: 0, advent: 20, bg: "linear-gradient(135deg, #c3d9f5, #eef5ff, #dfe9f7)" },
+  { id: "pal-tree", cat: "pal", emoji: "🎄", name: "크리스마스트리", price: 0, advent: 25 },
 ];
 
 // 개근 선물: 한 달 개근을 perfect번 하면 공짜로 받는다
+// 어드벤트 선물: 크리스마스 도장을 advent개 모으면 공짜로 받는다
 function shopItemUnlocked(profileName, item) {
-  return !item.perfect || getProfileData(profileName).perfectMonths.length >= item.perfect;
+  const p = getProfileData(profileName);
+  if (item.advent) return p.advent.length >= item.advent;
+  return !item.perfect || p.perfectMonths.length >= item.perfect;
 }
 
 function shopItem(id) {
@@ -243,7 +250,7 @@ function renderShopScreen(root, { profileName, actions }) {
               const owned = s.owned.includes(it.id);
               const on = s.equip[cat.id] === it.id;
               const unlocked = shopItemUnlocked(profileName, it);
-              const label = on ? "벗기" : owned ? "꾸미기" : !unlocked ? `📆 개근 ${it.perfect}번` : it.price ? `⭐ ${it.price}` : "🎁 받기";
+              const label = on ? "벗기" : owned ? "꾸미기" : !unlocked ? (it.advent ? `🎄 도장 ${it.advent}개` : `📆 개근 ${it.perfect}번`) : it.price ? `⭐ ${it.price}` : "🎁 받기";
               return `<button class="shop-item${on ? " on" : ""}${owned ? " owned" : ""}" data-item="${it.id}" ${!owned && (!unlocked || s.stars < it.price) ? "disabled" : ""}>
                 <span class="shop-emoji"${it.bg ? ` style="background:${it.bg}"` : ""}>${it.emoji}</span>
                 <b>${it.name}</b>

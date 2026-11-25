@@ -196,6 +196,7 @@ function renderHomeScreen(root, ctx) {
       ${isKid ? petCardHtml(profileName) : ""}
       ${levelProgressHtml(profileName)}
       ${todayCardHtml(profileName, { daily, dueWrong, wrongTotal, next })}
+      ${adventHomeCardHtml(profileName)}
       ${todayPhraseHtml(profileName)}
 
       <section class="group pin-group" id="pinGroup">
@@ -220,6 +221,8 @@ function renderHomeScreen(root, ctx) {
           ${homeTile({ id: "numbersBtn", emoji: "🔢", title: "숫자 · 시간", meta: `${sectionCount(profileName, "numbers", NUMBER_SETS)} / ${NUMBER_SETS.length} 묶음` })}
           ${homeTile({ id: "irregularBtn", emoji: "🔁", title: "불규칙 동사", meta: `${sectionCount(profileName, "irregular", IRREGULAR_SETS)} / ${IRREGULAR_SETS.length} 단계` })}
           ${show.advanced ? homeTile({ id: "verbPatternBtn", emoji: "🔀", title: "to부정사 · 동명사", meta: `${sectionCount(profileName, "verbPattern", VERB_PATTERN_GROUPS)} / ${VERB_PATTERN_GROUPS.length} 묶음` }) : ""}
+          ${homeTile({ id: "chantBtn", emoji: "🎵", title: "챈트", meta: `${sectionCount(profileName, "chant", CHANTS)} / ${CHANTS.length}곡` })}
+          ${homeTile({ id: "cultureBtn", emoji: "🌍", title: "세계 문화", meta: `카드 ${sectionCount(profileName, "culture", CULTURE_CARDS)} / ${CULTURE_CARDS.length}` })}
           ${homeTile({ id: "idiomsBtn", emoji: "🔗", title: "숙어 · 표현", meta: `${sectionCount(profileName, "idiom", IDIOM_SETS)} / ${IDIOM_SETS.length} 단계` })}
           ${show.advanced ? homeTile({ id: "affixesBtn", emoji: "🔠", title: "접두사 · 접미사", meta: `${sectionCount(profileName, "affix", AFFIX_SETS)} / ${AFFIX_SETS.length} 묶음` }) : ""}
         </div>
@@ -244,6 +247,8 @@ function renderHomeScreen(root, ctx) {
         <div class="tile-grid">
           ${isKid ? homeTile({ id: "pictureBtn", emoji: "🎧", title: "그림 퀴즈", meta: "듣고 · 보고 고르기" }) : ""}
           ${isKid ? homeTile({ id: "memoryBtn", emoji: "🃏", title: "짝 맞추기", meta: "카드 뒤집기 게임" }) : ""}
+          ${homeTile({ id: "pairsBtn", emoji: "🔗", title: "짝꿍 단어 잇기", meta: "반대말 · 비슷한 말" })}
+          ${homeTile({ id: "drawBtn", emoji: "🎨", title: "그림 맞히기", meta: "가족이 그리고 맞혀요" })}
           ${homeTile({ id: "rainBtn", emoji: "🌧️", title: "단어 비", meta: "떨어지기 전에 터뜨려요" })}
           ${homeTile({ id: "monsterBtn", emoji: "👾", title: "오답 몬스터", meta: wrongWords > 0 ? `오답 ${wrongWords}개로 싸우기` : "단어로 몬스터 잡기", warn: wrongWords > 0 })}
           ${homeTile({ id: "speedBtn", emoji: "⏱️", title: "60초 퀴즈", meta: "1분 동안 많이 맞히기" })}
@@ -325,6 +330,12 @@ function renderHomeScreen(root, ctx) {
   bind("chunksBtn", actions.openChunks);
   bind("wordListsBtn", actions.openWordLists);
   bind("roadmapBtn", actions.openRoadmap);
+  bind("adventBtn", actions.openAdvent);
+  bind("chantBtn", actions.openChants);
+  bind("cultureBtn", actions.openCulture);
+  bind("pairsBtn", actions.openPairs);
+  bind("drawBtn", actions.openDraw);
+  bindPetCare(root, profileName);
   bind("diagBtn", actions.openDiagnosis);
   bind("rainBtn", actions.openWordRain);
   bindBackupReminder(root);

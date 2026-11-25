@@ -176,6 +176,7 @@ function petCardHtml(profileName) {
         <button class="pet-sticker-btn" id="shopBtn" aria-label="별 상점, 별 ${shopStatus(profileName).stars}개">⭐ <b>${shopStatus(profileName).stars}</b></button>
         <button class="pet-sticker-btn" id="stickerBtn" aria-label="스티커북">📒 <b>${s.stickers}</b></button>
       </div>
+      ${petCareHtml(profileName)}
     </section>`;
 }
 

@@ -102,6 +102,8 @@ const startIrregularTest = (setId) => startMc({ type: "irregular", id: setId }, 
 const startTopicQuiz = (topicId) => startMc({ type: "topic", id: topicId }, buildTopicQuestions(topicId));
 const startNumbers = (setId) => startMc({ type: "numbers", id: setId }, buildNumberQuestions(setId));
 const startSounds = (setId) => startMc({ type: "sounds", id: setId }, buildSoundQuestions(setId));
+const startXmasQuiz = (day) => startMc({ type: "xmas", id: adventKey(adventInfo().year, day) }, buildXmasQuestions(day));
+
 function startWordListTest(listId, mode) {
   const list = findWordList(currentProfile(), listId);
   if (!list) return;
@@ -161,6 +163,7 @@ function mcSourceInfo(source) {
     const ss = SOUND_PAIR_SETS.find((x) => x.id === source.id);
     return { label: ss ? `${ss.emoji} ${ss.title}` : "🎲 소리 구별 모두 섞기", level: null, quitTo: "soundsList", listScreen: "soundsList" };
   }
+  if (source.type === "xmas") return { label: `🎄 12월 ${Number(source.id.slice(-2))}일 미션`, level: null, quitTo: "advent", listScreen: "advent" };
   if (source.type === "wordlist") {
     const list = findWordList(currentProfile(), source.id);
     return { label: `📝 ${escapeHtml(list?.title || "우리 집 단어장")}`, level: null, quitTo: "wordListView", listScreen: "wordLists" };
@@ -214,6 +217,13 @@ function nextMcQuestion() {
   if (mc.source.type === "listening") isNewBest = recordSectionResult(currentProfile(), "listening", mc.source.id, correct, total);
   if (mc.source.type === "verbPattern") isNewBest = recordSectionResult(currentProfile(), "verbPattern", mc.source.id, correct, total);
   if (mc.source.type === "daily") recordDaily(currentProfile(), correct, total);
+  if (mc.source.type === "xmas") {
+    isNewBest = recordSectionResult(currentProfile(), "xmas", mc.source.id, correct, total);
+    if (correct >= ADVENT_PASS && stampAdvent(currentProfile(), mc.source.id, ADVENT_STARS)) {
+      burstConfetti(70);
+      showToast(`<span class="toast-emoji">🌟</span><span>12월 ${Number(mc.source.id.slice(-2))}일 도장 쾅! ⭐ ${ADVENT_STARS}개를 받았어요</span>`);
+    }
+  }
   if (mc.source.type === "wordlist") isNewBest = recordSectionResult(currentProfile(), "wordlist", `${mc.source.id}:choice`, correct, total);
   if (["topic", "numbers", "sounds", "story", "riddle"].includes(mc.source.type)) isNewBest = recordSectionResult(currentProfile(), mc.source.type, mc.source.id, correct, total);
   if (mc.source.type === "weekly") isNewBest = recordSectionResult(currentProfile(), "weekly", mc.source.id, correct, total);
@@ -345,6 +355,17 @@ function mcResultActions(source, hasWrong) {
         { label: "📋 단어 다시 보기", onClick: () => set({ topicId: source.id, screen: "topicView" }) },
         ...(next ? [{ label: `다음 주제: ${next.emoji} ${next.title}`, onClick: () => set({ topicId: next.id, screen: "topicView" }) }] : []),
         { label: "주제 목록", onClick: () => set({ screen: "topicList" }) },
+      ],
+    };
+  }
+  if (source.type === "xmas") {
+    const day = Number(source.id.slice(-2));
+    const stamped = getProfileData(currentProfile()).advent.includes(source.id);
+    return {
+      actions: [
+        { label: "🎄 어드벤트 달력으로", primary: true, onClick: () => set({ adventDay: day, screen: "advent" }) },
+        ...(stamped ? [] : [{ label: `🔁 다시 풀기 (${ADVENT_PASS}개 맞히면 도장)`, onClick: () => startXmasQuiz(day) }]),
+        { label: "🏠 홈으로", onClick: goHome },
       ],
     };
   }
@@ -1259,6 +1280,8 @@ const QUIZ_QUIT_TARGET = {
   monster: (s) => (s.monster.done ? null : "home"),
   diagnosis: (s) => (!s.diag || s.diag.done ? null : "home"),
   wordRain: (s) => (s.wordrain.done ? null : "wordRainList"),
+  pairs: (s) => (s.pairs.done ? null : "pairsList"),
+  draw: (s) => (s.draw.done ? null : "drawSetup"),
 };
 
 function parentScreen(state) {
@@ -1274,7 +1297,12 @@ function parentScreen(state) {
     case "chainList": case "bingoSetup": case "calendar": case "printSetup":
     case "wordSearchList": case "wordGuessList": case "riddleList": case "dictationList":
     case "wordLists": case "typingList": case "monster":
-    case "diagnosis": case "roadmap": case "wordRainList": return "home";
+    case "diagnosis": case "roadmap": case "wordRainList":
+    case "advent": case "pairsList": case "drawSetup": case "chantList": case "cultureList": return "home";
+    case "pairs": return "pairsList";
+    case "draw": return "drawSetup";
+    case "chant": return "chantList";
+    case "culture": return "cultureList";
     case "certificate": return "report";
     case "wordRain": return "wordRainList";
     case "wordListEdit": return state.wordListId && findWordList(state.profileName, state.wordListId) ? "wordListView" : "wordLists";
@@ -1340,7 +1368,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -1527,6 +1555,11 @@ function render() {
           openWordSearch: () => set({ screen: "wordSearchList" }),
           openWordLists: () => set({ screen: "wordLists" }),
           openDiagnosis: () => set({ diag: null, screen: "diagnosis" }),
+          openAdvent: () => set({ adventDay: adventInfo().openUpTo || null, screen: "advent" }),
+          openPairs: () => set({ screen: "pairsList" }),
+          openDraw: () => set({ screen: "drawSetup" }),
+          openChants: () => set({ screen: "chantList" }),
+          openCulture: () => set({ screen: "cultureList" }),
           openRoadmap: () => set({ screen: "roadmap" }),
           openWordRain: () => set({ screen: "wordRainList" }),
           openTyping: () => set({ screen: "typingList" }),
@@ -1765,6 +1798,25 @@ function render() {
         write: (tplId) => set({ diaryDraft: { tplId, picks: findDiaryTemplate(tplId).lines.map(() => null) }, screen: "diaryWrite" }),
         back: goHome,
       }),
+    advent: () =>
+      renderAdventScreen(root, {
+        profileName: state.profileName,
+        selected: state.adventDay,
+        actions: {
+          back: goHome,
+          select: (adventDay) => set({ adventDay }),
+          quiz: startXmasQuiz,
+          story: () => openStoryChapter("story-xmas-1"),
+        },
+      }),
+    pairsList: () => renderPairsListScreen(root, { profileName: state.profileName, start: (setId) => set({ pairs: newPairGame(setId), screen: "pairs" }), back: goHome }),
+    pairs: () => renderPairsScreen(root, { game: state.pairs, actions: pairsActions }),
+    drawSetup: () => renderDrawSetupScreen(root, { profileName: state.profileName, start: (players) => set({ draw: newDrawGame(players), screen: "draw" }), back: goHome }),
+    draw: () => renderDrawScreen(root, { game: state.draw, actions: drawActions }),
+    chantList: () => renderChantListScreen(root, { profileName: state.profileName, open: (chantId) => set({ chantId, screen: "chant" }), back: goHome }),
+    chant: () => renderChantScreen(root, { profileName: state.profileName, chantId: state.chantId, back: () => set({ screen: "chantList" }) }),
+    cultureList: () => renderCultureListScreen(root, { profileName: state.profileName, open: (cultureId) => set({ cultureId, screen: "culture" }), back: goHome }),
+    culture: () => renderCultureCardScreen(root, { profileName: state.profileName, cardId: state.cultureId, open: (cultureId) => set({ cultureId }), back: () => set({ screen: "cultureList" }) }),
     diagnosis: () => renderDiagnosisScreen(root, { profileName: state.profileName, game: state.diag, actions: diagnosisActions }),
     roadmap: () => renderRoadmapScreen(root, { profileName: state.profileName, actions: { back: goHome, open: openNextStep, diagnose: () => set({ diag: null, screen: "diagnosis" }) } }),
     wordRainList: () => renderWordRainListScreen(root, { profileName: state.profileName, start: (levelId) => set({ wordrain: newWordRain(levelId), screen: "wordRain" }), back: goHome }),
