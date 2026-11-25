@@ -2381,3 +2381,37 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .culture-line { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 10px; }
 .culture-line p { margin: 0; }
 .culture-line small { display: block; color: var(--muted); font-size: 13px; }
+
+/* ── 🗂️ 홈 정리 ── */
+.home-search input { width: 100%; box-sizing: border-box; font: inherit; font-size: 16px; padding: 10px 14px; border-radius: 999px; border: 2px solid color-mix(in srgb, var(--primary) 30%, transparent); background: var(--card-bg); color: var(--text); }
+.home-search p { margin: 6px 4px 0; }
+.group-toggle { cursor: pointer; user-select: none; display: flex; align-items: center; gap: 6px; }
+.group-count { font-size: 12px; color: var(--muted); font-weight: 700; }
+.group-caret { margin-left: auto; transition: transform 0.2s; color: var(--muted); }
+.group.collapsed .tile-grid { display: none; }
+.group.collapsed .group-caret { transform: rotate(-90deg); }
+.screen-home.searching > :not(.home-header):not(.home-search):not(.group) { display: none; }
+.screen-home.searching .group:not(.search-hit) { display: none; }
+.screen-home.searching .group.collapsed .tile-grid { display: grid; }
+.screen-home.searching .pin-tip { display: none; }
+.tile[hidden] { display: none; }
+.menu-pick .pick-chip.off { opacity: 0.5; text-decoration: line-through; }
+
+/* ── ⛄ 방학 계획표 ── */
+.vacation-home { display: flex; align-items: center; gap: 12px; width: 100%; border: none; border-radius: 18px; padding: 12px 14px; cursor: pointer; font: inherit; text-align: left; color: var(--text); background: linear-gradient(135deg, color-mix(in srgb, #74c0fc 35%, var(--card-bg)), var(--card-bg)); box-shadow: var(--shadow); }
+.vacation-home-text { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+.vacation-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.vacation-dates .text-input { width: 100%; box-sizing: border-box; }
+.vacation-check { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-weight: 700; }
+.screen-vacation .print-toolbar { grid-template-columns: auto 1fr 1fr; }
+
+/* ── 🏫 교과 핵심 표현 ── */
+.school-dialog { display: flex; flex-direction: column; gap: 8px; }
+.school-line { display: flex; gap: 8px; align-items: flex-start; max-width: 90%; cursor: pointer; }
+.school-line.b { align-self: flex-end; flex-direction: row-reverse; text-align: right; }
+.school-line p { margin: 0; background: var(--surface-2); border-radius: 14px; padding: 8px 10px; }
+.school-line.b p { background: color-mix(in srgb, var(--primary) 16%, var(--card-bg)); }
+.school-line small { display: block; color: var(--muted); font-size: 12px; }
+.school-line.now p { outline: 2px solid var(--primary); }
+.school-who { font-size: 22px; }
+.screen-school .rec-row { justify-content: flex-start; margin: -4px 0 8px 38px; }
