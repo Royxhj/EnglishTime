@@ -279,6 +279,7 @@ function renderHomeScreen(root, ctx) {
   const bind = (id, fn) => root.querySelector(`#${id}`)?.addEventListener("click", fn);
   bind("backBtn", actions.backToProfile);
   bind("stickerBtn", actions.openStickers);
+  bind("petPickBtn", actions.openStickers);
   bind("shopBtn", actions.openShop);
   bind("calendarBtn", actions.openCalendar);
   bind("chainBtn", actions.openChain);

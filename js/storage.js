@@ -139,6 +139,7 @@ function normalizeProfile(profile) {
   if (!Array.isArray(p.wordLists)) p.wordLists = [];
   if (!Array.isArray(p.missionWeeks)) p.missionWeeks = [];
   p.bonusStars ||= 0;
+  if (p.petKind !== undefined && !(typeof p.petKind === "string" && /^[a-z]{2,10}$/.test(p.petKind))) delete p.petKind;
   if (p.diag && !(typeof p.diag === "object" && levelById(p.diag.levelId) && /^\d{4}-\d{2}-\d{2}$/.test(p.diag.date))) delete p.diag;
   for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster", "wordrain"]) {
     p[section] ||= { best: {}, wrong: {} };
@@ -366,6 +367,13 @@ function deleteWordList(profileName, id) {
   updateProfile(profileName, (profile) => {
     profile.wordLists = profile.wordLists.filter((l) => l.id !== id);
     for (const m of ["choice", "spell", "dict"]) delete profile.wordlist.best[`${id}:${m}`];
+  });
+}
+
+// 🐾 캐릭터 친구 종류
+function setPetKind(profileName, kindId) {
+  updateProfile(profileName, (profile) => {
+    profile.petKind = kindId;
   });
 }
 

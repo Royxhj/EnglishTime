@@ -126,25 +126,36 @@ function renderMemoryScreen(root, { game, actions }) {
 }
 
 // ── 자라는 캐릭터와 스티커: 푼 문제 수만큼 자라고 모인다 ──
-const PET_STAGES = [
-  { min: 0, emoji: "🥚", name: "알" },
-  { min: 20, emoji: "🐣", name: "아기 병아리" },
-  { min: 80, emoji: "🐥", name: "병아리" },
-  { min: 200, emoji: "🐤", name: "꼬마 새" },
-  { min: 400, emoji: "🐔", name: "멋진 닭" },
-  { min: 800, emoji: "🦚", name: "공작새" },
-  { min: 1500, emoji: "🦄", name: "전설의 유니콘" },
+// 친구 종류마다 7단계로 자란다. 단계는 푼 문제 수로 정해지고, 종류를 바꿔도 자란 만큼 그대로 간다.
+const PET_MINS = [0, 20, 80, 200, 400, 800, 1500];
+const PET_KINDS = [
+  { id: "chick", title: "병아리", stages: [["🥚", "알"], ["🐣", "아기 병아리"], ["🐥", "병아리"], ["🐤", "꼬마 새"], ["🐔", "멋진 닭"], ["🦚", "공작새"], ["🦄", "전설의 유니콘"]] },
+  { id: "puppy", title: "강아지", stages: [["🦴", "뼈다귀"], ["🐶", "아기 강아지"], ["🐕", "강아지"], ["🦮", "든든한 개"], ["🐩", "멋쟁이 개"], ["🐕‍🦺", "구조견"], ["🐺", "달빛 늑대"]] },
+  { id: "kitten", title: "고양이", stages: [["🧶", "털실 뭉치"], ["🐱", "아기 고양이"], ["🐈", "고양이"], ["🐈‍⬛", "까만 고양이"], ["🐆", "치타"], ["🐅", "호랑이"], ["🦁", "사자 왕"]] },
+  { id: "bunny", title: "숲속 친구", stages: [["🌰", "도토리"], ["🐿️", "다람쥐"], ["🐰", "토끼"], ["🦔", "고슴도치"], ["🦝", "너구리"], ["🦌", "사슴"], ["🦄", "숲의 유니콘"]] },
+  { id: "bear", title: "곰", stages: [["🍯", "꿀단지"], ["🧸", "곰 인형"], ["🐻", "아기 곰"], ["🐨", "코알라"], ["🐼", "판다"], ["🐻‍❄️", "북극곰"], ["🦣", "전설의 매머드"]] },
+  { id: "sea", title: "바다 친구", stages: [["🐚", "조개껍데기"], ["🐸", "개구리"], ["🐢", "거북이"], ["🐙", "문어"], ["🦭", "물개"], ["🐬", "돌고래"], ["🐳", "바다의 왕 고래"]] },
+  { id: "dino", title: "공룡", stages: [["🥚", "공룡 알"], ["🦎", "아기 공룡"], ["🐊", "악어 공룡"], ["🦕", "목 긴 공룡"], ["🦖", "티라노"], ["🐲", "아기 용"], ["🐉", "전설의 용"]] },
+  { id: "bird", title: "하늘 친구", stages: [["🪺", "새 둥지"], ["🐧", "아기 펭귄"], ["🦆", "오리"], ["🦉", "부엉이"], ["🦩", "홍학"], ["🦢", "백조"], ["🦅", "하늘의 왕 독수리"]] },
+  { id: "bug", title: "곤충", stages: [["🌱", "새싹"], ["🐛", "애벌레"], ["🐝", "꿀벌"], ["🐞", "무당벌레"], ["🦗", "귀뚜라미"], ["🦋", "나비"], ["🧚", "숲의 요정"]] },
+  { id: "jungle", title: "정글 친구", stages: [["🍌", "바나나"], ["🐵", "아기 원숭이"], ["🐒", "원숭이"], ["🦥", "나무늘보"], ["🦧", "오랑우탄"], ["🦍", "고릴라"], ["🐘", "정글의 왕 코끼리"]] },
 ];
+const petKindById = (id) => PET_KINDS.find((k) => k.id === id) || PET_KINDS[0];
+const petStages = (kindId) => petKindById(kindId).stages.map(([emoji, name], i) => ({ min: PET_MINS[i], emoji, name }));
+const PET_STAGES = petStages("chick");
 const STICKERS = "🌟🍎🐶🐱🚗🎈🍦🦋🌈🐠🍓🚀🐻🌻🎁🦁🍩🐢⚽🎨🐧🍉🚂🐰🌙🦖🍪🎸🐳👑".match(/\p{Extended_Pictographic}/gu);
 const STICKER_EVERY = 15;
 
 function petStatus(profileName) {
-  const total = getProfileData(profileName).totalAnswered || 0;
-  let stage = PET_STAGES[0];
-  for (const s of PET_STAGES) if (total >= s.min) stage = s;
-  const next = PET_STAGES[PET_STAGES.indexOf(stage) + 1];
+  const p = getProfileData(profileName);
+  const total = p.totalAnswered || 0;
+  const kind = petKindById(p.petKind);
+  const stages = petStages(kind.id);
+  let stage = stages[0];
+  for (const s of stages) if (total >= s.min) stage = s;
+  const next = stages[stages.indexOf(stage) + 1];
   const stickers = Math.min(STICKERS.length, Math.floor(total / STICKER_EVERY));
-  return { total, stage, next, left: next ? next.min - total : 0, stickers, toNextSticker: STICKER_EVERY - (total % STICKER_EVERY) };
+  return { total, kind, stages, chosen: !!p.petKind, stage, next, left: next ? next.min - total : 0, stickers, toNextSticker: STICKER_EVERY - (total % STICKER_EVERY) };
 }
 
 function petCardHtml(profileName) {
@@ -153,10 +164,10 @@ function petCardHtml(profileName) {
   const theme = petBackgroundStyle(profileName);
   return `
     <section class="pet-card${theme.cls}"${theme.style}>
-      ${dressedPetHtml(profileName, s.stage.emoji)}
+      <button class="pet-pick-btn" id="petPickBtn" aria-label="친구 바꾸기">${dressedPetHtml(profileName, s.stage.emoji)}</button>
       <div class="pet-text">
         <b>내 친구: ${s.stage.name}</b>
-        <small>${s.next ? `문제 ${s.left}개 더 풀면 ${s.next.emoji}로 자라요!` : "최고 단계까지 자랐어요! 🎉"}</small>
+        <small>${s.chosen ? "" : "🐾 캐릭터를 눌러 좋아하는 동물로 바꿔 봐요! · "}${s.next ? `문제 ${s.left}개 더 풀면 ${s.next.emoji}로 자라요!` : "최고 단계까지 자랐어요! 🎉"}</small>
         <span class="progress-track"><span class="progress-fill" style="width:${pct}%"></span></span>
       </div>
       <div class="pet-btns">
@@ -166,8 +177,9 @@ function petCardHtml(profileName) {
     </section>`;
 }
 
-function renderStickerScreen(root, { profileName, back }) {
+function renderStickerScreen(root, { profileName, back, choosePet }) {
   const s = petStatus(profileName);
+  const stageIndex = s.stages.indexOf(s.stage);
   root.innerHTML = `
     <div class="screen screen-stickers">
       <button class="back-btn" id="backBtn">← 홈</button>
@@ -178,11 +190,17 @@ function renderStickerScreen(root, { profileName, back }) {
         <p><b>${s.stage.name}</b> · 지금까지 ${s.total}문제</p>
         <p class="settings-help">${s.next ? `${s.left}문제 더 풀면 ${s.next.emoji} ${s.next.name}(으)로 자라요` : "최고 단계예요!"} · 다음 스티커까지 ${s.toNextSticker}문제</p>
       </section>
+      <h2 class="section-title">🐾 친구 고르기 <small>자란 만큼 그대로 바뀌어요</small></h2>
+      <div class="pet-kinds">
+        ${PET_KINDS.map((k) => `<button class="pet-kind${k.id === s.kind.id ? " active" : ""}" data-kind="${k.id}" aria-pressed="${k.id === s.kind.id}"><span class="pet-kind-emoji">${k.stages[stageIndex][0]}</span><small>${k.title}</small></button>`).join("")}
+      </div>
+      <h2 class="section-title">📒 스티커</h2>
       <div class="sticker-grid">
         ${STICKERS.map((e, i) => `<span class="sticker${i < s.stickers ? " got" : ""}" aria-label="${i < s.stickers ? e : "아직 없는 스티커"}">${i < s.stickers ? e : "?"}</span>`).join("")}
       </div>
       <h2 class="section-title">자라는 순서</h2>
-      <p class="pet-stages">${PET_STAGES.map((p) => `<span class="${s.total >= p.min ? "got" : ""}">${p.emoji}<small>${p.min}</small></span>`).join("")}</p>
+      <p class="pet-stages">${s.stages.map((p) => `<span class="${s.total >= p.min ? "got" : ""}">${p.emoji}<small>${p.min}</small></span>`).join("")}</p>
     </div>`;
   root.querySelector("#backBtn").addEventListener("click", back);
+  root.querySelectorAll("[data-kind]").forEach((b) => b.addEventListener("click", () => choosePet(b.dataset.kind)));
 }

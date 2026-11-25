@@ -1719,7 +1719,18 @@ function render() {
     memory: () => renderMemoryScreen(root, { game: state.memory, actions: memoryActions }),
     spellingList: () => renderSpellingListScreen(root, { profileName: state.profileName, start: startSpelling, back: goHome }),
     spelling: () => renderSpellingScreen(root, { game: state.spelling, actions: spellingActions }),
-    stickers: () => renderStickerScreen(root, { profileName: state.profileName, back: goHome }),
+    stickers: () =>
+      renderStickerScreen(root, {
+        profileName: state.profileName,
+        back: goHome,
+        choosePet: (kindId) => {
+          setPetKind(state.profileName, kindId);
+          const s = petStatus(state.profileName);
+          playSound("correct");
+          showToast(`<span class="toast-emoji">${s.stage.emoji}</span><span>이제 ${s.kind.title} 친구와 함께해요!</span>`);
+          set({});
+        },
+      }),
 
     topicList: () => renderTopicListScreen(root, { profileName: state.profileName, open: (topicId) => set({ topicId, screen: "topicView" }), back: goHome }),
     topicView: () => renderTopicViewScreen(root, { topicId: state.topicId, startQuiz: () => startTopicQuiz(state.topicId), back: () => set({ screen: "topicList" }) }),

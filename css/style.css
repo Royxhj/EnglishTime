@@ -2295,3 +2295,11 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .screen-cert .print-toolbar { grid-template-columns: auto 1fr; }
 .screen-cert .print-toolbar .segmented { grid-column: 1 / -1; grid-row: 2; }
 .screen-cert .print-toolbar .segmented-btn { flex: 1; }
+
+/* ── 🐾 친구 고르기 ── */
+.pet-pick-btn { border: none; background: none; padding: 0; cursor: pointer; font: inherit; color: inherit; flex-shrink: 0; }
+.pet-kinds { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.pet-kind { display: flex; flex-direction: column; align-items: center; gap: 2px; border: 2px solid transparent; border-radius: 14px; background: var(--card-bg); box-shadow: var(--shadow); padding: 8px 2px; cursor: pointer; font: inherit; color: var(--text); min-width: 0; }
+.pet-kind.active { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 14%, var(--card-bg)); }
+.pet-kind-emoji { font-size: 28px; line-height: 1.1; }
+.pet-kind small { font-size: 11px; font-weight: 700; overflow-wrap: anywhere; text-align: center; }
