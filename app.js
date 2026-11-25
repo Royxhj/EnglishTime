@@ -21493,6 +21493,158 @@ for (const r of HOUSE_ROOMS) {
 
 ;
 
+/* ── data/bizPhrases.js ── */
+// 💼 업무 영어 표현집: 상황(기능)별로 바로 쓰는 표현. tip = 뉘앙스 · 쓰는 때
+const BIZ_PHRASE_SETS = [
+  // ── 회의 ──
+  { id: "m-open", group: "meeting", emoji: "🟢", title: "회의 시작하기", situation: "회의를 시작할 때",
+    phrases: [
+      { en: "Shall we get started?", ko: "시작할까요?", tip: "가장 무난한 시작 멘트" },
+      { en: "Thanks for joining, everyone.", ko: "모두 참석해 주셔서 감사합니다.", tip: "화상 · 대면 모두 OK" },
+      { en: "Let's go over today's agenda.", ko: "오늘 안건을 한번 훑어보죠.", tip: "agenda = 안건 목록" },
+      { en: "The purpose of today's meeting is to decide on the launch date.", ko: "오늘 회의의 목적은 출시일을 정하는 것입니다.", tip: "목적을 먼저 말하면 회의가 짧아져요" },
+      { en: "We have about thirty minutes, so let's keep it brief.", ko: "30분 정도 있으니 간단히 하죠.", tip: "시간을 미리 알려 두기" },
+      { en: "Before we begin, let me introduce our new team member.", ko: "시작하기 전에 새 팀원을 소개할게요.", tip: "" },
+    ] },
+  { id: "m-opinion", group: "meeting", emoji: "💬", title: "의견 말하기", situation: "내 의견을 말할 때",
+    phrases: [
+      { en: "In my opinion, we should focus on quality first.", ko: "제 생각에는 품질에 먼저 집중해야 합니다.", tip: "" },
+      { en: "From my perspective, the timeline is too tight.", ko: "제 입장에서 보면 일정이 너무 빠듯해요.", tip: "perspective = 관점 · 입장" },
+      { en: "I'd like to point out that the budget is limited.", ko: "예산이 한정되어 있다는 점을 짚고 싶어요.", tip: "중요한 사실을 강조할 때" },
+      { en: "As far as I'm concerned, option B makes more sense.", ko: "제가 보기엔 B안이 더 합리적이에요.", tip: "" },
+      { en: "I feel strongly that we need more user feedback.", ko: "사용자 의견이 더 필요하다고 강하게 생각합니다.", tip: "확신이 있을 때" },
+      { en: "If I may add something, the competitors are moving fast.", ko: "한 가지 덧붙이자면, 경쟁사가 빠르게 움직이고 있어요.", tip: "정중하게 끼어들며 의견 추가" },
+    ] },
+  { id: "m-agree", group: "meeting", emoji: "👍", title: "동의하기", situation: "상대 의견에 동의할 때",
+    phrases: [
+      { en: "I completely agree with you.", ko: "전적으로 동의합니다.", tip: "" },
+      { en: "That's a good point.", ko: "좋은 지적이네요.", tip: "상대를 인정하는 가장 흔한 말" },
+      { en: "I'm on the same page.", ko: "저도 같은 생각이에요.", tip: "on the same page = 생각이 같다" },
+      { en: "That makes sense to me.", ko: "그게 맞는 것 같아요. / 이해가 돼요.", tip: "" },
+      { en: "I couldn't agree more.", ko: "더할 나위 없이 동의해요.", tip: "강한 동의 (부정문이지만 '완전 동의')" },
+      { en: "I'm all for it.", ko: "전적으로 찬성이에요.", tip: "제안에 찬성할 때" },
+    ] },
+  { id: "m-disagree", group: "meeting", emoji: "🤔", title: "정중하게 반대하기", situation: "정중하게 반대 의견을 낼 때",
+    phrases: [
+      { en: "I see your point, but I have some concerns.", ko: "무슨 말씀인지 알겠지만, 걱정되는 점이 있어요.", tip: "먼저 인정하고 반대하기" },
+      { en: "I'm not sure I agree with that.", ko: "그 부분은 동의하기 어려울 것 같아요.", tip: "'I disagree'보다 부드러움" },
+      { en: "That's true, but have we considered the cost?", ko: "맞는 말이지만, 비용은 고려해 봤을까요?", tip: "질문으로 반대하기" },
+      { en: "I'm afraid I see it a little differently.", ko: "죄송하지만 저는 조금 다르게 봐요.", tip: "I'm afraid = 유감이지만" },
+      { en: "With all due respect, I don't think that will work.", ko: "외람되지만, 그건 잘 안 될 것 같아요.", tip: "윗사람에게 반대할 때, 꽤 강한 표현" },
+      { en: "Could we look at this from another angle?", ko: "다른 각도에서 한번 볼 수 있을까요?", tip: "대안을 찾자고 할 때" },
+    ] },
+  { id: "m-clarify", group: "meeting", emoji: "❓", title: "다시 묻기 · 확인하기", situation: "잘 못 알아들었거나 확인할 때",
+    phrases: [
+      { en: "Sorry, could you say that again?", ko: "죄송한데 다시 말씀해 주시겠어요?", tip: "" },
+      { en: "Could you elaborate on that?", ko: "그 부분을 좀 더 자세히 설명해 주시겠어요?", tip: "elaborate = 자세히 말하다" },
+      { en: "What do you mean by \"scalable\"?", ko: "'확장 가능한'이 무슨 뜻인가요?", tip: "단어 뜻을 확인할 때" },
+      { en: "Just to clarify, are we talking about this quarter?", ko: "확인차 여쭤보면, 이번 분기 얘기인가요?", tip: "Just to clarify = 확실히 하려고" },
+      { en: "So, if I understand correctly, the deadline is Friday?", ko: "그러니까, 제가 이해한 게 맞다면 마감이 금요일이죠?", tip: "내 말로 다시 확인" },
+      { en: "Sorry, I didn't quite catch that.", ko: "죄송해요, 잘 못 들었어요.", tip: "catch = 알아듣다" },
+    ] },
+  { id: "m-interrupt", group: "meeting", emoji: "✋", title: "끼어들기 · 발언 넘기기", situation: "말을 끊거나 다른 사람에게 발언을 넘길 때",
+    phrases: [
+      { en: "Sorry to interrupt, but I have a quick question.", ko: "말씀 중에 죄송한데, 간단한 질문이 있어요.", tip: "" },
+      { en: "Can I jump in here?", ko: "여기서 한마디 해도 될까요?", tip: "가벼운 끼어들기" },
+      { en: "Please, go ahead.", ko: "네, 말씀하세요.", tip: "발언을 양보할 때" },
+      { en: "Let me finish my point first.", ko: "제 얘기 먼저 마칠게요.", tip: "끼어든 사람에게 정중하게" },
+      { en: "I'd like to hear what Sarah thinks.", ko: "사라 씨 생각도 듣고 싶어요.", tip: "조용한 사람에게 발언 넘기기" },
+      { en: "Does anyone have anything to add?", ko: "덧붙일 분 계신가요?", tip: "" },
+    ] },
+  { id: "m-suggest", group: "meeting", emoji: "💡", title: "제안하기", situation: "아이디어를 제안할 때",
+    phrases: [
+      { en: "How about we run a small test first?", ko: "먼저 작게 시험해 보면 어떨까요?", tip: "How about we + 동사" },
+      { en: "What if we moved the deadline to next month?", ko: "마감을 다음 달로 옮기면 어떨까요?", tip: "가정형으로 부드럽게" },
+      { en: "I suggest that we hire a freelancer.", ko: "프리랜서를 고용하자고 제안합니다.", tip: "" },
+      { en: "Why don't we split the work into two phases?", ko: "작업을 두 단계로 나누는 게 어때요?", tip: "" },
+      { en: "One option would be to outsource the design.", ko: "한 가지 방법은 디자인을 외주로 맡기는 거예요.", tip: "여러 안 중 하나를 낼 때" },
+      { en: "It might be worth checking with the legal team.", ko: "법무팀에 확인해 보는 것도 좋을 것 같아요.", tip: "it might be worth -ing = ~해 볼 만하다" },
+    ] },
+  { id: "m-time", group: "meeting", emoji: "⏱️", title: "진행 · 주제 전환", situation: "회의를 진행하거나 주제를 바꿀 때",
+    phrases: [
+      { en: "Let's move on to the next item.", ko: "다음 안건으로 넘어가죠.", tip: "" },
+      { en: "We're running out of time, so let's wrap this up.", ko: "시간이 얼마 없으니 이건 마무리하죠.", tip: "" },
+      { en: "Let's get back on track.", ko: "다시 본론으로 돌아가죠.", tip: "이야기가 샜을 때" },
+      { en: "Can we take this offline?", ko: "이건 회의 끝나고 따로 얘기할까요?", tip: "offline = 회의 밖에서 따로" },
+      { en: "Let's park that for now.", ko: "그건 일단 보류하죠.", tip: "park = 잠시 미뤄 두다" },
+      { en: "Let's circle back to this next week.", ko: "이건 다음 주에 다시 이야기하죠.", tip: "circle back = 다시 돌아오다" },
+    ] },
+  { id: "m-summary", group: "meeting", emoji: "📝", title: "정리 · 결정 · 할 일", situation: "결론을 정리하고 할 일을 나눌 때",
+    phrases: [
+      { en: "To sum up, we'll launch in March.", ko: "정리하면, 3월에 출시합니다.", tip: "" },
+      { en: "So, we've agreed to increase the budget.", ko: "그럼 예산을 늘리기로 합의했습니다.", tip: "" },
+      { en: "Let's go over the action items.", ko: "할 일들을 정리해 보죠.", tip: "action items = 회의 후 할 일" },
+      { en: "Who's going to take care of the report?", ko: "보고서는 누가 맡을까요?", tip: "" },
+      { en: "Minjun will follow up with the client by Thursday.", ko: "민준 씨가 목요일까지 고객에게 후속 연락을 할 거예요.", tip: "follow up = 후속 조치하다" },
+      { en: "I'll send out the meeting notes later today.", ko: "오늘 중으로 회의록을 보내 드릴게요.", tip: "meeting notes = 회의록" },
+    ] },
+  { id: "m-close", group: "meeting", emoji: "🔚", title: "회의 마무리", situation: "회의를 끝낼 때",
+    phrases: [
+      { en: "I think that covers everything.", ko: "다 다룬 것 같네요.", tip: "" },
+      { en: "Does anyone have any other questions?", ko: "다른 질문 있으신가요?", tip: "" },
+      { en: "Thanks, everyone. That was very productive.", ko: "모두 감사합니다. 아주 생산적인 회의였어요.", tip: "" },
+      { en: "Let's meet again next Tuesday at the same time.", ko: "다음 주 화요일 같은 시간에 다시 만나죠.", tip: "" },
+      { en: "Let's call it a day.", ko: "오늘은 여기까지 하죠.", tip: "하루 일을 마칠 때" },
+    ] },
+  { id: "m-online", group: "meeting", emoji: "💻", title: "화상 회의", situation: "화상 회의 중에",
+    phrases: [
+      { en: "Can everyone hear me?", ko: "다들 제 목소리 들리세요?", tip: "" },
+      { en: "I think you're on mute.", ko: "음소거 되어 있으신 것 같아요.", tip: "on mute = 음소거 상태" },
+      { en: "Can you see my screen?", ko: "제 화면 보이세요?", tip: "" },
+      { en: "Let me share my screen.", ko: "제 화면을 공유할게요.", tip: "" },
+      { en: "Sorry, you're breaking up a little.", ko: "죄송한데, 소리가 조금 끊겨요.", tip: "break up = (소리가) 끊기다" },
+      { en: "I'll drop the link in the chat.", ko: "채팅창에 링크를 올릴게요.", tip: "drop = (가볍게) 올리다" },
+      { en: "I have to hop off for another meeting.", ko: "다른 회의 때문에 먼저 나가 봐야 해요.", tip: "hop off = (회의에서) 나가다" },
+    ] },
+  // ── 이메일 · 전화 · 발표 · 협상 ──
+  { id: "e-mail", group: "work", emoji: "📧", title: "이메일", situation: "이메일을 쓸 때",
+    phrases: [
+      { en: "I hope this email finds you well.", ko: "잘 지내고 계시길 바랍니다.", tip: "격식 있는 첫인사" },
+      { en: "I'm writing to ask about the invoice.", ko: "청구서에 대해 문의드리려고 메일 드립니다.", tip: "메일 목적 밝히기" },
+      { en: "Please find the file attached.", ko: "첨부 파일을 확인해 주세요.", tip: "" },
+      { en: "Could you get back to me by Friday?", ko: "금요일까지 답변 주실 수 있을까요?", tip: "get back to = 다시 연락하다" },
+      { en: "Just a friendly reminder that the deadline is tomorrow.", ko: "마감이 내일이라는 점 다시 한번 알려 드려요.", tip: "재촉을 부드럽게" },
+      { en: "Please let me know if you have any questions.", ko: "궁금한 점이 있으면 알려 주세요.", tip: "맺음말 단골" },
+      { en: "Looking forward to hearing from you.", ko: "답장 기다리겠습니다.", tip: "" },
+    ] },
+  { id: "e-phone", group: "work", emoji: "📞", title: "전화 통화", situation: "업무 전화를 할 때",
+    phrases: [
+      { en: "Hi, this is Jia from the marketing team.", ko: "안녕하세요, 마케팅팀 지아입니다.", tip: "전화에서는 'I am' 대신 'This is'" },
+      { en: "May I speak to Mr. Kim, please?", ko: "김 선생님과 통화할 수 있을까요?", tip: "" },
+      { en: "I'm calling about the order I placed yesterday.", ko: "어제 한 주문 때문에 전화드렸어요.", tip: "" },
+      { en: "Could you hold on a moment?", ko: "잠시만 기다려 주시겠어요?", tip: "" },
+      { en: "Can I leave a message?", ko: "메시지를 남길 수 있을까요?", tip: "" },
+      { en: "I'll call you back in ten minutes.", ko: "10분 뒤에 다시 전화드릴게요.", tip: "" },
+    ] },
+  { id: "e-present", group: "work", emoji: "📊", title: "발표하기", situation: "발표할 때",
+    phrases: [
+      { en: "Today, I'm going to talk about our sales results.", ko: "오늘은 매출 실적에 대해 말씀드리겠습니다.", tip: "" },
+      { en: "My presentation is divided into three parts.", ko: "제 발표는 세 부분으로 나뉩니다.", tip: "" },
+      { en: "As you can see on this slide, sales went up by 20%.", ko: "이 슬라이드에서 보시듯 매출이 20% 올랐습니다.", tip: "" },
+      { en: "Let me give you an example.", ko: "예를 하나 들어 볼게요.", tip: "" },
+      { en: "Moving on to the next point, ...", ko: "다음 내용으로 넘어가서, ...", tip: "" },
+      { en: "That brings me to the end of my presentation.", ko: "이것으로 발표를 마치겠습니다.", tip: "" },
+      { en: "I'd be happy to take any questions.", ko: "질문이 있으면 기꺼이 받겠습니다.", tip: "" },
+    ] },
+  { id: "e-negotiate", group: "work", emoji: "🤝", title: "협상 · 요청", situation: "조건을 협상하거나 부탁할 때",
+    phrases: [
+      { en: "Is there any flexibility on the price?", ko: "가격을 조정할 여지가 있을까요?", tip: "flexibility = 융통성, 여지" },
+      { en: "Would you be willing to extend the deadline?", ko: "마감을 연장해 주실 수 있을까요?", tip: "Would you be willing to ~ = 정중한 부탁" },
+      { en: "We could offer a discount if you order in bulk.", ko: "대량 주문하시면 할인해 드릴 수 있어요.", tip: "in bulk = 대량으로" },
+      { en: "That's a bit more than we expected.", ko: "예상보다 조금 높네요.", tip: "가격이 비쌀 때 돌려 말하기" },
+      { en: "Let's meet halfway.", ko: "서로 조금씩 양보하죠.", tip: "meet halfway = 절충하다" },
+      { en: "I need to check with my manager first.", ko: "먼저 상사와 확인해 봐야 해요.", tip: "바로 결정하기 어려울 때" },
+      { en: "It's a deal!", ko: "좋아요, 그렇게 하죠!", tip: "합의할 때" },
+    ] },
+];
+const BIZ_GROUPS = [
+  { id: "meeting", emoji: "🗣️", title: "회의" },
+  { id: "work", emoji: "💼", title: "이메일 · 전화 · 발표 · 협상" },
+];
+BIZ_PHRASE_SETS.forEach((s) => s.phrases.forEach((p, i) => (p.id = `${s.id}-${i + 1}`)));
+
+;
+
 /* ── js/state.js ── */
 function createStore(initialState) {
   let state = initialState;
@@ -21668,7 +21820,7 @@ function normalizeProfile(profile) {
   p.care = { day: typeof p.care.day === "string" ? p.care.day : "", pets: Number(p.care.pets) || 0, snacks: Number(p.care.snacks) || 0, bond: Math.max(0, Math.floor(Number(p.care.bond) || 0)) };
   if (p.petKind !== undefined && !(typeof p.petKind === "string" && /^[a-z]{2,10}$/.test(p.petKind))) delete p.petKind;
   if (p.diag && !(typeof p.diag === "object" && levelById(p.diag.levelId) && /^\d{4}-\d{2}-\d{2}$/.test(p.diag.date))) delete p.diag;
-  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster", "wordrain", "xmas", "pairs", "chant", "culture", "drawgame", "school", "house"]) {
+  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster", "wordrain", "xmas", "pairs", "chant", "culture", "drawgame", "school", "house", "biz"]) {
     p[section] ||= { best: {}, wrong: {} };
     p[section].best ||= {};
     p[section].wrong ||= {};
@@ -22416,6 +22568,7 @@ const BADGES = [
   { id: "wordSearch", emoji: "🔍", title: "숨은 단어 탐험가", desc: "단어 찾기 퍼즐 완성하기", test: (p) => Object.keys(p.wordsearch.best).length >= 1 },
   { id: "wordGuess", emoji: "🕵️", title: "명탐정", desc: "단어 추리 5개 모두 맞히기", test: (p) => perfectCount(p.wordguess.best) >= 1 },
   { id: "riddle", emoji: "❓", title: "수수께끼 박사", desc: "영어 수수께끼 만점", test: (p) => perfectCount(p.riddle.best) >= 1 },
+  { id: "bizMeeting", emoji: "💼", title: "회의 달인", desc: "회의 표현 섞기 퀴즈 80점 이상", test: (p) => { const b = p.biz.best["mix-meeting"]; return !!b && b.correct / b.total >= 0.8; } },
   { id: "town", emoji: "🏘️", title: "우리 동네 박사", desc: "우리 동네 장소 6곳에서 별 2개 이상", test: (p) => HOUSE_ROOMS.filter((r) => r.group === "town").every((r) => ["listen", "look"].some((m) => { const b = p.house.best[`${r.id}:${m}`]; return b && b.correct / b.total >= 0.8; })) },
   { id: "house", emoji: "🏠", title: "우리 집 박사", desc: "우리 집 물건 방 7곳에서 별 2개 이상", test: (p) => HOUSE_ROOMS.filter((r) => r.group === "home").every((r) => ["listen", "look"].some((m) => { const b = p.house.best[`${r.id}:${m}`]; return b && b.correct / b.total >= 0.8; })) },
   { id: "school8", emoji: "🏫", title: "교과 표현 박사", desc: "교과 핵심 표현 8주제 퀴즈 통과", test: (p) => Object.values(p.school.best).filter((b) => b.correct / b.total >= 0.66).length >= 8 },
@@ -23832,6 +23985,7 @@ function renderHomeScreen(root, ctx) {
       <section class="group">
         <h2 class="group-title">🗣️ 말하기 · 듣기 · 쓰기</h2>
         <div class="tile-grid">
+          ${show.advanced ? homeTile({ id: "bizBtn", emoji: "💼", title: "업무 영어 표현", meta: "회의 · 이메일 · 발표" }) : ""}
           ${show.practice ? homeTile({ id: "practiceBtn", emoji: "💼", title: "실전 연습", meta: "롤플레이 · 이메일" }) : ""}
           ${homeTile({ id: "speakingBtn", emoji: "🎙️", title: "따라 말하기", meta: `${sectionCount(profileName, "speaking", TALK_GROUPS)} / ${TALK_GROUPS.length} 묶음` })}
           ${homeTile({ id: "listeningBtn", emoji: "🎧", title: "듣기 평가", meta: `${LISTENING_SETS.filter((s) => getSectionBest(profileName, "listening", s.levelId)).length} / ${LISTENING_SETS.length} 단계` })}
@@ -23935,6 +24089,7 @@ function renderHomeScreen(root, ctx) {
   bind("adventBtn", actions.openAdvent);
   bind("schoolBtn", actions.openSchool);
   bind("houseBtn", actions.openHouse);
+  bind("bizBtn", actions.openBiz);
   bind("vacationBtn", actions.openVacation);
   bind("vacationCardBtn", actions.openVacation);
   bind("chantBtn", actions.openChants);
@@ -31439,6 +31594,7 @@ const HOME_TILE_ALIASES = {
   diagBtn: "test 진단 레벨",
   schoolBtn: "school 교과서 학교 교과",
   vacationBtn: "vacation 방학 계획",
+  bizBtn: "business meeting 회의 업무 비즈니스 이메일 전화 발표 협상 직장",
   houseBtn: "house home town 집 가구 물건 생활 방 동네 학교 교실 마트 놀이터 공원 병원 길 바다 캠핑",
 };
 
@@ -31922,6 +32078,119 @@ const houseActions = {
     set({ screen: isHouseMix(game.roomId) ? "houseList" : "houseRoom", houseRoomId: game.roomId });
   },
 };
+
+;
+
+/* ── js/screens/biz.js ── */
+// 💼 업무 영어 표현집: 회의 · 화상 회의 · 이메일 · 전화 · 발표 · 협상 표현을 상황별로 보고 듣고 퀴즈
+const BIZ_QUIZ_SIZE = 10;
+const bizSet = (id) => BIZ_PHRASE_SETS.find((s) => s.id === id);
+
+function renderBizListScreen(root, { profileName, open, start, back }) {
+  const card = (s) => {
+    const best = getSectionBest(profileName, "biz", s.id);
+    return `
+      <button class="level-card" data-set="${s.id}">
+        <span class="level-icon">${s.emoji}</span>
+        <span class="topic-text"><span class="level-label">${s.title}</span><span class="topic-summary">${s.phrases[0].en}</span></span>
+        <span class="level-best${best ? "" : " level-best-empty"}">${best ? ratioLabel(best) : `${s.phrases.length}개`}</span>
+      </button>`;
+  };
+  root.innerHTML = `
+    <div class="screen screen-biz">
+      <button class="back-btn" id="backBtn">← 홈</button>
+      <h1 class="title">💼 업무 영어 표현집</h1>
+      <p class="subtitle">회의 · 이메일 · 전화 · 발표에서 바로 쓰는 표현 ${BIZ_PHRASE_SETS.reduce((n, s) => n + s.phrases.length, 0)}개 · 상황별로 듣고 따라 하고 퀴즈로 확인해요</p>
+      ${BIZ_GROUPS.map(
+        (g) => `
+        <h2 class="section-title">${g.emoji} ${g.title}</h2>
+        <div class="level-grid">${BIZ_PHRASE_SETS.filter((s) => s.group === g.id).map(card).join("")}</div>
+        <button class="secondary-btn" data-mix="${g.id}">🎲 ${g.title} 표현 섞어서 퀴즈 ${BIZ_QUIZ_SIZE}문제</button>`
+      ).join("")}
+    </div>`;
+  root.querySelector("#backBtn").addEventListener("click", back);
+  root.querySelectorAll("[data-set]").forEach((b) => b.addEventListener("click", () => open(b.dataset.set)));
+  root.querySelectorAll("[data-mix]").forEach((b) => b.addEventListener("click", () => start(`mix-${b.dataset.mix}`)));
+}
+
+function renderBizSetScreen(root, { setId, actions }) {
+  const s = bizSet(setId);
+  const i = BIZ_PHRASE_SETS.indexOf(s);
+  const next = BIZ_PHRASE_SETS[i + 1];
+  root.innerHTML = `
+    <div class="screen screen-biz">
+      <button class="back-btn" id="backBtn">← 표현집</button>
+      <div class="lesson-head"><span class="lesson-emoji">${s.emoji}</span><h1 class="title">${s.title}</h1><p class="subtitle">${s.situation} 쓰는 표현</p></div>
+      <button class="listen-btn" id="allBtn" ${speechSupported ? "" : "disabled"}>▶ 전체 듣기</button>
+      <div class="biz-list">
+        ${s.phrases
+          .map(
+            (p, k) => `
+          <div class="biz-phrase" data-k="${k}">
+            <div class="culture-line"><button class="speak-btn" data-say="${k}" aria-label="듣기" ${speechSupported ? "" : "disabled"}>🔊</button><p><b>${p.en}</b><small>${p.ko}</small></p></div>
+            ${p.tip ? `<p class="biz-tip">💡 ${p.tip}</p>` : ""}
+            ${recorderHtml("b:" + p.en)}
+          </div>`
+          )
+          .join("")}
+      </div>
+      <button class="primary-btn" id="quizBtn">✅ 이 상황 퀴즈</button>
+      ${next ? `<button class="secondary-btn" id="nextBtn">다음: ${next.emoji} ${next.title} →</button>` : ""}
+    </div>`;
+  let token = 0;
+  const items = [...root.querySelectorAll(".biz-phrase")];
+  root.querySelector("#backBtn").addEventListener("click", () => {
+    token++;
+    stopSpeaking();
+    actions.back();
+  });
+  root.querySelectorAll("[data-say]").forEach((b) => b.addEventListener("click", () => speak(s.phrases[Number(b.dataset.say)].en, { rate: 0.9 })));
+  root.querySelector("#allBtn").addEventListener("click", async () => {
+    const my = ++token;
+    for (let k = 0; k < s.phrases.length; k++) {
+      if (my !== token || !items[k].isConnected) return;
+      items.forEach((el, j) => el.classList.toggle("now", j === k));
+      await speakAsync(s.phrases[k].en, { rate: 0.9 });
+    }
+    items.forEach((el) => el.classList.remove("now"));
+  });
+  root.querySelector("#quizBtn").addEventListener("click", () => {
+    token++;
+    stopSpeaking();
+    actions.quiz(setId);
+  });
+  root.querySelector("#nextBtn")?.addEventListener("click", () => {
+    token++;
+    stopSpeaking();
+    actions.open(next.id);
+  });
+  bindRecorders(root);
+}
+
+// 문제: ① 뜻 보고 영어 표현 고르기 ② 상황 보고 알맞은 표현 고르기 (오답은 다른 상황의 표현)
+function buildBizQuestions(id) {
+  const mix = id.startsWith("mix-");
+  const sets = mix ? BIZ_PHRASE_SETS.filter((s) => s.group === id.slice(4)) : [bizSet(id)];
+  const group = sets[0].group;
+  const pool = shuffle(sets.flatMap((s) => s.phrases.map((p) => ({ p, s })))).slice(0, mix ? BIZ_QUIZ_SIZE : 6);
+  return pool.map(({ p, s }, i) => {
+    const others = shuffle(BIZ_PHRASE_SETS.filter((x) => x.group === group && x !== s).flatMap((x) => x.phrases)).slice(0, 3);
+    const bySituation = i % 2 === 1;
+    return {
+      id: p.id,
+      kind: "biz",
+      label: bySituation ? "💼 이런 상황에 알맞은 표현은?" : "💼 뜻에 맞는 영어 표현은?",
+      q: bySituation ? `${s.emoji} ${s.situation}` : p.ko,
+      ko: null,
+      choices: shuffle([p, ...others].map((x) => x.en)),
+      correctAnswer: p.en,
+      explain: `<b>${p.en}</b><br>${p.ko}${p.tip ? `<br><small>💡 ${p.tip}</small>` : ""}`,
+      summary: `${p.en} <small>${p.ko}</small>`,
+      listenText: p.en,
+      selectedAnswer: null,
+    };
+  });
+}
 
 ;
 
@@ -33858,6 +34127,10 @@ function mcSourceInfo(source) {
     const ss = SOUND_PAIR_SETS.find((x) => x.id === source.id);
     return { label: ss ? `${ss.emoji} ${ss.title}` : "🎲 소리 구별 모두 섞기", level: null, quitTo: "soundsList", listScreen: "soundsList" };
   }
+  if (source.type === "biz") {
+    const s = bizSet(source.id);
+    return { label: s ? `${s.emoji} ${s.title}` : `🎲 ${BIZ_GROUPS.find((g) => `mix-${g.id}` === source.id)?.title || ""} 표현 섞기`, level: levelById("adult"), quitTo: s ? "bizSet" : "bizList", listScreen: "bizList" };
+  }
   if (source.type === "school") {
     const t = SCHOOL_TALKS.find((x) => x.id === source.id);
     return { label: `🏫 ${t.title}`, level: null, quitTo: "schoolTalk", listScreen: "schoolList" };
@@ -33924,7 +34197,7 @@ function nextMcQuestion() {
     }
   }
   if (mc.source.type === "wordlist") isNewBest = recordSectionResult(currentProfile(), "wordlist", `${mc.source.id}:choice`, correct, total);
-  if (["topic", "numbers", "sounds", "story", "riddle", "school"].includes(mc.source.type)) isNewBest = recordSectionResult(currentProfile(), mc.source.type, mc.source.id, correct, total);
+  if (["topic", "numbers", "sounds", "story", "riddle", "school", "biz"].includes(mc.source.type)) isNewBest = recordSectionResult(currentProfile(), mc.source.type, mc.source.id, correct, total);
   if (mc.source.type === "weekly") isNewBest = recordSectionResult(currentProfile(), "weekly", mc.source.id, correct, total);
   set({ mc: { ...mc, isNewBest }, screen: "mcResult" });
   announceBadges(checkNewBadges(currentProfile()));
@@ -34054,6 +34327,18 @@ function mcResultActions(source, hasWrong) {
         { label: "📋 단어 다시 보기", onClick: () => set({ topicId: source.id, screen: "topicView" }) },
         ...(next ? [{ label: `다음 주제: ${next.emoji} ${next.title}`, onClick: () => set({ topicId: next.id, screen: "topicView" }) }] : []),
         { label: "주제 목록", onClick: () => set({ screen: "topicList" }) },
+      ],
+    };
+  }
+  if (source.type === "biz") {
+    const s = bizSet(source.id);
+    const next = s && BIZ_PHRASE_SETS[BIZ_PHRASE_SETS.indexOf(s) + 1];
+    return {
+      actions: [
+        { ...retry, onClick: () => startMc({ type: "biz", id: source.id }, buildBizQuestions(source.id)) },
+        ...(s ? [{ label: "📖 표현 다시 보기", onClick: () => set({ bizSetId: source.id, screen: "bizSet" }) }] : []),
+        ...(next ? [{ label: `다음: ${next.emoji} ${next.title}`, onClick: () => set({ bizSetId: next.id, screen: "bizSet" }) }] : []),
+        { label: "표현집 목록", onClick: () => set({ screen: "bizList" }) },
       ],
     };
   }
@@ -35011,7 +35296,8 @@ function parentScreen(state) {
     case "wordLists": case "typingList": case "monster":
     case "diagnosis": case "roadmap": case "wordRainList":
     case "advent": case "pairsList": case "drawSetup": case "chantList": case "cultureList":
-    case "schoolList": case "vacation": case "houseList": return "home";
+    case "schoolList": case "vacation": case "houseList": case "bizList": return "home";
+    case "bizSet": return "bizList";
     case "houseRoom": return "houseList";
     case "houseGame": return state.house && isHouseMix(state.house.roomId) ? "houseList" : "houseRoom";
     case "schoolTalk": return "schoolList";
@@ -35084,7 +35370,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation", "houseList",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation", "houseList", "bizList",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -35144,7 +35430,7 @@ function render() {
   }
 
   // 지문 듣기 중에 다른 화면으로 가면 소리를 멈춘다.
-  if (["passage", "basicLesson", "storyRead", "chant", "schoolTalk", "culture"].includes(lastScreen) && state.screen !== lastScreen) stopSpeaking();
+  if (["passage", "basicLesson", "storyRead", "chant", "schoolTalk", "culture", "bizSet"].includes(lastScreen) && state.screen !== lastScreen) stopSpeaking();
   if (lastScreen !== state.screen) stopRecording(); // 녹음 중에 화면을 옮기면 녹음을 멈춘다
   lastScreen = state.screen;
 
@@ -35274,6 +35560,7 @@ function render() {
           openDiagnosis: () => set({ diag: null, screen: "diagnosis" }),
           openSchool: () => set({ screen: "schoolList" }),
           openHouse: () => set({ screen: "houseList" }),
+          openBiz: () => set({ screen: "bizList" }),
           openVacation: () => set({ vacationEdit: false, screen: "vacation" }),
           openAdvent: () => set({ adventDay: adventInfo().openUpTo || null, screen: "advent" }),
           openPairs: () => set({ screen: "pairsList" }),
@@ -35517,6 +35804,22 @@ function render() {
         profileName: state.profileName,
         write: (tplId) => set({ diaryDraft: { tplId, picks: findDiaryTemplate(tplId).lines.map(() => null) }, screen: "diaryWrite" }),
         back: goHome,
+      }),
+    bizList: () =>
+      renderBizListScreen(root, {
+        profileName: state.profileName,
+        open: (bizSetId) => set({ bizSetId, screen: "bizSet" }),
+        start: (id) => startMc({ type: "biz", id }, buildBizQuestions(id)),
+        back: goHome,
+      }),
+    bizSet: () =>
+      renderBizSetScreen(root, {
+        setId: state.bizSetId,
+        actions: {
+          back: () => set({ screen: "bizList" }),
+          open: (bizSetId) => set({ bizSetId }),
+          quiz: (id) => startMc({ type: "biz", id }, buildBizQuestions(id)),
+        },
       }),
     houseList: () =>
       renderHouseListScreen(root, {

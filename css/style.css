@@ -2441,3 +2441,12 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .house-look { display: flex; flex-direction: column; align-items: center; gap: 6px; background: var(--room); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); color: #333; }
 .house-look p { margin: 0; }
 .house-stars { text-align: center; font-size: 44px; letter-spacing: 6px; }
+
+/* ── 💼 업무 영어 표현집 ── */
+.biz-list { display: flex; flex-direction: column; gap: 8px; }
+.biz-phrase { background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); padding: 10px 12px; }
+.biz-phrase.now { outline: 2px solid var(--primary); }
+.biz-phrase .culture-line { margin-bottom: 4px; }
+.biz-phrase .culture-line b { font-size: 17px; }
+.biz-tip { margin: 0 0 4px 38px; font-size: 13px; color: var(--muted); }
+.biz-phrase .rec-row { justify-content: flex-start; margin: 4px 0 0 38px; }
