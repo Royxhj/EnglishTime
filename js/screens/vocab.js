@@ -205,6 +205,7 @@ function renderFlashcardScreen(root, { session, profileName, actions }) {
             <button class="speak-btn" id="speakWordBtn" aria-label="발음 듣기" ${speechSupported ? "" : "disabled"}>🔊</button>
             <span class="ipa-text">${card.ipa}</span>
           </div>
+          ${recorderHtml("w:" + card.word)}
           ${card.examples
             .slice(0, 2)
             .map(
@@ -238,6 +239,7 @@ function renderFlashcardScreen(root, { session, profileName, actions }) {
   root.querySelector("#flipBtn")?.addEventListener("click", flip);
   root.querySelector("#quitBtn").addEventListener("click", actions.quit);
   root.querySelector("#speakWordBtn")?.addEventListener("click", () => speak(card.word));
+  bindRecorders(root);
   root.querySelectorAll("[data-example]").forEach((btn) => btn.addEventListener("click", () => speak(card.examples[Number(btn.dataset.example)].en)));
   root.querySelector("#knownBtn")?.addEventListener("click", () => actions.answer(true));
   root.querySelector("#unsureBtn")?.addEventListener("click", () => actions.answer(false));

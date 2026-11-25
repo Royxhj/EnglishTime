@@ -118,7 +118,7 @@ function renderPassageScreen(root, { profileName, passage, startQuiz, backToList
           <button class="listen-btn" id="speedBtn" aria-pressed="${slow}" ${speechSupported ? "" : "disabled"}>${slow ? "🐢 느리게" : "🐇 보통 속도"}</button>
           <button class="listen-btn" id="toggleAllBtn">해석 모두 보기</button>
         </div>
-        <p class="settings-help" id="playStatus">밑줄 단어를 누르면 뜻, 문장을 누르면 해석이 나와요. <b>따라 읽기</b>는 한 문장을 들려준 뒤 따라 말할 시간을 줘요.</p>
+        <p class="settings-help" id="playStatus">밑줄 단어를 누르면 뜻, 문장을 누르면 해석이 나와요. <b>따라 읽기</b>는 한 문장을 들려준 뒤 따라 말할 시간을 줘요.${recSupported ? " <b>⏺</b>를 누르면 내 목소리를 녹음해서 들어 볼 수 있어요." : ""}</p>
         ${aloud ? `<p class="settings-help" id="aloudStatus">🎙️ 문장 옆 마이크를 누르고 <b>소리 내어 읽어</b> 봐요. 80%를 넘으면 통과! · 통과 0 / ${passage.sentences.length}</p>` : ""}
       </section>
 
@@ -130,6 +130,7 @@ function renderPassageScreen(root, { profileName, passage, startQuiz, backToList
             <div class="sentence-btns">
               <button class="speak-btn sentence-speak" data-speak-sentence="${i}" aria-label="${i + 1}번째 문장 듣기" ${speechSupported ? "" : "disabled"}>🔊</button>
               ${aloud ? `<button class="speak-btn sentence-mic" data-mic="${i}" aria-label="${i + 1}번째 문장 소리 내어 읽기">🎙️</button>` : ""}
+              ${recorderHtml("s:" + s.en, true)}
             </div>
             <div class="passage-text" tabindex="0" role="button" aria-expanded="false">
               <p class="passage-en">${glossedSentence(s.en, passage.glossary)}</p>
@@ -198,6 +199,7 @@ function renderPassageScreen(root, { profileName, passage, startQuiz, backToList
   const stopPlayback = (message) => {
     playToken += 1;
     if (aloud) stopRecognition();
+    stopRecording();
     clearTimeout(pauseTimer);
     stopSpeaking();
     clearPlaying();
@@ -250,6 +252,7 @@ function renderPassageScreen(root, { profileName, passage, startQuiz, backToList
     (shadow ? shadowBtn : listenAllBtn).textContent = "⏹ 멈추기";
     play(0, shadow, playToken);
   };
+  bindRecorders(root);
   listenAllBtn.addEventListener("click", () => startPlayback(false));
   shadowBtn.addEventListener("click", () => startPlayback(true));
 
@@ -292,7 +295,7 @@ function renderPassageScreen(root, { profileName, passage, startQuiz, backToList
         }
       };
       rec.onerror = (ev) => {
-        out.innerHTML = `<p class="speak-heard">${ev.error === "not-allowed" ? "🎤 마이크 사용을 허용해 주세요." : ev.error === "no-speech" ? "🤫 소리가 들리지 않았어요. 다시 눌러 읽어 보세요." : "😥 음성 인식이 잠깐 안 됐어요. 다시 해 보세요."}</p>`;
+        out.innerHTML = ["not-allowed", "service-not-allowed", "audio-capture"].includes(ev.error) ? micHelpHtml().replace(/<br>.*<\/p>$/, "</p>") : recognitionErrorHtml(ev.error).replace("말해", "읽어");
       };
       rec.onend = () => {
         if (activeRecognition === rec) activeRecognition = null;

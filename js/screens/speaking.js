@@ -90,6 +90,30 @@ function renderSpeakingListScreen(root, { profileName, start, back }) {
 }
 
 let activeRecognition = null;
+// 마이크가 막히면(권한 거부 · 지원 안 함) 이번 실행 동안은 스스로 체크 버튼도 같이 보여 준다
+let micBlocked = false;
+
+// 마이크 권한을 켜는 방법 (기기별)
+function micHelpHtml() {
+  const ua = navigator.userAgent;
+  const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const standalone = window.matchMedia?.("(display-mode: standalone)").matches || navigator.standalone;
+  const how = ios
+    ? "아이폰: <b>설정 → Safari → 마이크 → 허용</b>으로 바꾼 뒤 앱을 다시 열어요." + (standalone ? " 홈 화면 앱에서 계속 안 되면 Safari로 이 사이트를 열어서 해 보세요." : "")
+    : /Android/.test(ua)
+      ? standalone
+        ? "안드로이드 앱: <b>휴대폰 설정 → 애플리케이션 → Chrome → 권한 → 마이크 → 허용</b> 후 다시 눌러요."
+        : "안드로이드 크롬: 주소창 왼쪽 <b>🔒(또는 ⚙) → 권한 → 마이크 → 허용</b> 후 다시 눌러요."
+      : "PC: 주소창 왼쪽 <b>🔒 → 마이크 → 허용</b> 후 페이지를 새로 고쳐요.";
+  return `<p class="speak-heard">🎤 마이크를 쓸 수 없어요. ${how}<br>지금은 아래 <b>✅ 잘 말했어요</b>로 스스로 체크하며 계속할 수 있어요.</p>`;
+}
+
+function recognitionErrorHtml(error) {
+  if (["not-allowed", "service-not-allowed", "audio-capture"].includes(error)) return micHelpHtml();
+  if (error === "no-speech") return `<p class="speak-heard">🤫 소리가 들리지 않았어요. 다시 눌러 말해 보세요.</p>`;
+  if (error === "network") return `<p class="speak-heard">📶 음성 인식은 인터넷이 필요해요. 연결을 확인하고 다시 해 보세요.</p>`;
+  return `<p class="speak-heard">😥 음성 인식이 잠깐 안 됐어요. 다시 해 보세요.</p>`;
+}
 
 function stopRecognition() {
   if (activeRecognition) {
@@ -102,7 +126,7 @@ function stopRecognition() {
 
 function speakingResultHtml(item) {
   if (!item.tries) return "";
-  if (!SpeechRecognitionApi) return `<p class="speak-score ${item.best >= SPEAKING_PASS ? "ok" : ""}">${item.best >= SPEAKING_PASS ? "✅ 잘 말했어요!" : "🔁 한 번 더 해 봐요"}</p>`;
+  if (!SpeechRecognitionApi || item.self) return `<p class="speak-score ${item.best >= SPEAKING_PASS ? "ok" : ""}">${item.best >= SPEAKING_PASS ? "✅ 잘 말했어요!" : "🔁 한 번 더 해 봐요"}</p>`;
   const m = speakingMatch(item.en, item.heard);
   const pct = Math.round(m.score * 100);
   return `
@@ -128,25 +152,26 @@ function renderSpeakingSessionScreen(root, { session, group, actions }) {
           <button class="listen-btn" id="listenBtn" ${speechSupported ? "" : "disabled"}>🔊 듣기</button>
           <button class="listen-btn" id="slowBtn" ${speechSupported ? "" : "disabled"}>🐢 천천히</button>
         </div>
+        ${recorderHtml("s:" + item.en)}
       </div>
       <div id="speakResult" class="speak-result" aria-live="polite">${speakingResultHtml(item)}</div>
-      ${
-        SpeechRecognitionApi
-          ? `<button class="primary-btn speak-mic" id="micBtn">🎙️ ${item.tries ? "다시 말하기" : "말하기"}</button>`
-          : `<div class="settings-actions"><button class="primary-btn" id="selfOkBtn">✅ 잘 말했어요</button><button class="secondary-btn" id="selfRetryBtn">🔁 다시 해 볼래요</button></div>`
-      }
+      ${SpeechRecognitionApi ? `<button class="${micBlocked ? "secondary-btn" : "primary-btn"} speak-mic" id="micBtn">🎙️ ${micBlocked ? "마이크 다시 시도" : item.tries ? "다시 말하기" : "말하기"}</button>` : ""}
+      ${!SpeechRecognitionApi || micBlocked ? `<div class="settings-actions"><button class="primary-btn" id="selfOkBtn">✅ 잘 말했어요</button><button class="secondary-btn" id="selfRetryBtn">🔁 다시 해 볼래요</button></div>` : ""}
       <button class="secondary-btn" id="nextBtn">${isLast ? "결과 보기" : item.tries ? "다음 문장 ▶" : "건너뛰기 ▶"}</button>
     </div>
   `;
 
   bindQuitConfirm(root, () => {
     stopRecognition();
+    stopRecording();
     actions.quit();
   });
+  bindRecorders(root);
   root.querySelector("#listenBtn").addEventListener("click", () => speak(item.en, { rate: 0.9 }));
   root.querySelector("#slowBtn").addEventListener("click", () => speak(item.en, { rate: 0.6 }));
   root.querySelector("#nextBtn").addEventListener("click", () => {
     stopRecognition();
+    stopRecording();
     actions.next();
   });
   root.querySelector("#selfOkBtn")?.addEventListener("click", () => actions.selfCheck(true));
@@ -176,10 +201,16 @@ function renderSpeakingSessionScreen(root, { session, group, actions }) {
     };
     rec.onerror = (e) => {
       activeRecognition = null;
-      const msg = e.error === "not-allowed" ? "🎤 마이크 사용을 허용해 주세요. (브라우저 주소창 옆 설정)" : e.error === "no-speech" ? "🤫 소리가 들리지 않았어요. 다시 눌러 말해 보세요." : "😥 음성 인식이 잠깐 안 됐어요. 다시 해 보세요.";
-      root.querySelector("#speakResult").innerHTML = `<p class="speak-heard">${msg}</p>`;
-      mic.textContent = "🎙️ 다시 말하기";
       mic.classList.remove("listening");
+      if (["not-allowed", "service-not-allowed", "audio-capture"].includes(e.error) && !micBlocked) {
+        // 스스로 체크 버튼이 보이게 다시 그린 뒤 안내를 띄운다
+        micBlocked = true;
+        actions.refresh();
+        document.querySelector("#speakResult")?.insertAdjacentHTML("afterbegin", micHelpHtml());
+        return;
+      }
+      root.querySelector("#speakResult").innerHTML = recognitionErrorHtml(e.error);
+      mic.textContent = micBlocked ? "🎙️ 마이크 다시 시도" : "🎙️ 다시 말하기";
     };
     rec.onend = () => {
       activeRecognition = null;
@@ -192,6 +223,9 @@ function renderSpeakingSessionScreen(root, { session, group, actions }) {
       rec.start();
     } catch {
       activeRecognition = null;
+      mic.classList.remove("listening");
+      mic.textContent = "🎙️ 다시 말하기";
+      root.querySelector("#speakResult").innerHTML = recognitionErrorHtml("");
     }
   });
 }

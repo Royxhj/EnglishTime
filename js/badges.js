@@ -42,6 +42,10 @@ const BADGES = [
   { id: "wordSearch", emoji: "🔍", title: "숨은 단어 탐험가", desc: "단어 찾기 퍼즐 완성하기", test: (p) => Object.keys(p.wordsearch.best).length >= 1 },
   { id: "wordGuess", emoji: "🕵️", title: "명탐정", desc: "단어 추리 5개 모두 맞히기", test: (p) => perfectCount(p.wordguess.best) >= 1 },
   { id: "riddle", emoji: "❓", title: "수수께끼 박사", desc: "영어 수수께끼 만점", test: (p) => perfectCount(p.riddle.best) >= 1 },
+  { id: "wordList", emoji: "🏠", title: "우리 집 단어 박사", desc: "우리 집 단어장 시험 90점 이상", test: (p) => Object.values(p.wordlist.best).some((b) => b.correct / b.total >= 0.9) },
+  { id: "typing100", emoji: "⌨️", title: "타자왕", desc: "타자 연습 1분에 100타 넘기", test: (p) => Object.values(p.typing.best).some((b) => b.correct >= 100) },
+  { id: "monster", emoji: "👾", title: "몬스터 사냥꾼", desc: "오답 몬스터 무찌르기", test: (p) => Object.keys(p.monster.best).length >= 1 },
+  { id: "familyMission", emoji: "🎯", title: "함께 해냈어요", desc: "가족 미션 성공", test: (p) => p.missionWeeks.length >= 1 },
   { id: "dictation", emoji: "📝", title: "받아쓰기 달인", desc: "문장 받아쓰기 90점 이상", test: (p) => Object.values(p.sentdict.best).some((b) => b.correct / b.total >= 0.9) },
   { id: "perfectMonth", emoji: "📆", title: "개근상", desc: "한 달 동안 하루도 빠짐없이 공부하기", test: (p) => p.perfectMonths.length >= 1 },
   { id: "goalWeek", emoji: "🎯", title: "목표 달성", desc: "이번 주 목표 모두 이루기", test: (p, name) => {

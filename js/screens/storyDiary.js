@@ -204,7 +204,7 @@ function shopItem(id) {
 
 function shopStatus(profileName) {
   const p = getProfileData(profileName);
-  const earned = Math.floor(p.totalAnswered / STAR_EVERY);
+  const earned = Math.floor(p.totalAnswered / STAR_EVERY) + p.bonusStars;
   return { earned, stars: Math.max(0, earned - p.shop.spent), owned: p.shop.owned, equip: p.shop.equip, toNext: STAR_EVERY - (p.totalAnswered % STAR_EVERY) };
 }
 

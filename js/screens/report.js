@@ -193,6 +193,9 @@ function renderReportScreen(root, { profileName, actions }) {
           <div><b>${Object.keys(profile.bingo.best).length}</b><small>🎱 빙고 단계</small></div>
           <div><b>${profile.perfectMonths.length}</b><small>📆 개근한 달</small></div>
           <div><b>${Object.values(profile.wordsearch.best).reduce((a, b) => a + b.total, 0)}</b><small>🔍 단어 찾기 완성</small></div>
+          <div><b>${Math.max(0, ...Object.values(profile.typing.best).map((b) => b.correct))}</b><small>⌨️ 타자 최고(타)</small></div>
+          <div><b>${profile.monster.best.all?.total || 0}</b><small>👾 무찌른 몬스터</small></div>
+          <div><b>${profile.missionWeeks.length}</b><small>🎯 가족 미션 성공</small></div>
         </div>
         <button class="secondary-btn" id="calendarBtn">📆 출석 달력 보기</button>
       </section>

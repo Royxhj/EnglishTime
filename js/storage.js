@@ -136,7 +136,10 @@ function normalizeProfile(profile) {
   if (!Array.isArray(p.perfectMonths)) p.perfectMonths = [];
   p.battleWins ||= 0;
   if (!Array.isArray(p.homePins)) p.homePins = [];
-  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict"]) {
+  if (!Array.isArray(p.wordLists)) p.wordLists = [];
+  if (!Array.isArray(p.missionWeeks)) p.missionWeeks = [];
+  p.bonusStars ||= 0;
+  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster"]) {
     p[section] ||= { best: {}, wrong: {} };
     p[section].best ||= {};
     p[section].wrong ||= {};
@@ -329,12 +332,50 @@ function recordBestCount(profileName, section, id, correct, total) {
   });
 }
 
-// 단어 찾기: 단계별로 완성한 횟수를 센다 ({ correct: 횟수, total: 횟수 })
-function recordWordSearchDone(profileName, levelId) {
+// 완성 · 승리 횟수를 센다 ({ correct: 횟수, total: 횟수 }) — 단어 찾기, 오답 몬스터
+function recordCountUp(profileName, section, id) {
   updateProfile(profileName, (profile) => {
     profile.lessonDay = dateKey();
-    const n = (profile.wordsearch.best[levelId]?.total || 0) + 1;
-    profile.wordsearch.best[levelId] = { correct: n, total: n };
+    const n = (profile[section].best[id]?.total || 0) + 1;
+    profile[section].best[id] = { correct: n, total: n };
+  });
+}
+const recordWordSearchDone = (profileName, levelId) => recordCountUp(profileName, "wordsearch", levelId);
+
+// ── 📝 우리 집 단어장 ──
+function getWordLists(profileName) {
+  return getProfileData(profileName).wordLists;
+}
+
+// id가 없으면 새로 만든다. 저장한 단어장 id를 돌려준다.
+function saveWordList(profileName, id, title, words) {
+  return updateProfile(profileName, (profile) => {
+    const list = profile.wordLists.find((l) => l.id === id);
+    if (list) {
+      Object.assign(list, { title, words });
+      return list.id;
+    }
+    const newId = `wl${Date.now().toString(36)}`;
+    profile.wordLists.unshift({ id: newId, title, words });
+    return newId;
+  });
+}
+
+function deleteWordList(profileName, id) {
+  updateProfile(profileName, (profile) => {
+    profile.wordLists = profile.wordLists.filter((l) => l.id !== id);
+    for (const m of ["choice", "spell", "dict"]) delete profile.wordlist.best[`${id}:${m}`];
+  });
+}
+
+// 👨‍👩‍👧 가족 미션 별: 그 주에 처음 받으면 true
+function grantMissionStars(profileName, week, stars) {
+  return updateProfile(profileName, (profile) => {
+    if (profile.missionWeeks.includes(week)) return false;
+    profile.missionWeeks.push(week);
+    profile.missionWeeks = profile.missionWeeks.slice(-60);
+    profile.bonusStars += stars;
+    return true;
   });
 }
 
@@ -674,6 +715,12 @@ function importBackup(data) {
     p.perfectMonths = p.perfectMonths.filter((m) => typeof m === "string" && /^\d{4}-\d{2}$/.test(m)).slice(0, 120);
     p.battleWins = Math.max(0, Math.floor(Number(p.battleWins) || 0));
     p.homePins = [...new Set(p.homePins.filter(isPinId))].slice(0, HOME_PIN_MAX);
+    p.wordLists = p.wordLists
+      .filter((l) => l && /^wl[a-z0-9]{1,15}$/.test(l.id) && Array.isArray(l.words))
+      .slice(0, 30)
+      .map((l) => ({ id: l.id, title: cleanText(l.title, 20) || "단어장", words: l.words.map((w) => ({ w: cleanText(w?.w, 40), ko: cleanText(w?.ko, 60) })).filter((w) => w.w && w.ko).slice(0, 100) }));
+    p.missionWeeks = p.missionWeeks.filter((d) => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)).slice(-60);
+    p.bonusStars = Math.max(0, Math.floor(Number(p.bonusStars) || 0));
     const owned = p.shop.owned.filter((id) => shopItem(id));
     p.shop = {
       spent: Math.max(0, Number(p.shop.spent) || 0),

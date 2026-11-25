@@ -2173,3 +2173,61 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 /* ── 📨 주간 요약 ── */
 .summary-preview { white-space: pre-wrap; font-family: inherit; font-size: 13px; background: var(--surface-2); border-radius: 12px; padding: 10px 12px; margin: 6px 0; overflow-wrap: anywhere; }
 .summary-btns { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+
+/* ── 🎙️ 내 목소리 녹음 ── */
+.rec-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+.rec-row .chip-btn { text-align: center; }
+.rec-btn.recording { background: var(--wrong); color: #fff; animation: micPulse 1s infinite; }
+.sentence-btns .rec-btn, .sentence-btns .rec-play { width: 30px; height: 30px; font-size: 12px; }
+
+/* ── 📝 우리 집 단어장 ── */
+.settings-label { display: block; font-weight: 700; margin: 10px 0 6px; }
+.wl-text { width: 100%; box-sizing: border-box; font-size: 16px; }
+.wl-tests { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.wl-tests small { color: var(--muted); }
+.wl-words { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.wl-words li { display: flex; align-items: center; gap: 8px; background: var(--card-bg); border-radius: 12px; box-shadow: var(--shadow); padding: 6px 10px; flex-wrap: wrap; min-width: 0; }
+.wl-words li span { color: var(--muted); overflow-wrap: anywhere; }
+.wl-mine { width: 100%; color: var(--wrong); }
+.danger-btn { color: var(--wrong); }
+
+/* ── ⌨️ 타자 연습 ── */
+.typing-target { background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); padding: 16px; font-family: ui-monospace, Consolas, monospace; font-size: 24px; line-height: 1.6; overflow-wrap: anywhere; text-align: center; }
+.typing-target span.ok { color: var(--correct); }
+.typing-target span.bad { color: #fff; background: var(--wrong); border-radius: 3px; }
+.typing-target span.cur { border-bottom: 3px solid var(--primary); }
+.typing-next { margin: 0; text-align: center; color: var(--muted); font-size: 14px; }
+.typing-box { font-family: ui-monospace, Consolas, monospace; font-size: 20px; padding: 12px; border-radius: 12px; border: 2px solid var(--primary); background: var(--card-bg); color: var(--text); width: 100%; box-sizing: border-box; }
+.typing-stats { grid-template-columns: repeat(3, 1fr); }
+
+/* ── 💬 오늘의 한마디 ── */
+.phrase-card { background: var(--card-bg); border-radius: 20px; box-shadow: var(--shadow); padding: 12px 14px; }
+.phrase-label { margin: 0 0 6px; font-size: 13px; font-weight: 800; color: var(--muted); }
+.phrase-main { display: flex; align-items: center; gap: 10px; }
+.phrase-main > div { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.phrase-emoji { font-size: 32px; line-height: 1; }
+.phrase-en { font-size: 18px; }
+.phrase-main small, .phrase-ex small { color: var(--muted); }
+.phrase-ex { margin-top: 6px; font-size: 14px; }
+.phrase-ex summary { cursor: pointer; color: var(--primary-dark, var(--primary)); font-weight: 700; }
+.phrase-ex p { margin: 6px 0 0; }
+.phrase-ex small { display: block; }
+
+/* ── 🎯 가족 미션 ── */
+.mission-card { margin-top: 10px; }
+.mission-card.done { background: color-mix(in srgb, var(--correct) 14%, var(--card-bg)); }
+.mission-title { margin: 0 0 8px; font-size: 16px; }
+.mission-row { display: flex; justify-content: space-between; font-size: 14px; margin: 6px 0; }
+.mission-members { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; font-size: 13px; }
+.mission-members span { background: var(--surface-2); border-radius: 999px; padding: 2px 8px; }
+.mission-members span.ok { background: color-mix(in srgb, var(--correct) 25%, var(--card-bg)); }
+
+/* ── 👾 오답 몬스터 ── */
+.monster-stage { display: flex; flex-direction: column; align-items: center; gap: 6px; background: var(--card-bg); border-radius: 20px; box-shadow: var(--shadow); padding: 14px; }
+.monster { font-size: 72px; line-height: 1; transition: transform 0.2s; }
+.monster.hit { animation: shake 0.4s ease; filter: drop-shadow(0 0 8px var(--wrong)); }
+.monster.heal { animation: micPulse 0.6s ease 2; }
+.monster.beaten { transform: scale(1.2); }
+.monster-hp { width: 100%; height: 14px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.monster-hp span { display: block; height: 100%; background: linear-gradient(90deg, #e03131, #ff8787); transition: width 0.3s; }
+.monster-stage small { color: var(--muted); }

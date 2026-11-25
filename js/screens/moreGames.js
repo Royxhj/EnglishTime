@@ -329,6 +329,7 @@ function printSourceWords(profileName, source) {
   if (source === "wrong") return getWrongWords(profileName).map((r) => findWordById(r.id)).filter(Boolean);
   if (source === "starred") return getStarredIds(profileName).map(findWordById).filter(Boolean);
   if (source === "seen") return getWordsSeen(profileName).map((s) => findWordById(s.id)).filter(Boolean);
+  if (source.startsWith("list:")) return (findWordList(profileName, source.slice(5))?.words || []).map((w) => ({ word: escapeHtml(w.w), meaningKo: escapeHtml(w.ko) }));
   return WORD_BANK[source] || [];
 }
 
@@ -349,6 +350,7 @@ function printSourceOptions(profileName) {
     { id: "wrong", label: "📝 오답노트", n: getWrongWords(profileName).length },
     { id: "starred", label: "⭐ 즐겨찾기", n: getStarredIds(profileName).length },
     { id: "seen", label: "📅 최근 2주 본 단어", n: getWordsSeen(profileName).length },
+    ...getWordLists(profileName).map((l) => ({ id: `list:${l.id}`, label: `📝 ${escapeHtml(l.title)}`, n: l.words.length })),
   ];
 }
 

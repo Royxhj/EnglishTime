@@ -172,6 +172,7 @@ function renderHomeScreen(root, ctx) {
   const weeklyBest = getSectionBest(profileName, "weekly", weekDateKeys()[0]);
   const storyDone = STORY_SERIES.flatMap((x) => x.chapters).filter((c) => storyChapterPassed(profileName, c.id)).length;
   const storyTotal = STORY_SERIES.reduce((n, x) => n + x.chapters.length, 0);
+  const missionNew = getFamily().length > 1 && grantFamilyMission(profileName);
   const passagesDone = (list) => list.filter((p) => isPassageRead(profileName, p.id) || getSectionBest(profileName, "reading", p.id)).length;
 
   root.innerHTML = `
@@ -194,6 +195,7 @@ function renderHomeScreen(root, ctx) {
       ${isKid ? petCardHtml(profileName) : ""}
       ${levelProgressHtml(profileName)}
       ${todayCardHtml(profileName, { daily, dueWrong, wrongTotal, next })}
+      ${todayPhraseHtml(profileName)}
 
       <section class="group pin-group" id="pinGroup">
         <h2 class="group-title">⭐ 내 메뉴</h2>
@@ -205,6 +207,7 @@ function renderHomeScreen(root, ctx) {
         <h2 class="group-title">📚 배우기</h2>
         <div class="tile-grid">
           ${show.phonics ? homeTile({ id: "phonicsBtn", emoji: "🔤", title: "파닉스", meta: `${lessonDoneCount(profileName, PHONICS_TOPICS)} / ${PHONICS_TOPICS.length}` }) : ""}
+          ${homeTile({ id: "wordListsBtn", emoji: "📝", title: "우리 집 단어장", meta: getWordLists(profileName).length ? `${getWordLists(profileName).length}개 단어장` : "학교 단어 넣기" })}
           ${homeTile({ id: "vocabBtn", emoji: "📇", title: "단어장", meta: vocab.due > 0 ? `복습 ${vocab.due}개` : vocab.learned > 0 ? `외운 단어 ${vocab.mastered}` : "카드로 외우기", warn: vocab.due > 0 })}
           ${homeTile({ id: "notesBtn", emoji: "📘", title: "문법", meta: level ? `내 단계 ${lessonDoneCount(profileName, myBasics)} / ${myBasics.length}` : `${lessonDoneCount(profileName, BASIC_TOPICS)} / ${BASIC_TOPICS.length}` })}
           ${homeTile({ id: "talkBtn", emoji: "💬", title: "대화 표현", meta: level && myTalks.length ? `내 단계 ${lessonDoneCount(profileName, myTalks)} / ${myTalks.length}` : `${lessonDoneCount(profileName, TALK_TOPICS)} / ${TALK_TOPICS.length}` })}
@@ -226,6 +229,7 @@ function renderHomeScreen(root, ctx) {
           ${homeTile({ id: "speakingBtn", emoji: "🎙️", title: "따라 말하기", meta: `${sectionCount(profileName, "speaking", TALK_GROUPS)} / ${TALK_GROUPS.length} 묶음` })}
           ${homeTile({ id: "listeningBtn", emoji: "🎧", title: "듣기 평가", meta: `${LISTENING_SETS.filter((s) => getSectionBest(profileName, "listening", s.levelId)).length} / ${LISTENING_SETS.length} 단계` })}
           ${homeTile({ id: "writingBtn", emoji: "✍️", title: "영작 연습", meta: "뜻 보고 문장 만들기" })}
+          ${homeTile({ id: "typingBtn", emoji: "⌨️", title: "타자 연습", meta: "빠르고 정확하게" })}
           ${homeTile({ id: "dictationBtn", emoji: "🎧", title: "문장 받아쓰기", meta: "듣고 문장 쓰기" })}
           ${homeTile({ id: "soundsBtn", emoji: "👂", title: "소리 구별", meta: "ship · sheep" })}
           ${homeTile({ id: "diaryBtn", emoji: "📓", title: "영어 일기", meta: getDiaryEntries(profileName).length ? `${getDiaryEntries(profileName).length}편 썼어요` : "골라서 일기 쓰기" })}
@@ -237,6 +241,7 @@ function renderHomeScreen(root, ctx) {
         <div class="tile-grid">
           ${isKid ? homeTile({ id: "pictureBtn", emoji: "🎧", title: "그림 퀴즈", meta: "듣고 · 보고 고르기" }) : ""}
           ${isKid ? homeTile({ id: "memoryBtn", emoji: "🃏", title: "짝 맞추기", meta: "카드 뒤집기 게임" }) : ""}
+          ${homeTile({ id: "monsterBtn", emoji: "👾", title: "오답 몬스터", meta: wrongWords > 0 ? `오답 ${wrongWords}개로 싸우기` : "단어로 몬스터 잡기", warn: wrongWords > 0 })}
           ${homeTile({ id: "speedBtn", emoji: "⏱️", title: "60초 퀴즈", meta: "1분 동안 많이 맞히기" })}
           ${homeTile({ id: "battleBtn", emoji: "⚔️", title: "가족 대결", meta: getFamily().length > 1 ? "번갈아 풀기" : "가족 2명부터", disabled: getFamily().length < 2 })}
           ${homeTile({ id: "chainBtn", emoji: "🐍", title: "끝말잇기", meta: "컴퓨터와 단어 잇기" })}
@@ -258,6 +263,7 @@ function renderHomeScreen(root, ctx) {
           ? `<section class="group">
         <h2 class="group-title">이번 주 가족 순위</h2>
         <ol class="rank-list">${leaderboardHtml(profileName)}</ol>
+        ${familyMissionHtml()}
         <button class="secondary-btn" id="familyBtn">👨‍👩‍👧 가족 한눈에 보기</button>
       </section>`
           : weeklyRecordHtml(profileName)
@@ -311,5 +317,13 @@ function renderHomeScreen(root, ctx) {
   bind("affixesBtn", actions.openAffixes);
   bind("verbPatternBtn", actions.openVerbPattern);
   bind("chunksBtn", actions.openChunks);
+  bind("wordListsBtn", actions.openWordLists);
+  bind("typingBtn", actions.openTyping);
+  bind("monsterBtn", actions.startMonster);
+  bindTodayPhrase(root, profileName);
   setupHomePins(root, profileName);
+  if (missionNew) {
+    burstConfetti(60);
+    showToast(`<span class="toast-emoji">🎯</span><span>이번 주 가족 미션 성공! ⭐ ${MISSION_STARS}개를 받았어요</span>`);
+  }
 }
