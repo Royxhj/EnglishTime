@@ -169,6 +169,7 @@ function renderHomeScreen(root, ctx) {
   const myPassages = READING_PASSAGES.filter((p) => p.levelId === level);
   const myTalks = TALK_TOPICS.filter((t) => TALK_GROUP_LEVELS[t.group]?.includes(level));
   const show = { phonics: !level || ["elementary-low", "elementary-mid", "elementary-high", "middle"].includes(level), advanced: !isKid, practice: ["high", "adult"].includes(level) };
+  const weeklyBest = getSectionBest(profileName, "weekly", weekDateKeys()[0]);
   const passagesDone = (list) => list.filter((p) => isPassageRead(profileName, p.id) || getSectionBest(profileName, "reading", p.id)).length;
 
   root.innerHTML = `
@@ -222,6 +223,8 @@ function renderHomeScreen(root, ctx) {
         <div class="tile-grid">
           ${isKid ? homeTile({ id: "pictureBtn", emoji: "🎧", title: "그림 퀴즈", meta: "듣고 · 보고 고르기" }) : ""}
           ${isKid ? homeTile({ id: "memoryBtn", emoji: "🃏", title: "짝 맞추기", meta: "카드 뒤집기 게임" }) : ""}
+          ${homeTile({ id: "spellingBtn", emoji: "🎯", title: "스펠링 게임", meta: "글자 맞혀 단어 완성" })}
+          ${homeTile({ id: "weeklyBtn", emoji: "📅", title: "주간 단어 시험", meta: weeklyBest ? `이번 주 ${ratioLabel(weeklyBest)}` : `이번 주 본 단어 ${weeklySeenCount(profileName)}개` })}
           ${homeTile({ id: "wordsBtn", emoji: "✏️", title: "단어 시험", meta: wrongWords > 0 ? `오답 ${wrongWords}개` : wordBest !== null ? `최고 ${wordBest}점` : "고르기 · 철자 · 받아쓰기", warn: wrongWords > 0 })}
           ${homeTile({ id: "chunksBtn", emoji: "✂️", title: "끊어 읽기", meta: `${chunkDone} / ${CHUNK_SETS.length} 완료` })}
           ${homeTile({ id: "crosswordBtn", emoji: "🧩", title: "가로세로 낱말", meta: "매번 새 퍼즐" })}
@@ -246,6 +249,8 @@ function renderHomeScreen(root, ctx) {
   bind("stickerBtn", actions.openStickers);
   bind("pictureBtn", actions.openPicture);
   bind("memoryBtn", () => actions.startMemory(level && level.startsWith("elementary") ? level : "elementary-low"));
+  bind("spellingBtn", actions.openSpelling);
+  bind("weeklyBtn", actions.startWeekly);
   bind("todayDaily", actions.startDaily);
   bind("todayReview", () => (daily ? actions.openWrongNote() : actions.startDaily()));
   bind("todayNext", () => actions.openNext(next));

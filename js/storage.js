@@ -127,7 +127,8 @@ function normalizeProfile(profile) {
   p.customWords ||= {};
   p.readingRead ||= {};
   p.notesRead ||= {};
-  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory"]) {
+  p.wordSeen ||= {};
+  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly"]) {
     p[section] ||= { best: {}, wrong: {} };
     p[section].best ||= {};
     p[section].wrong ||= {};
@@ -196,8 +197,22 @@ function getDueWrongs(profileName) {
   };
 }
 
+// 최근 2주 동안 문제나 카드로 본 단어 (주간 단어 시험에 쓴다)
+const WORD_SEEN_KEEP_DAYS = 14;
+
+function markWordSeen(profile, wordId, levelId) {
+  profile.wordSeen[wordId] = { levelId, date: dateKey() };
+  const cutoff = daysAgoKey(WORD_SEEN_KEEP_DAYS);
+  for (const [id, v] of Object.entries(profile.wordSeen)) if (!(v.date >= cutoff)) delete profile.wordSeen[id];
+}
+
+function getWordsSeen(profileName) {
+  return Object.entries(getProfileData(profileName).wordSeen).map(([id, v]) => ({ id, ...v }));
+}
+
 function recordAnswerOutcome(profileName, wordId, levelId, isCorrect) {
   updateProfile(profileName, (profile) => {
+    markWordSeen(profile, wordId, levelId);
     updateWrongEntry(profile.wrongWords, wordId, isCorrect, { id: wordId, levelId });
     // 퀴즈에서 틀린 단어는 단어장의 '헷갈려요' 단계로 보내 내일 다시 복습하게 한다.
     if (!isCorrect) profile.vocab[wordId] = { ...profile.vocab[wordId], levelId, box: 0, due: daysFromTodayKey(VOCAB_INTERVALS[0]) };
@@ -396,6 +411,7 @@ const VOCAB_MASTERED_BOX = 3;
 function recordVocabReview(profileName, wordId, levelId, known) {
   updateProfile(profileName, (profile) => {
     const prev = profile.vocab[wordId];
+    markWordSeen(profile, wordId, levelId);
     // 처음 보는데 이미 아는 단어는 바로 2단계(3일 뒤)로 보낸다.
     const box = known ? (prev ? Math.min(prev.box + 1, VOCAB_INTERVALS.length - 1) : 2) : 0;
     profile.vocab[wordId] = { levelId, box, due: daysFromTodayKey(VOCAB_INTERVALS[box]), seen: (prev?.seen || 0) + 1 };

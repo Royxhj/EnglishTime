@@ -140,6 +140,7 @@ function mcSourceInfo(source) {
   if (source.type === "drillReview") return { label: "📝 기초 · 동사 오답 복습", level: null, quitTo: "wrongNote", listScreen: "wrongNote" };
   if (source.type === "verbPattern") return { label: vpTestLabel(source.id), level: null, quitTo: "verbPattern", listScreen: "verbPattern" };
   if (source.type === "daily") return { label: "☀️ 오늘의 학습", level: null, quitTo: "home", listScreen: "home" };
+  if (source.type === "weekly") return { label: "📅 주간 단어 시험", level: null, quitTo: "home", listScreen: "home" };
   return { label: "📝 문법 오답 복습", level: null, quitTo: "grammarList", listScreen: "grammarList" };
 }
 
@@ -177,6 +178,7 @@ function nextMcQuestion() {
   if (mc.source.type === "listening") isNewBest = recordSectionResult(currentProfile(), "listening", mc.source.id, correct, total);
   if (mc.source.type === "verbPattern") isNewBest = recordSectionResult(currentProfile(), "verbPattern", mc.source.id, correct, total);
   if (mc.source.type === "daily") recordDaily(currentProfile(), correct, total);
+  if (mc.source.type === "weekly") isNewBest = recordSectionResult(currentProfile(), "weekly", mc.source.id, correct, total);
   set({ mc: { ...mc, isNewBest }, screen: "mcResult" });
   announceBadges(checkNewBadges(currentProfile()));
 }
@@ -297,6 +299,17 @@ function mcResultActions(source, hasWrong) {
       ],
     };
   }
+  if (source.type === "weekly") {
+    const wrongLeft = getWrongWords(currentProfile()).length;
+    return {
+      actions: [
+        { ...retry, onClick: startWeekly },
+        ...(hasWrong && wrongLeft > 0 ? [{ label: `📝 틀린 단어 복습 (${wrongLeft})`, onClick: () => set({ screen: "wrongNote" }) }] : []),
+        { label: "📇 단어장 보기", onClick: () => set({ screen: "vocab" }) },
+        { label: "🏠 홈으로", onClick: goHome },
+      ],
+    };
+  }
   if (source.type === "daily") {
     // 오늘의 학습을 마치면 다음 공부로 바로 이어지게 한다
     const next = nextStep(currentProfile());
@@ -358,6 +371,50 @@ function nextChunk() {
 // ── 초등: 그림 퀴즈 · 짝 맞추기 ──
 const startPicture = (levelId, kind) => startMc({ type: "picture", id: `${kind}:${levelId}` }, buildPictureQuestions(levelId, kind));
 const startMemory = (levelId) => set({ memory: buildMemoryGame(levelId), screen: "memory" });
+
+// ── 단어 놀이: 스펠링 게임 · 주간 단어 시험 ──
+const startSpelling = (levelId) => set({ spelling: buildSpellingGame(levelId), screen: "spelling" });
+const startWeekly = () => startMc({ type: "weekly", id: weekDateKeys()[0] }, buildWeeklyQuestions(currentProfile()));
+
+const spellingActions = {
+  guess: (letter) => {
+    const { spelling: game } = store.getState();
+    if (game.done || spellingStatus(game) !== "playing" || game.guessed.includes(letter)) return;
+    const w = game.words[game.index];
+    game.guessed.push(letter);
+    if (w.word.includes(letter)) playSound("correct");
+    else {
+      game.misses += 1;
+      playSound("wrong");
+    }
+    const status = spellingStatus(game);
+    if (status !== "playing") {
+      const solved = status === "solved";
+      game.results.push({ word: w, solved });
+      recordAnswerOutcome(currentProfile(), w.id, game.levelId, solved);
+      recordActivity(currentProfile());
+      speak(w.word, { rate: 0.85 });
+      if (solved && game.misses === 0) burstConfetti(30);
+    }
+    set({});
+  },
+  next: () => {
+    const { spelling: game } = store.getState();
+    if (game.index + 1 < game.words.length) {
+      Object.assign(game, { index: game.index + 1, guessed: [], misses: 0 });
+    } else {
+      const solved = game.results.filter((r) => r.solved).length;
+      game.done = true;
+      game.isNewBest = recordSectionResult(currentProfile(), "spelling", game.levelId, solved, game.words.length);
+      if (solved === game.words.length) burstConfetti(40);
+      announceBadges(checkNewBadges(currentProfile()));
+    }
+    set({});
+  },
+  again: () => startSpelling(store.getState().spelling.levelId),
+  list: () => set({ screen: "spellingList" }),
+  quit: () => set({ screen: "home" }),
+};
 
 let memoryBusy = false;
 const memoryActions = {
@@ -822,6 +879,7 @@ const QUIZ_QUIT_TARGET = {
   speakingSession: () => "speakingList",
   writingSession: () => "writingList",
   roleplay: () => "practiceList",
+  spelling: (s) => (s.spelling.done ? null : "spellingList"),
 };
 
 function parentScreen(state) {
@@ -832,7 +890,8 @@ function parentScreen(state) {
     case "settings": case "wrongNote": case "report": case "vocab": case "grammarNotes": case "phonics": case "talk":
     case "irregular": case "verbPattern": case "speakingList": case "listeningList": case "writingList":
     case "idioms": case "affixes": case "examList": case "goals": case "crosswordList": case "family": case "practiceList":
-    case "pictureList": case "stickers": case "memory": return "home";
+    case "pictureList": case "stickers": case "memory": case "spellingList": return "home";
+    case "spelling": return "spellingList";
     case "roleplayResult": return "practiceList";
     case "crossword": return "crosswordList";
     case "speakingResult": return "speakingList";
@@ -856,7 +915,9 @@ window.addEventListener("popstate", () => {
   const state = store.getState();
   const openModal = document.querySelector(".modal-overlay");
 
-  if (openModal || QUIZ_QUIT_TARGET[state.screen]) {
+  // 문제를 푸는 중이면 그만둘지 묻는다 (끝난 게임은 묻지 않고 위 화면으로)
+  const quitTarget = QUIZ_QUIT_TARGET[state.screen]?.(state);
+  if (openModal || quitTarget) {
     history.pushState({ englishword: true }, "");
     hasBackBuffer = true;
     if (openModal) openModal.querySelector("#modalCancelBtn").click();
@@ -865,7 +926,7 @@ window.addEventListener("popstate", () => {
         message: "지금 그만두면 이번 기록은 저장되지 않아요. 그만할까요?",
         confirmText: "그만하기",
         cancelText: "계속 풀기",
-        onConfirm: () => set({ screen: QUIZ_QUIT_TARGET[state.screen](state) }),
+        onConfirm: () => set({ screen: quitTarget }),
       });
     return;
   }
@@ -878,7 +939,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -1043,6 +1104,8 @@ function render() {
           openStickers: () => set({ screen: "stickers" }),
           startPicture,
           startMemory,
+          openSpelling: () => set({ screen: "spellingList" }),
+          startWeekly,
           refresh: () => set({}),
           openNext: openNextStep,
           openAffixes: () => set({ screen: "affixes" }),
@@ -1223,6 +1286,8 @@ function render() {
 
     pictureList: () => renderPictureQuizListScreen(root, { profileName: state.profileName, start: startPicture, back: goHome }),
     memory: () => renderMemoryScreen(root, { game: state.memory, actions: memoryActions }),
+    spellingList: () => renderSpellingListScreen(root, { profileName: state.profileName, start: startSpelling, back: goHome }),
+    spelling: () => renderSpellingScreen(root, { game: state.spelling, actions: spellingActions }),
     stickers: () => renderStickerScreen(root, { profileName: state.profileName, back: goHome }),
 
     practiceList: () => renderPracticeListScreen(root, { profileName: state.profileName, startRoleplay, startEmail, back: goHome }),

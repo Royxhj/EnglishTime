@@ -1914,3 +1914,25 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
   background: var(--wrong);
 }
 .modal-actions .modal-confirm-btn:active { background: #e04a4a; }
+
+/* ── 🎯 스펠링 게임 ── */
+.spell-card { background: var(--card-bg); border-radius: 20px; box-shadow: var(--shadow); padding: 16px; margin: 12px 0; text-align: center; }
+.spell-emoji { font-size: 64px; line-height: 1.1; }
+.spell-meaning { font-size: 20px; font-weight: 800; margin: 6px 0 10px; }
+.spell-speak { padding: 8px 16px; width: auto; }
+.spell-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 14px 0 6px; }
+.spell-slot { width: 34px; height: 44px; border-bottom: 4px solid var(--primary); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 800; text-transform: lowercase; }
+.spell-slot.filled { color: var(--text); }
+.spell-slot.reveal { color: var(--wrong); }
+.spell-hearts { text-align: center; font-size: 20px; letter-spacing: 2px; margin: 4px 0 10px; }
+.spell-keys { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.spell-key { min-height: 44px; border: none; border-radius: 10px; background: var(--card-bg); color: var(--text); box-shadow: var(--shadow); font-size: 20px; font-weight: 800; cursor: pointer; }
+.spell-key.hit { background: color-mix(in srgb, var(--correct) 25%, var(--card-bg)); }
+.spell-key.miss { background: color-mix(in srgb, var(--wrong) 20%, var(--card-bg)); opacity: 0.6; }
+.spell-key:disabled { cursor: default; }
+.spell-example { text-align: center; margin: 10px 0; }
+.spell-summary { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 8px; }
+.spell-summary li { background: var(--card-bg); border-radius: 12px; box-shadow: var(--shadow); padding: 10px 12px; display: flex; align-items: center; gap: 8px; }
+.spell-summary li.miss { outline: 2px solid color-mix(in srgb, var(--wrong) 50%, transparent); }
+.spell-sum-emoji { font-size: 26px; }
+.spell-sum-mark { margin-left: auto; }
