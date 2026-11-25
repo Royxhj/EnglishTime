@@ -21446,8 +21446,50 @@ const HOUSE_SVG = {
   washer: `<rect x="10" y="6" width="44" height="52" rx="4" fill="#eceff1" stroke="#90a4ae" stroke-width="2"/><rect x="10" y="6" width="44" height="10" rx="4" fill="#cfd8dc"/><circle cx="32" cy="37" r="14" fill="#90caf9" stroke="#78909c" stroke-width="3"/><circle cx="46" cy="11" r="2" fill="#78909c"/>`,
 };
 
+// 🏘️ 우리 동네: 집 밖에서 자주 보는 장소
+HOUSE_ROOMS.push(
+  {
+    id: "classroom", group: "town", emoji: "🏫", title: "교실", en: "classroom", bg: "#e8f5e9",
+    items: [["blackboard", "칠판", "svg:blackboard"], ["chalk", "분필", "svg:chalk"], ["globe", "지구본", "🌍"], ["map", "지도", "🗺️"], ["locker", "사물함", "svg:locker"], ["bell", "종", "🔔"], ["microscope", "현미경", "🔬"], ["magnet", "자석", "🧲"], ["palette", "팔레트", "🎨"], ["flag", "깃발", "🚩"], ["trophy", "트로피", "🏆"], ["test tube", "시험관", "🧪"], ["abacus", "주판", "🧮"]],
+  },
+  {
+    id: "mart", group: "town", emoji: "🛒", title: "마트", en: "supermarket", bg: "#fff3e0",
+    items: [["cart", "카트", "🛒"], ["shopping bag", "쇼핑백", "🛍️"], ["receipt", "영수증", "🧾"], ["money", "돈", "💵"], ["coin", "동전", "🪙"], ["credit card", "신용 카드", "💳"], ["milk", "우유", "🥛"], ["egg", "달걀", "🥚"], ["bread", "빵", "🍞"], ["cheese", "치즈", "🧀"], ["carrot", "당근", "🥕"], ["fish", "생선", "🐟"], ["price tag", "가격표", "🏷️"]],
+  },
+  {
+    id: "park", group: "town", emoji: "🌳", title: "놀이터 · 공원", en: "playground · park", bg: "#e0f7fa",
+    items: [["slide", "미끄럼틀", "svg:slide"], ["swing", "그네", "svg:swing"], ["seesaw", "시소", "svg:seesaw"], ["bench", "벤치, 긴 의자", "svg:bench"], ["tree", "나무", "🌳"], ["flower", "꽃", "🌸"], ["soccer ball", "축구공", "⚽"], ["kite", "연", "🪁"], ["bicycle", "자전거", "🚲"], ["scooter", "킥보드", "🛴"], ["skateboard", "스케이트보드", "🛹"], ["fountain", "분수", "⛲"]],
+  },
+  {
+    id: "hospital", group: "town", emoji: "🏥", title: "병원", en: "hospital", bg: "#fce4ec",
+    items: [["ambulance", "구급차", "🚑"], ["bandage", "반창고, 붕대", "🩹"], ["medicine", "약", "💊"], ["syringe", "주사기", "💉"], ["thermometer", "체온계, 온도계", "🌡️"], ["stethoscope", "청진기", "🩺"], ["wheelchair", "휠체어", "🦽"], ["face mask", "마스크", "😷"], ["hospital", "병원", "🏥"], ["tooth", "이, 치아", "🦷"], ["doctor", "의사", "🧑‍⚕️"]],
+  },
+  {
+    id: "street", group: "town", emoji: "🚦", title: "길거리", en: "street", bg: "#eceff1",
+    items: [["traffic light", "신호등", "🚦"], ["crosswalk", "횡단보도", "svg:crosswalk"], ["bus stop", "버스 정류장", "🚏"], ["car", "자동차", "🚗"], ["bus", "버스", "🚌"], ["taxi", "택시", "🚕"], ["motorcycle", "오토바이", "🏍️"], ["truck", "트럭", "🚚"], ["police car", "경찰차", "🚓"], ["fire truck", "소방차", "🚒"], ["stop sign", "정지 표지판", "🛑"], ["gas station", "주유소", "⛽"], ["construction sign", "공사 중 표지판", "🚧"]],
+  },
+  {
+    id: "beach", group: "town", emoji: "🏖️", title: "바다 · 캠핑", en: "beach · camping", bg: "#e3f2fd",
+    items: [["tent", "텐트", "⛺"], ["campfire", "모닥불", "🔥"], ["beach umbrella", "파라솔", "🏖️"], ["sunglasses", "선글라스", "🕶️"], ["swimsuit", "수영복", "🩱"], ["seashell", "조개껍데기", "🐚"], ["crab", "게", "🦀"], ["wave", "파도", "🌊"], ["sun", "해, 태양", "☀️"], ["sailboat", "돛단배", "⛵"], ["fishing rod", "낚싯대", "🎣"], ["compass", "나침반", "🧭"]],
+  }
+);
+
+Object.assign(HOUSE_SVG, {
+  blackboard: `<rect x="4" y="10" width="56" height="36" rx="2" fill="#795548"/><rect x="8" y="14" width="48" height="28" fill="#2e7d32"/><path d="M14 22h18M14 30h26" stroke="#e8f5e9" stroke-width="2.5" stroke-linecap="round"/><rect x="20" y="46" width="24" height="3" fill="#8d6e63"/><rect x="30" y="47" width="8" height="3" fill="#fff"/>`,
+  chalk: `<rect x="10" y="26" width="44" height="10" rx="5" transform="rotate(-20 32 31)" fill="#fafafa" stroke="#bdbdbd" stroke-width="2"/><rect x="12" y="38" width="40" height="9" rx="4.5" transform="rotate(-20 32 42)" fill="#f48fb1"/>`,
+  locker: `<rect x="8" y="6" width="22" height="52" rx="2" fill="#5c6bc0"/><rect x="34" y="6" width="22" height="52" rx="2" fill="#5c6bc0"/><path d="M12 12h14M12 15h14M12 18h14M38 12h14M38 15h14M38 18h14" stroke="#9fa8da" stroke-width="1.5"/><rect x="24" y="30" width="3" height="8" rx="1.5" fill="#e8eaf6"/><rect x="50" y="30" width="3" height="8" rx="1.5" fill="#e8eaf6"/>`,
+  swing: `<path d="M6 8h52" stroke="#e53935" stroke-width="5" stroke-linecap="round"/><path d="M10 8L4 60M54 8l6 52" stroke="#e53935" stroke-width="4"/><path d="M24 8v36M40 8v36" stroke="#757575" stroke-width="2"/><rect x="20" y="44" width="24" height="5" rx="2" fill="#ffb300"/>`,
+  seesaw: `<path d="M24 52l8-14 8 14z" fill="#43a047"/><rect x="4" y="34" width="56" height="5" rx="2.5" transform="rotate(-12 32 36)" fill="#fb8c00"/><rect x="8" y="34" width="4" height="10" rx="2" transform="rotate(-12 32 36)" fill="#e53935"/><rect x="52" y="34" width="4" height="10" rx="2" transform="rotate(-12 32 36)" fill="#e53935"/>`,
+  bench: `<rect x="6" y="18" width="52" height="6" rx="2" fill="#a1887f"/><rect x="6" y="27" width="52" height="6" rx="2" fill="#a1887f"/><rect x="6" y="36" width="52" height="6" rx="2" fill="#8d6e63"/><rect x="10" y="42" width="4" height="14" fill="#455a64"/><rect x="50" y="42" width="4" height="14" fill="#455a64"/>`,
+  slide: `<path d="M10 10h8v46h-8z" fill="#1e88e5"/><path d="M10 14h8M10 22h8M10 30h8M10 38h8" stroke="#bbdefb" stroke-width="2"/><path d="M18 12c10 0 12 8 18 20s10 22 22 22v4c-14 0-18-10-24-22S26 18 18 18z" fill="#ffb300"/>`,
+  crosswalk: `<rect x="2" y="8" width="60" height="48" fill="#546e7a"/><rect x="8" y="12" width="7" height="40" fill="#fff"/><rect x="21" y="12" width="7" height="40" fill="#fff"/><rect x="34" y="12" width="7" height="40" fill="#fff"/><rect x="47" y="12" width="7" height="40" fill="#fff"/>`,
+});
+
 // 방마다 id · 물건 객체로 바꿔 둔다
-for (const r of HOUSE_ROOMS) r.items = r.items.map(([word, ko, art]) => ({ word, ko, art, room: r.id }));
+for (const r of HOUSE_ROOMS) {
+  r.group ||= "home";
+  r.items = r.items.map(([word, ko, art]) => ({ word, ko, art, room: r.id }));
+}
 
 ;
 
@@ -22374,7 +22416,8 @@ const BADGES = [
   { id: "wordSearch", emoji: "🔍", title: "숨은 단어 탐험가", desc: "단어 찾기 퍼즐 완성하기", test: (p) => Object.keys(p.wordsearch.best).length >= 1 },
   { id: "wordGuess", emoji: "🕵️", title: "명탐정", desc: "단어 추리 5개 모두 맞히기", test: (p) => perfectCount(p.wordguess.best) >= 1 },
   { id: "riddle", emoji: "❓", title: "수수께끼 박사", desc: "영어 수수께끼 만점", test: (p) => perfectCount(p.riddle.best) >= 1 },
-  { id: "house", emoji: "🏠", title: "우리 집 박사", desc: "우리 집 물건 방 7곳에서 별 2개 이상", test: (p) => HOUSE_ROOMS.every((r) => ["listen", "look"].some((m) => { const b = p.house.best[`${r.id}:${m}`]; return b && b.correct / b.total >= 0.8; })) },
+  { id: "town", emoji: "🏘️", title: "우리 동네 박사", desc: "우리 동네 장소 6곳에서 별 2개 이상", test: (p) => HOUSE_ROOMS.filter((r) => r.group === "town").every((r) => ["listen", "look"].some((m) => { const b = p.house.best[`${r.id}:${m}`]; return b && b.correct / b.total >= 0.8; })) },
+  { id: "house", emoji: "🏠", title: "우리 집 박사", desc: "우리 집 물건 방 7곳에서 별 2개 이상", test: (p) => HOUSE_ROOMS.filter((r) => r.group === "home").every((r) => ["listen", "look"].some((m) => { const b = p.house.best[`${r.id}:${m}`]; return b && b.correct / b.total >= 0.8; })) },
   { id: "school8", emoji: "🏫", title: "교과 표현 박사", desc: "교과 핵심 표현 8주제 퀴즈 통과", test: (p) => Object.values(p.school.best).filter((b) => b.correct / b.total >= 0.66).length >= 8 },
   { id: "vacation", emoji: "⛄", title: "계획 박사", desc: "방학 계획표 세우기", test: (p) => !!p.vacation },
   { id: "advent10", emoji: "🎄", title: "크리스마스 요정", desc: "어드벤트 달력 도장 10개", test: (p) => p.advent.length >= 10 },
@@ -23803,7 +23846,7 @@ function renderHomeScreen(root, ctx) {
       <section class="group">
         <h2 class="group-title">✏️ 문제 풀기</h2>
         <div class="tile-grid">
-          ${homeTile({ id: "houseBtn", emoji: "🏠", title: "우리 집 물건", meta: "그림 보고 · 듣고 맞히기" })}
+          ${homeTile({ id: "houseBtn", emoji: "🏠", title: "집 · 동네 물건", meta: "그림 보고 · 듣고 맞히기" })}
           ${isKid ? homeTile({ id: "pictureBtn", emoji: "🎧", title: "그림 퀴즈", meta: "듣고 · 보고 고르기" }) : ""}
           ${isKid ? homeTile({ id: "memoryBtn", emoji: "🃏", title: "짝 맞추기", meta: "카드 뒤집기 게임" }) : ""}
           ${homeTile({ id: "pairsBtn", emoji: "🔗", title: "짝꿍 단어 잇기", meta: "반대말 · 비슷한 말" })}
@@ -31396,7 +31439,7 @@ const HOME_TILE_ALIASES = {
   diagBtn: "test 진단 레벨",
   schoolBtn: "school 교과서 학교 교과",
   vacationBtn: "vacation 방학 계획",
-  houseBtn: "house home 집 가구 물건 생활 방",
+  houseBtn: "house home town 집 가구 물건 생활 방 동네 학교 교실 마트 놀이터 공원 병원 길 바다 캠핑",
 };
 
 function renderMenuVisibilitySettingsHtml(profileName) {
@@ -31664,7 +31707,7 @@ function buildSchoolQuestions(talkId) {
 ;
 
 /* ── js/screens/house.js ── */
-// 🏠 우리 집 물건 찾기: 방마다 생활 물건을 그림으로 둘러보고, 듣고 찾기 · 보고 맞히기
+// 🏠 집 · 동네 물건 찾기 (all-home · all-town = 그 묶음 전체 섞기): 방마다 생활 물건을 그림으로 둘러보고, 듣고 찾기 · 보고 맞히기
 const HOUSE_ROUND = 10;
 
 function houseArt(item, big) {
@@ -31673,7 +31716,12 @@ function houseArt(item, big) {
 }
 
 const houseRoom = (id) => HOUSE_ROOMS.find((r) => r.id === id);
-const houseItemsOf = (roomId) => (roomId === "all" ? HOUSE_ROOMS.flatMap((r) => r.items) : houseRoom(roomId).items);
+const HOUSE_GROUPS = [
+  { id: "home", emoji: "🏠", title: "우리 집" },
+  { id: "town", emoji: "🏘️", title: "우리 동네" },
+];
+const isHouseMix = (roomId) => roomId.startsWith("all-");
+const houseItemsOf = (roomId) => (isHouseMix(roomId) ? HOUSE_ROOMS.filter((r) => r.group === roomId.slice(4)).flatMap((r) => r.items) : houseRoom(roomId).items);
 
 function houseBest(profileName, roomId) {
   return ["listen", "look"].map((m) => getSectionBest(profileName, "house", `${roomId}:${m}`)).filter(Boolean);
@@ -31694,16 +31742,21 @@ function renderHouseListScreen(root, { profileName, open, start, back }) {
   root.innerHTML = `
     <div class="screen screen-house">
       <button class="back-btn" id="backBtn">← 홈</button>
-      <h1 class="title">🏠 우리 집 물건 찾기</h1>
-      <p class="subtitle">집 안에서 매일 보는 물건을 영어로! 방을 골라 둘러보고 게임해요</p>
-      <div class="house-room-grid">${HOUSE_ROOMS.map(card).join("")}</div>
-      <button class="secondary-btn" id="allListenBtn">🎲 모든 방 섞어서 · 듣고 찾기</button>
-      <button class="secondary-btn" id="allLookBtn">🎲 모든 방 섞어서 · 보고 맞히기</button>
+      <h1 class="title">🏠 집 · 동네 물건 찾기</h1>
+      <p class="subtitle">매일 보는 물건을 영어로! 장소를 골라 둘러보고 게임해요</p>
+      ${HOUSE_GROUPS.map(
+        (g) => `
+        <h2 class="section-title">${g.emoji} ${g.title}</h2>
+        <div class="house-room-grid">${HOUSE_ROOMS.filter((r) => r.group === g.id).map(card).join("")}</div>
+        <div class="wl-tests">
+          <button class="secondary-btn" data-mix="all-${g.id}" data-mode="listen">🎲 ${g.title} 섞기 · 듣고</button>
+          <button class="secondary-btn" data-mix="all-${g.id}" data-mode="look">🎲 ${g.title} 섞기 · 보고</button>
+        </div>`
+      ).join("")}
     </div>`;
   root.querySelector("#backBtn").addEventListener("click", back);
   root.querySelectorAll("[data-room]").forEach((b) => b.addEventListener("click", () => open(b.dataset.room)));
-  root.querySelector("#allListenBtn").addEventListener("click", () => start("all", "listen"));
-  root.querySelector("#allLookBtn").addEventListener("click", () => start("all", "look"));
+  root.querySelectorAll("[data-mix]").forEach((b) => b.addEventListener("click", () => start(b.dataset.mix, b.dataset.mode)));
 }
 
 function renderHouseRoomScreen(root, { profileName, roomId, start, back }) {
@@ -31752,7 +31805,8 @@ function newHouseGame(roomId, mode) {
 }
 
 function renderHouseGameScreen(root, { game, actions }) {
-  const r = game.roomId === "all" ? { emoji: "🎲", title: "모든 방", bg: "#f5f0ff" } : houseRoom(game.roomId);
+  const mixGroup = isHouseMix(game.roomId) && HOUSE_GROUPS.find((g) => g.id === game.roomId.slice(4));
+  const r = mixGroup ? { emoji: "🎲", title: `${mixGroup.title} 전체`, bg: "#f5f0ff" } : houseRoom(game.roomId);
   if (game.done) {
     const total = game.rounds.length;
     const stars = game.firstTry === total ? 3 : game.firstTry >= total * 0.8 ? 2 : 1;
@@ -31865,7 +31919,7 @@ const houseActions = {
   list: () => set({ screen: "houseList" }),
   quit: () => {
     const { house: game } = store.getState();
-    set({ screen: game.roomId === "all" ? "houseList" : "houseRoom", houseRoomId: game.roomId });
+    set({ screen: isHouseMix(game.roomId) ? "houseList" : "houseRoom", houseRoomId: game.roomId });
   },
 };
 
@@ -34938,7 +34992,7 @@ const QUIZ_QUIT_TARGET = {
   diagnosis: (s) => (!s.diag || s.diag.done ? null : "home"),
   wordRain: (s) => (s.wordrain.done ? null : "wordRainList"),
   pairs: (s) => (s.pairs.done ? null : "pairsList"),
-  houseGame: (s) => (s.house.done ? null : s.house.roomId === "all" ? "houseList" : "houseRoom"),
+  houseGame: (s) => (s.house.done ? null : isHouseMix(s.house.roomId) ? "houseList" : "houseRoom"),
   draw: (s) => (s.draw.done ? null : "drawSetup"),
 };
 
@@ -34959,7 +35013,7 @@ function parentScreen(state) {
     case "advent": case "pairsList": case "drawSetup": case "chantList": case "cultureList":
     case "schoolList": case "vacation": case "houseList": return "home";
     case "houseRoom": return "houseList";
-    case "houseGame": return state.house?.roomId === "all" ? "houseList" : "houseRoom";
+    case "houseGame": return state.house && isHouseMix(state.house.roomId) ? "houseList" : "houseRoom";
     case "schoolTalk": return "schoolList";
     case "pairs": return "pairsList";
     case "draw": return "drawSetup";
