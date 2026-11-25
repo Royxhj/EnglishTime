@@ -1450,17 +1450,6 @@ button {
 .pet-stages span.got { opacity: 1; }
 .pet-stages small { font-size: 11px; color: var(--muted); }
 
-/* 초1~2 쉬운 홈 */
-.screen-kids .home-hello { display: flex; align-items: center; gap: 10px; }
-.screen-kids .home-hello .icon-btn { margin-left: auto; }
-.kids-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.kids-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 150px; padding: 14px 8px; border: none; border-radius: 22px; background: var(--card-bg); box-shadow: var(--shadow); color: var(--text); cursor: pointer; text-align: center; }
-.kids-btn .kids-emoji { font-size: 54px; line-height: 1.1; }
-.kids-btn b { font-size: 20px; }
-.kids-btn small { font-size: 13px; color: var(--muted); }
-.kids-btn.done { background: color-mix(in srgb, var(--correct) 14%, var(--card-bg)); }
-.kids-parent { align-self: center; }
-
 /* 하단 탭 바 */
 #app.with-tabbar { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 .tab-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: grid; grid-template-columns: repeat(5, 1fr); padding: 4px 4px calc(4px + env(safe-area-inset-bottom)); background: var(--card-bg); border-top: 1px solid var(--border); box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06); }

@@ -70,9 +70,7 @@ function buildDailyQuestions(profileName) {
   const take = (id, wordLevelId, review = false) => {
     if (picked.length >= DAILY_WORDS || used.has(id) || !findWordById(id)) return;
     used.add(id);
-    // 초1~2는 한글 뜻을 읽기 어려우니 그림 · 소리 문제로 낸다 (js/screens/kids.js)
-    const w = findWordById(id);
-    const q = levelId === "elementary-low" && w.emoji ? pictureQuestion(w, wordLevelId, picked.length % 2 ? "picture" : "listen") : wordToMcQuestion(w, wordLevelId);
+    const q = wordToMcQuestion(findWordById(id), wordLevelId);
     if (review) q.label = `🔁 지난번에 틀린 단어 · ${q.label}`;
     picked.push(q);
   };

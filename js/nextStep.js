@@ -22,10 +22,6 @@ function nextStep(profileName) {
     return b && b.correct / b.total >= 0.8;
   };
 
-  if (level === "elementary-low") {
-    const p = PHONICS_TOPICS.find((t) => !done("basics", t.id));
-    if (p) return { emoji: p.emoji, title: `파닉스 · ${p.title}`, desc: p.subtitle, type: "lesson", id: p.id };
-  }
   for (const g of BASIC_GRADES.filter((x) => x.levelId === level)) {
     const t = BASIC_TOPICS.find((x) => x.grade === g.id && !done("basics", x.id));
     if (t) return { emoji: t.emoji, title: `${g.label.replace(/^\S+\s/, "")} · ${t.title}`, desc: t.subtitle, type: "lesson", id: t.id };

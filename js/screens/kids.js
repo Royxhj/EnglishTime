@@ -1,5 +1,5 @@
 // 초등 저학년을 위한 것들: 그림 퀴즈(듣고 그림 고르기 · 그림 보고 단어 고르기), 짝 맞추기 게임,
-// 문제를 풀수록 자라는 캐릭터와 스티커북, 초1~2용 쉬운 홈.
+// 문제를 풀수록 자라는 캐릭터와 스티커북.
 const PICTURE_QUIZ_SIZE = 10;
 
 // 그림만 보고는 뜻을 알기 어려운 기호 · 달력 · 화살표 같은 그림
@@ -181,52 +181,4 @@ function renderStickerScreen(root, { profileName, back }) {
       <p class="pet-stages">${PET_STAGES.map((p) => `<span class="${s.total >= p.min ? "got" : ""}">${p.emoji}<small>${p.min}</small></span>`).join("")}</p>
     </div>`;
   root.querySelector("#backBtn").addEventListener("click", back);
-}
-
-// ── 초1~2용 쉬운 홈: 큰 버튼 4개 ──
-let kidsShowFullHome = false;
-
-function renderKidsHome(root, { profileName, actions }) {
-  const profile = findMember(profileName);
-  const daily = getStats(profileName).dailyToday;
-  const next = nextStep(profileName);
-  const big = (id, emoji, title, desc, done) => `
-    <button class="kids-btn${done ? " done" : ""}" id="${id}">
-      <span class="kids-emoji">${done ? "✅" : emoji}</span>
-      <b>${title}</b>
-      <small>${desc}</small>
-    </button>`;
-  root.innerHTML = `
-    <div class="screen screen-home screen-kids" style="--accent:${profile.color}">
-      <div class="home-hello">
-        <span class="home-avatar">${profile.emoji}</span>
-        <h1 class="home-title">${profileName}, 안녕! 👋</h1>
-        ${getFamily().length > 1 ? `<button class="icon-btn" id="backBtn" aria-label="프로필 바꾸기">👥</button>` : ""}
-      </div>
-      ${petCardHtml(profileName)}
-      <div class="kids-grid">
-        ${big("kidsDaily", "☀️", "오늘 공부", daily ? "다 했어요! 한 번 더?" : "5분이면 끝!", !!daily)}
-        ${big("kidsPicture", "🎧", "듣고 고르기", "소리 듣고 그림 찾기")}
-        ${big("kidsPhonics", "🔤", "파닉스", "글자 소리 배우기")}
-        ${big("kidsMemory", "🃏", "짝 맞추기", "카드 뒤집기 게임")}
-      </div>
-      <button class="next-card" id="kidsNext">
-        <span class="next-emoji">${next.emoji}</span>
-        <span class="next-text"><span class="next-label">▶ 이어서 하기</span><span class="next-title">${next.title}</span></span>
-        <span class="next-go" aria-hidden="true">›</span>
-      </button>
-      <button class="link-btn kids-parent" id="fullHomeBtn">👨‍👩‍👧 전체 메뉴 보기 (부모님)</button>
-    </div>`;
-  const bind = (id, fn) => root.querySelector(`#${id}`)?.addEventListener("click", fn);
-  bind("backBtn", actions.backToProfile);
-  bind("stickerBtn", actions.openStickers);
-  bind("kidsDaily", actions.startDaily);
-  bind("kidsPicture", () => actions.startPicture("elementary-low", "listen"));
-  bind("kidsPhonics", actions.openPhonics);
-  bind("kidsMemory", () => actions.startMemory("elementary-low"));
-  bind("kidsNext", () => actions.openNext(next));
-  bind("fullHomeBtn", () => {
-    kidsShowFullHome = true;
-    actions.refresh();
-  });
 }
