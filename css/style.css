@@ -1404,7 +1404,7 @@ button {
 .vp-verb-head span { color: var(--muted); font-size: 14px; margin-left: 6px; }
 .vp-why { margin: 2px 0 0; font-size: 13px; font-weight: 700; color: var(--accent); }
 
-.transfer-input { width: 100%; min-height: 72px; margin: 10px 0; font-size: 13px; font-family: monospace; resize: vertical; word-break: break-all; }
+.transfer-input { width: 100%; min-height: 72px; margin: 10px 0; font-size: 16px; font-family: monospace; resize: vertical; word-break: break-all; }
 
 /* 가족 한눈에 보기 */
 .family-card { border-left: 5px solid var(--accent); display: flex; flex-direction: column; gap: 10px; }

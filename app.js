@@ -2178,7 +2178,7 @@ const WORD_BANK = {
     ]},
     { id: "mid-72", word: "application", ipa: "/ˌæp.lɪˈkeɪ.ʃən/", meaningKo: "애플리케이션/신청서", emoji: "📱", desc: "휴대폰에서 쓰는 프로그램이거나 신청서예요.", examples: [
       { en: "I downloaded an application.", ko: "나는 애플리케이션을 다운로드했어요." },
-      { en: "This app is fun.", ko: "이 앱은 재미있어요." },
+      { en: "This application is easy to use.", ko: "이 애플리케이션은 쓰기 쉬워요." },
       { en: "I filled out an application.", ko: "나는 신청서를 작성했어요." },
     ]},
     { id: "mid-73", word: "network", ipa: "/ˈnet.wɜːrk/", meaningKo: "네트워크/연결망", emoji: "🌐", desc: "서로 연결된 시스템이에요.", examples: [
@@ -3275,7 +3275,7 @@ const WORD_BANK = {
     { id: "adult-50", word: "agreement", ipa: "/əˈgriː.mənt/", meaningKo: "합의/계약", emoji: "🤝", desc: "서로 동의한 내용이에요.", examples: [
       { en: "We reached an agreement.", ko: "우리는 합의에 도달했어요." },
       { en: "The agreement was signed.", ko: "그 계약서는 서명됐어요." },
-      { en: "Both sides agreed.", ko: "양측이 동의했어요." },
+      { en: "Both sides were happy with the agreement.", ko: "양측 모두 그 합의에 만족했어요." },
     ]},
     { id: "adult-51", word: "warranty", ipa: "/ˈwɒr.ən.ti/", meaningKo: "보증(서)", emoji: "🛡", desc: "제품이 고장나면 고쳐주겠다는 약속이에요.", examples: [
       { en: "The product has a warranty.", ko: "그 제품은 보증서가 있어요." },
@@ -21423,11 +21423,16 @@ function readJson(key, fallback) {
   }
 }
 
+let storageWarned = false;
 function writeJson(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // localStorage unavailable (private mode, etc.) — fail silently
+  } catch (e) {
+    // 저장 공간이 가득 찼으면 한 번 알려 준다 (사생활 보호 모드 등 저장이 아예 안 되는 경우도 포함)
+    if (!storageWarned && typeof showToast === "function") {
+      storageWarned = true;
+      setTimeout(() => showToast(`<span class="toast-emoji">⚠️</span><span>기록을 저장하지 못했어요. 브라우저 저장 공간이 가득 찼거나 사생활 보호 모드일 수 있어요. 설정에서 백업해 두세요.</span>`), 0);
+    }
   }
 }
 
@@ -22736,6 +22741,18 @@ function levelById(levelId) {
   return LEVELS.find((lv) => lv.id === levelId) || null;
 }
 
+// 인쇄: 아이폰 홈 화면 앱에서는 window.print()가 동작하지 않아 사파리에서 열도록 안내한다
+function printPage() {
+  const ua = navigator.userAgent;
+  const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const standalone = navigator.standalone || window.matchMedia?.("(display-mode: standalone)").matches;
+  if (ios && standalone) {
+    showToast(`<span class="toast-emoji">🖨️</span><span>아이폰 홈 화면 앱에서는 인쇄가 안 돼요. <b>사파리</b>에서 이 사이트를 열고 같은 화면에서 인쇄하거나, 공유 버튼 → <b>프린트</b>를 눌러 주세요.</span>`);
+    return;
+  }
+  window.print();
+}
+
 function levelThemeStyle(level) {
   return level ? ` style="--primary:${level.color}; --primary-dark:${level.colorDark}"` : "";
 }
@@ -22794,8 +22811,16 @@ function shuffle(arr) {
   return a;
 }
 
+// 뜻 조각이 하나라도 같으면 보기로 같이 내지 않는다 (예: contest "대회" ↔ competition "대회/경쟁")
+const meaningParts = (m) => String(m).replace(/\([^)]*\)/g, "").split(/[,/·;]/).map((s) => s.trim()).filter(Boolean);
+function meaningsClash(a, b) {
+  if (a === b) return true;
+  const pa = meaningParts(a);
+  return meaningParts(b).some((x) => pa.includes(x));
+}
+
 function toQuestion(wordData, pool, levelId) {
-  const distractorPool = pool.filter((w) => w.id !== wordData.id);
+  const distractorPool = pool.filter((w) => w.id !== wordData.id && !meaningsClash(w.meaningKo, wordData.meaningKo) && w.word.toLowerCase() !== wordData.word.toLowerCase());
   const distractorWords = shuffle(distractorPool).slice(0, 3);
   const choiceMeta = shuffle([
     { word: wordData.word, meaningKo: wordData.meaningKo, isCorrect: true },
@@ -27294,7 +27319,7 @@ function buildTopicQuestions(topicId) {
     .slice(0, TOPIC_QUIZ_SIZE)
     .map(({ w, levelId }) => {
       // 보기도 같은 주제에서 고른다 (뜻이 같은 단어는 빼고)
-      const others = shuffle(all.filter((x) => x.w.id !== w.id && x.w.meaningKo !== w.meaningKo && x.w.word !== w.word)).slice(0, 3);
+      const others = shuffle(all.filter((x) => x.w.id !== w.id && !meaningsClash(x.w.meaningKo, w.meaningKo) && x.w.word !== w.word)).slice(0, 3);
       const ex = w.examples[0];
       return {
         id: w.id,
@@ -27609,7 +27634,7 @@ function speedQuestion(levelId, prevId) {
   const used = new Set([w.meaningKo]);
   const others = [];
   for (const x of shuffle(pool)) {
-    if (used.has(x.meaningKo)) continue;
+    if ([...used].some((m) => meaningsClash(m, x.meaningKo))) continue;
     used.add(x.meaningKo);
     others.push(x.meaningKo);
     if (others.length === 3) break;
@@ -28530,7 +28555,7 @@ function renderPrintSheetScreen(root, { profileName, sheet, actions }) {
     </div>`;
   root.querySelector("#backBtn").addEventListener("click", actions.back);
   root.querySelector("#againBtn").addEventListener("click", actions.again);
-  root.querySelector("#printBtn").addEventListener("click", () => window.print());
+  root.querySelector("#printBtn").addEventListener("click", printPage);
 }
 
 ;
@@ -29058,7 +29083,7 @@ function renderDictationScreen(root, { game, actions }) {
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        form.requestSubmit();
+        actions.check(input.value); // requestSubmit은 아이폰 iOS 16부터라 직접 부른다
       }
     });
     form.addEventListener("submit", (e) => {
@@ -29460,7 +29485,7 @@ function renderWordListViewScreen(root, { profileName, listId, actions }) {
 function buildWordListQuestions(list, profileName) {
   const extra = (WORD_BANK[getPreferredLevel(profileName) || "elementary-mid"] || []).map((w) => w.meaningKo);
   return shuffle(list.words).map((w, i) => {
-    const others = shuffle([...new Set([...list.words.map((x) => x.ko), ...shuffle(extra).slice(0, 6)])].filter((ko) => ko !== w.ko)).slice(0, 3);
+    const others = shuffle([...new Set([...list.words.map((x) => x.ko), ...shuffle(extra).slice(0, 6)])].filter((ko) => !meaningsClash(ko, w.ko))).slice(0, 3);
     return {
       id: `wl-${list.id}-${i}`,
       kind: "wordlist",
@@ -29802,7 +29827,7 @@ function monsterPool(profileName) {
 }
 
 function monsterQuestion(item) {
-  const others = shuffle((WORD_BANK[item.levelId] || []).filter((x) => x.meaningKo !== item.w.meaningKo)).slice(0, 3).map((x) => x.meaningKo);
+  const others = shuffle((WORD_BANK[item.levelId] || []).filter((x) => !meaningsClash(x.meaningKo, item.w.meaningKo))).slice(0, 3).map((x) => x.meaningKo);
   return { ...item, choices: shuffle([item.w.meaningKo, ...others]), picked: null };
 }
 
@@ -29923,7 +29948,7 @@ function newDiagnosis() {
     shuffle((WORD_BANK[lv.id] || []).filter((w) => /^[a-z]+$/i.test(w.word)))
       .slice(0, DIAG_PER_LEVEL)
       .map((w) => {
-        const others = shuffle((WORD_BANK[lv.id] || []).filter((x) => x.meaningKo !== w.meaningKo)).slice(0, 3).map((x) => x.meaningKo);
+        const others = shuffle((WORD_BANK[lv.id] || []).filter((x) => !meaningsClash(x.meaningKo, w.meaningKo))).slice(0, 3).map((x) => x.meaningKo);
         return { w, levelId: lv.id, choices: shuffle([w.meaningKo, ...others]), picked: null };
       })
   );
@@ -30134,7 +30159,7 @@ function rainNextWord(game) {
     game.next = 0;
   }
   const w = game.pool[game.next++];
-  const others = shuffle(game.pool.filter((x) => x !== w)).slice(0, 3).map((x) => x.meaningKo);
+  const others = shuffle(game.pool.filter((x) => x !== w && !meaningsClash(x.meaningKo, w.meaningKo))).slice(0, 3).map((x) => x.meaningKo);
   return { w, choices: shuffle([w.meaningKo, ...others]) };
 }
 
@@ -30345,7 +30370,7 @@ function renderCertificateScreen(root, { profileName, offset, setOffset, back })
   root.querySelector("#backBtn").addEventListener("click", back);
   root.querySelector("#prevBtn").addEventListener("click", () => setOffset(-1));
   root.querySelector("#thisBtn").addEventListener("click", () => setOffset(0));
-  root.querySelector("#printBtn").addEventListener("click", () => window.print());
+  root.querySelector("#printBtn").addEventListener("click", printPage);
 }
 
 // ── 🔒 부모님 잠금: 4자리 비밀번호 (아이들이 실수로 기록을 지우지 않게) ──
@@ -31112,7 +31137,7 @@ function renderChantScreen(root, { profileName, chantId, back }) {
     btn.textContent = "⏹ 멈추기";
     beat.classList.add("on");
     for (let i = 0; i < chant.lines.length; i++) {
-      if (token !== chantToken || !root.isConnected) return;
+      if (token !== chantToken || !lines[i].isConnected) return;
       lines.forEach((l, k) => l.classList.toggle("now", k === i));
       lines[i].scrollIntoView({ block: "nearest" });
       status.textContent = echo ? "🔊 잘 들어요…" : `🎵 ${i + 1} / ${chant.lines.length}`;
@@ -31184,8 +31209,12 @@ function renderCultureCardScreen(root, { profileName, cardId, open, back }) {
     back();
   });
   root.querySelectorAll("[data-say]").forEach((b) => b.addEventListener("click", () => speak(card.en[Number(b.dataset.say)], { rate: 0.85 })));
-  root.querySelector("#allBtn").addEventListener("click", async () => {
-    for (const en of card.en) await speakAsync(en, { rate: 0.85 });
+  const allBtn = root.querySelector("#allBtn");
+  allBtn.addEventListener("click", async () => {
+    for (const en of card.en) {
+      if (!allBtn.isConnected) return; // 다른 화면으로 가면 멈춘다
+      await speakAsync(en, { rate: 0.85 });
+    }
   });
   root.querySelector("#nextBtn")?.addEventListener("click", () => {
     stopSpeaking();
@@ -31471,7 +31500,7 @@ function renderVacationScreen(root, { profileName, editing, actions }) {
     </div>`;
   root.querySelector("#backBtn").addEventListener("click", actions.back);
   root.querySelector("#editBtn").addEventListener("click", actions.edit);
-  root.querySelector("#printBtn")?.addEventListener("click", () => window.print());
+  root.querySelector("#printBtn")?.addEventListener("click", printPage);
 }
 
 // ── 🏫 초등 교과 핵심 표현 ──
@@ -31533,7 +31562,7 @@ function renderSchoolTalkScreen(root, { talkId, actions }) {
   root.querySelector("#playAllBtn").addEventListener("click", async () => {
     const my = ++token;
     for (let i = 0; i < t.dialog.length; i++) {
-      if (my !== token || !root.isConnected) return;
+      if (my !== token || !lines[i].isConnected) return;
       lines.forEach((l, k) => l.classList.toggle("now", k === i));
       await speakAsync(t.dialog[i][1], { rate: 0.85 });
     }
@@ -34781,7 +34810,8 @@ function render() {
   }
 
   // 지문 듣기 중에 다른 화면으로 가면 소리를 멈춘다.
-  if (["passage", "basicLesson", "storyRead"].includes(lastScreen) && state.screen !== lastScreen) stopSpeaking();
+  if (["passage", "basicLesson", "storyRead", "chant", "schoolTalk", "culture"].includes(lastScreen) && state.screen !== lastScreen) stopSpeaking();
+  if (lastScreen !== state.screen) stopRecording(); // 녹음 중에 화면을 옮기면 녹음을 멈춘다
   lastScreen = state.screen;
 
   const viewKey = [state.screen, state.currentIndex, state.mc?.index, state.chunk?.index, state.passageId, state.grammarTopicId, state.vocabSession?.index, state.vocabTab, state.basic?.phase, state.basic?.slide, state.basic?.pIndex, state.topicId, state.storyChapterId, state.diaryDraft?.tplId].join(":");
