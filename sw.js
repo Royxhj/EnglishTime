@@ -1,6 +1,6 @@
 // 오프라인 캐시. 캐시에 있으면 바로 보여 주고, 뒤에서 새 버전을 받아 다음 실행 때 반영한다.
 // 앱 파일을 추가·삭제하면 아래 목록을 고친다. Netlify 배포 때는 캐시 이름 뒤에 커밋 번호가 자동으로 붙는다.
-const CACHE = "englishword-d2157ec";
+const CACHE = "englishword-40b3b80";
 
 const APP_FILES = [
   "./",
@@ -72,11 +72,13 @@ const APP_FILES = [
   "js/screens/wordGames.js",
   "js/screens/funGames.js",
   "js/screens/storyDiary.js",
+  "js/screens/moreGames.js",
   "data/practiceAdult.js",
   "data/topicWords.js",
   "data/soundPairs.js",
   "data/diary.js",
   "data/stories.js",
+  "data/storiesMore.js",
   "data/idioms.js",
   "data/idiomsExtra.js",
   "data/affixes.js",

@@ -29,6 +29,17 @@ const BADGES = [
   { id: "writer", emoji: "✍️", title: "문장 장인", desc: "영작 연습 직접 쓰기 80점 이상", test: (p) => Object.entries(p.writing.best).some(([k, b]) => k.startsWith("type:") && ratioAtLeast(b, 0.8)) },
   { id: "crossword", emoji: "🧩", title: "퍼즐 해결사", desc: "가로세로 낱말 힌트 없이 완성", test: (p) => perfectCount(p.crossword.best) >= 1 },
   { id: "exam100", emoji: "🏆", title: "모의고사 만점", desc: "단원 모의고사 100점", test: (p) => perfectCount(p.exam.best) >= 1 },
+  { id: "speed20", emoji: "⚡", title: "번개 손", desc: "60초 퀴즈에서 20개 맞히기", test: (p) => Object.values(p.speed.best).some((b) => b.correct >= 20) },
+  { id: "battleWin", emoji: "⚔️", title: "첫 승리", desc: "가족 대결에서 이기기", test: (p) => p.battleWins >= 1 },
+  { id: "diary5", emoji: "📓", title: "일기 작가", desc: "영어 일기 5편 쓰기", test: (p) => p.diary.length >= 5 },
+  { id: "storyDone", emoji: "📚", title: "책벌레", desc: "이야기책 한 편 끝까지 읽기", test: (p) => STORY_SERIES.some((s) => s.chapters.every((c) => (p.story.best[c.id]?.correct || 0) >= STORY_PASS)) },
+  { id: "shopFirst", emoji: "🛍️", title: "첫 쇼핑", desc: "별 상점에서 처음 꾸미기", test: (p) => p.shop.owned.length >= 1 },
+  { id: "soundsPerfect", emoji: "👂", title: "소리 탐정", desc: "소리 구별 10문제 만점", test: (p) => perfectCount(p.sounds.best) >= 1 },
+  { id: "numbersAll", emoji: "🔢", title: "숫자 박사", desc: "숫자 · 시간 6묶음 모두 80% 이상", test: (p) => NUMBER_SETS.every((s) => ratioAtLeast(p.numbers.best[s.id], 0.8)) },
+  { id: "chain10", emoji: "🔤", title: "끝말잇기 왕", desc: "끝말잇기에서 10개 이어 가기", test: (p) => Object.values(p.wordchain.best).some((b) => b.correct >= 10) },
+  { id: "bingo", emoji: "🎱", title: "빙고!", desc: "단어 빙고 완성하기", test: (p) => Object.keys(p.bingo.best).length >= 1 },
+  { id: "aloudAll", emoji: "🗣️", title: "낭독왕", desc: "지문 · 이야기 한 장을 모두 소리 내어 읽기", test: (p) => Object.values(p.aloud.best).some((b) => b.correct === b.total) },
+  { id: "perfectMonth", emoji: "📆", title: "개근상", desc: "한 달 동안 하루도 빠짐없이 공부하기", test: (p) => p.perfectMonths.length >= 1 },
   { id: "goalWeek", emoji: "🎯", title: "목표 달성", desc: "이번 주 목표 모두 이루기", test: (p, name) => {
       const s = goalSummary(name);
       return s.total > 0 && s.done === s.total;

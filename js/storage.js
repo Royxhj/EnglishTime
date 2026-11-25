@@ -133,7 +133,9 @@ function normalizeProfile(profile) {
   p.shop.spent ||= 0;
   if (!Array.isArray(p.shop.owned)) p.shop.owned = [];
   p.shop.equip ||= {};
-  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed"]) {
+  if (!Array.isArray(p.perfectMonths)) p.perfectMonths = [];
+  p.battleWins ||= 0;
+  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud"]) {
     p[section] ||= { best: {}, wrong: {} };
     p[section].best ||= {};
     p[section].wrong ||= {};
@@ -338,6 +340,21 @@ function streakFrom(activity) {
   return streak;
 }
 
+// 개근한 달: 그달 모든 날에 공부 기록이 있으면 "YYYY-MM"을 남긴다 (지난달과, 오늘이 말일이면 이번 달)
+function markPerfectMonths(profile) {
+  const now = new Date();
+  const check = (y, m) => {
+    const id = `${y}-${String(m + 1).padStart(2, "0")}`;
+    if (profile.perfectMonths.includes(id)) return;
+    const days = new Date(y, m + 1, 0).getDate();
+    for (let d = 1; d <= days; d++) if (!(profile.activity[dateKey(new Date(y, m, d))] > 0)) return;
+    profile.perfectMonths.push(id);
+  };
+  const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  check(prev.getFullYear(), prev.getMonth());
+  check(now.getFullYear(), now.getMonth());
+}
+
 function recordActivity(profileName) {
   updateProfile(profileName, (profile) => {
     const today = dateKey();
@@ -345,6 +362,7 @@ function recordActivity(profileName) {
     profile.totalAnswered += 1;
     profile.bestDay = Math.max(profile.bestDay, profile.activity[today]);
     profile.bestStreak = Math.max(profile.bestStreak, streakFrom(profile.activity));
+    markPerfectMonths(profile);
     const cutoff = daysAgoKey(ACTIVITY_KEEP_DAYS);
     for (const key of Object.keys(profile.activity)) {
       if (key < cutoff) delete profile.activity[key];
@@ -524,7 +542,7 @@ function getDiaryEntries(profileName) {
 // 별이 모자라거나 없는 물건이면 false
 function buyShopItem(profileName, itemId) {
   const item = shopItem(itemId);
-  if (!item || shopStatus(profileName).stars < item.price) return false;
+  if (!item || !shopItemUnlocked(profileName, item) || shopStatus(profileName).stars < item.price) return false;
   updateProfile(profileName, (profile) => {
     if (profile.shop.owned.includes(itemId)) return;
     profile.shop.spent += item.price;
@@ -540,6 +558,12 @@ function toggleShopEquip(profileName, itemId) {
     if (!item || !profile.shop.owned.includes(itemId)) return;
     if (profile.shop.equip[item.cat] === itemId) delete profile.shop.equip[item.cat];
     else profile.shop.equip[item.cat] = itemId;
+  });
+}
+
+function recordBattleWin(profileName) {
+  updateProfile(profileName, (profile) => {
+    profile.battleWins += 1;
   });
 }
 
@@ -618,6 +642,8 @@ function importBackup(data) {
       .filter((e) => e && findDiaryTemplate(e.t) && /^\d{4}-\d{2}-\d{2}$/.test(e.d) && Array.isArray(e.p) && findDiaryTemplate(e.t).lines.every((l, i) => Number.isInteger(e.p[i]) && e.p[i] >= 0 && e.p[i] < l.options.length))
       .map((e) => ({ d: e.d, t: e.t, p: e.p.slice(0, findDiaryTemplate(e.t).lines.length) }))
       .slice(0, DIARY_KEEP);
+    p.perfectMonths = p.perfectMonths.filter((m) => typeof m === "string" && /^\d{4}-\d{2}$/.test(m)).slice(0, 120);
+    p.battleWins = Math.max(0, Math.floor(Number(p.battleWins) || 0));
     const owned = p.shop.owned.filter((id) => shopItem(id));
     p.shop = {
       spent: Math.max(0, Number(p.shop.spent) || 0),

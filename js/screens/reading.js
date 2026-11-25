@@ -94,6 +94,9 @@ function renderPassageScreen(root, { profileName, passage, startQuiz, backToList
   const level = levelById(passage.levelId);
   const read = isPassageRead(profileName, passage.id);
   let slow = getSettings().readingSlow === true;
+  // 🎙️ 소리 내어 읽기: 음성 인식이 되는 기기에서 문장마다 읽고 맞게 읽은 단어를 표시한다
+  const aloud = typeof SpeechRecognitionApi !== "undefined" && !!SpeechRecognitionApi;
+  const aloudPassed = new Set();
   const bottomLinks = [
     { label: "📖 지문 목록", onClick: () => { stopPlayback(); backToList(); } },
     { label: "🏠 홈으로", onClick: () => { stopPlayback(); goHome(); } },
@@ -116,6 +119,7 @@ function renderPassageScreen(root, { profileName, passage, startQuiz, backToList
           <button class="listen-btn" id="toggleAllBtn">해석 모두 보기</button>
         </div>
         <p class="settings-help" id="playStatus">밑줄 단어를 누르면 뜻, 문장을 누르면 해석이 나와요. <b>따라 읽기</b>는 한 문장을 들려준 뒤 따라 말할 시간을 줘요.</p>
+        ${aloud ? `<p class="settings-help" id="aloudStatus">🎙️ 문장 옆 마이크를 누르고 <b>소리 내어 읽어</b> 봐요. 80%를 넘으면 통과! · 통과 0 / ${passage.sentences.length}</p>` : ""}
       </section>
 
       <article class="passage-card-body">
@@ -123,11 +127,15 @@ function renderPassageScreen(root, { profileName, passage, startQuiz, backToList
           .map(
             (s, i) => `
           <div class="passage-sentence" data-sentence="${i}">
-            <button class="speak-btn sentence-speak" data-speak-sentence="${i}" aria-label="${i + 1}번째 문장 듣기" ${speechSupported ? "" : "disabled"}>🔊</button>
+            <div class="sentence-btns">
+              <button class="speak-btn sentence-speak" data-speak-sentence="${i}" aria-label="${i + 1}번째 문장 듣기" ${speechSupported ? "" : "disabled"}>🔊</button>
+              ${aloud ? `<button class="speak-btn sentence-mic" data-mic="${i}" aria-label="${i + 1}번째 문장 소리 내어 읽기">🎙️</button>` : ""}
+            </div>
             <div class="passage-text" tabindex="0" role="button" aria-expanded="false">
               <p class="passage-en">${glossedSentence(s.en, passage.glossary)}</p>
               <p class="passage-ko" hidden>${s.ko}</p>
               <p class="shadow-cue" hidden>🗣 따라 말해 보세요</p>
+              <div class="aloud-result" hidden></div>
             </div>
           </div>
         `
@@ -189,6 +197,7 @@ function renderPassageScreen(root, { profileName, passage, startQuiz, backToList
   };
   const stopPlayback = (message) => {
     playToken += 1;
+    if (aloud) stopRecognition();
     clearTimeout(pauseTimer);
     stopSpeaking();
     clearPlaying();
@@ -243,6 +252,60 @@ function renderPassageScreen(root, { profileName, passage, startQuiz, backToList
   };
   listenAllBtn.addEventListener("click", () => startPlayback(false));
   shadowBtn.addEventListener("click", () => startPlayback(true));
+
+  root.querySelectorAll("[data-mic]").forEach((btn) =>
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const wasListening = btn.classList.contains("listening");
+      stopPlayback();
+      root.querySelectorAll(".sentence-mic.listening").forEach((b) => b.classList.remove("listening"));
+      if (wasListening) return;
+      const i = Number(btn.dataset.mic);
+      const target = passage.sentences[i].en;
+      const out = sentenceEls[i].querySelector(".aloud-result");
+      const rec = new SpeechRecognitionApi();
+      rec.lang = "en-US";
+      rec.interimResults = false;
+      rec.maxAlternatives = 3;
+      activeRecognition = rec;
+      btn.classList.add("listening");
+      out.hidden = false;
+      out.innerHTML = `<p class="speak-heard">👂 듣고 있어요… 문장을 소리 내어 읽어요</p>`;
+      rec.onresult = (ev) => {
+        const alts = [...ev.results[0]].map((r) => r.transcript);
+        const heard = alts.sort((x, y) => speakingMatch(target, y).score - speakingMatch(target, x).score)[0];
+        const m = speakingMatch(target, heard);
+        const ok = m.score >= SPEAKING_PASS;
+        out.innerHTML = `<p class="speak-words">${m.words.map((w, k) => `<span class="${m.hit[k] ? "hit" : "miss"}">${w}</span>`).join(" ")}</p>
+          <p class="speak-score ${ok ? "ok" : ""}">${ok ? "🎉" : "💪"} ${Math.round(m.score * 100)}%${ok ? " · 통과!" : " · 빨간 단어를 또박또박 다시 읽어 봐요"}</p>`;
+        if (ok && !aloudPassed.has(i)) {
+          aloudPassed.add(i);
+          playSound("correct");
+          recordActivity(profileName);
+          recordBestCount(profileName, "aloud", passage.id, aloudPassed.size, passage.sentences.length);
+          root.querySelector("#aloudStatus").innerHTML = `🎙️ 소리 내어 읽기 · 통과 <b>${aloudPassed.size}</b> / ${passage.sentences.length}`;
+          if (aloudPassed.size === passage.sentences.length) {
+            burstConfetti(40);
+            showToast(`<span class="toast-emoji">🎙️</span><span>모든 문장을 소리 내어 읽었어요!</span>`);
+            announceBadges(checkNewBadges(profileName));
+          }
+        }
+      };
+      rec.onerror = (ev) => {
+        out.innerHTML = `<p class="speak-heard">${ev.error === "not-allowed" ? "🎤 마이크 사용을 허용해 주세요." : ev.error === "no-speech" ? "🤫 소리가 들리지 않았어요. 다시 눌러 읽어 보세요." : "😥 음성 인식이 잠깐 안 됐어요. 다시 해 보세요."}</p>`;
+      };
+      rec.onend = () => {
+        if (activeRecognition === rec) activeRecognition = null;
+        btn.classList.remove("listening");
+      };
+      try {
+        rec.start();
+      } catch {
+        activeRecognition = null;
+        btn.classList.remove("listening");
+      }
+    })
+  );
 
   root.querySelectorAll("[data-speak-sentence]").forEach((btn) =>
     btn.addEventListener("click", () => {

@@ -2034,3 +2034,82 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .diary-entry .diary-ko { margin-bottom: 6px; }
 .diary-entry-head { display: flex; justify-content: space-between; align-items: center; font-weight: 800; color: var(--muted); font-size: 13px; margin-bottom: 6px; }
 .screen.no-anim { animation: none; }
+
+/* ── 출석 달력 버튼 칩 ── */
+.chip-btn-cal { border: none; cursor: pointer; font-family: inherit; }
+
+/* ── 소리 내어 읽기 ── */
+.sentence-btns { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.sentence-mic { width: 30px; height: 30px; font-size: 13px; }
+.sentence-mic.listening { background: var(--wrong); color: #fff; animation: micPulse 1s infinite; }
+@keyframes micPulse { 50% { transform: scale(1.12); } }
+.aloud-result { margin-top: 6px; }
+.aloud-result .speak-words { font-size: 15px; margin: 0; }
+
+/* ── 끝말잇기 ── */
+.chain-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.chain-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--card-bg); border-radius: 999px; box-shadow: var(--shadow); padding: 4px 10px; font-size: 13px; }
+.chain-chip.me { background: color-mix(in srgb, var(--primary) 18%, var(--card-bg)); }
+.chain-chip small { color: var(--muted); font-size: 11px; }
+.chain-arrow { color: var(--muted); font-weight: 800; }
+.chain-need { text-align: center; background: var(--card-bg); border-radius: 20px; box-shadow: var(--shadow); padding: 14px; }
+.chain-need p { font-size: 32px; margin: 0; }
+.chain-letter { color: var(--wrong); text-decoration: underline; }
+.chain-msg { background: var(--surface-2); border-radius: 12px; padding: 8px 12px; margin: 0; font-size: 14px; }
+.chain-opt { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.chain-opt small { font-size: 12px; color: var(--muted); font-weight: 600; }
+.chain-opt.wrong { opacity: 0.45; text-decoration: line-through; }
+.chain-type { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.chain-type input { font-size: 18px; padding: 10px 12px; border-radius: 12px; border: 2px solid color-mix(in srgb, var(--primary) 40%, transparent); background: var(--card-bg); color: var(--text); min-width: 0; }
+.chain-type .secondary-btn { width: auto; padding: 0 18px; }
+
+/* ── 단어 빙고 ── */
+.bingo-listen { justify-content: center; }
+.bingo-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.bingo-cell { aspect-ratio: 1; border: none; border-radius: 14px; background: var(--card-bg); color: var(--text); box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px; cursor: pointer; min-width: 0; }
+.bingo-cell small { font-size: 11px; font-weight: 700; overflow-wrap: anywhere; text-align: center; line-height: 1.1; }
+.bingo-emoji { font-size: 28px; line-height: 1; }
+.bingo-cell.marked { background: color-mix(in srgb, var(--correct) 25%, var(--card-bg)); }
+.bingo-cell:disabled { cursor: default; }
+
+/* ── 출석 달력 ── */
+.cal-head { display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 18px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-week { text-align: center; font-size: 12px; font-weight: 800; color: var(--muted); }
+.cal-cell { aspect-ratio: 1; background: var(--card-bg); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; position: relative; min-width: 0; }
+.cal-cell.empty { background: transparent; }
+.cal-cell b { font-size: 12px; position: absolute; top: 3px; left: 5px; color: var(--muted); }
+.cal-cell.stamped { background: color-mix(in srgb, #f4a300 22%, var(--card-bg)); }
+.cal-cell.today { outline: 2px solid var(--primary); }
+.cal-cell.future { opacity: 0.45; }
+.cal-stamp { font-size: 20px; line-height: 1; margin-top: 6px; }
+.cal-cell small { font-size: 10px; color: var(--muted); }
+
+/* ── 리포트 놀이 기록 ── */
+.report-fun { grid-template-columns: repeat(3, 1fr); margin: 10px 0; }
+
+/* ── 시험지 ── */
+.print-toolbar { display: grid; grid-template-columns: auto 1fr 1fr; gap: 8px; align-items: center; }
+.print-toolbar .back-btn { margin: 0; }
+.print-sheet { background: #fff; color: #222; border-radius: 12px; box-shadow: var(--shadow); padding: 20px 18px; }
+.print-head h1 { font-size: 22px; margin: 0 0 4px; text-align: center; }
+.print-head p { text-align: center; margin: 0 0 10px; color: #555; font-size: 13px; }
+.print-fields { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; font-size: 14px; border-bottom: 2px solid #222; padding-bottom: 8px; margin-bottom: 10px; }
+.print-list { columns: 2; column-gap: 24px; padding-left: 24px; margin: 0; }
+.print-list li { break-inside: avoid; padding: 6px 0; font-size: 15px; }
+.print-q { font-weight: 700; }
+.print-line { display: block; color: #888; font-size: 12px; border-bottom: 1px solid #999; height: 22px; margin-top: 2px; }
+.print-answers { margin-top: 24px; border-top: 2px dashed #bbb; padding-top: 12px; }
+.print-answers h2 { font-size: 18px; margin: 0 0 6px; }
+.print-list.answers li { padding: 3px 0; font-size: 13px; }
+@media (max-width: 420px) { .print-list { columns: 1; } }
+@media print {
+  @page { margin: 14mm; }
+  html, body, #app { background: #fff !important; color: #000 !important; }
+  .tab-bar, .no-print, .toast-stack, .confetti-layer, .modal-overlay { display: none !important; }
+  #app { padding: 0 !important; max-width: none !important; }
+  .screen { animation: none !important; gap: 0; }
+  .print-sheet { box-shadow: none; border-radius: 0; padding: 0; }
+  .print-list { columns: 2; }
+  .print-answers { break-before: page; border-top: none; margin-top: 0; }
+}

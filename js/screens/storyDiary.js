@@ -183,13 +183,20 @@ const SHOP_ITEMS = [
   { id: "bg-sunset", cat: "bg", emoji: "🌇", name: "노을", price: 35, bg: "linear-gradient(135deg, #ffd1a8, #ffe9f0)" },
   { id: "bg-candy", cat: "bg", emoji: "🍭", name: "사탕 나라", price: 45, bg: "linear-gradient(135deg, #ffd6f0, #e6dcff)" },
   { id: "bg-rainbow", cat: "bg", emoji: "🌈", name: "무지개", price: 70, bg: "linear-gradient(135deg, #ffd6d6, #fff3c4, #d6f5d6, #d6e9ff, #ecd6ff)" },
+  { id: "bg-gold", cat: "bg", emoji: "✨", name: "황금빛", price: 0, perfect: 2, bg: "linear-gradient(135deg, #ffe58a, #fff6cf, #ffd34d)" },
   { id: "pal-dog", cat: "pal", emoji: "🐶", name: "강아지", price: 30 },
   { id: "pal-cat", cat: "pal", emoji: "🐱", name: "고양이", price: 30 },
   { id: "pal-frog", cat: "pal", emoji: "🐸", name: "개구리", price: 30 },
   { id: "pal-rabbit", cat: "pal", emoji: "🐰", name: "토끼", price: 40 },
   { id: "pal-panda", cat: "pal", emoji: "🐼", name: "판다", price: 50 },
   { id: "pal-dragon", cat: "pal", emoji: "🐲", name: "아기 용", price: 100 },
+  { id: "pal-trophy", cat: "pal", emoji: "🏆", name: "개근 트로피", price: 0, perfect: 1 },
 ];
+
+// 개근 선물: 한 달 개근을 perfect번 하면 공짜로 받는다
+function shopItemUnlocked(profileName, item) {
+  return !item.perfect || getProfileData(profileName).perfectMonths.length >= item.perfect;
+}
 
 function shopItem(id) {
   return SHOP_ITEMS.find((it) => it.id === id) || null;
@@ -235,8 +242,9 @@ function renderShopScreen(root, { profileName, actions }) {
             .map((it) => {
               const owned = s.owned.includes(it.id);
               const on = s.equip[cat.id] === it.id;
-              const label = on ? "벗기" : owned ? "꾸미기" : `⭐ ${it.price}`;
-              return `<button class="shop-item${on ? " on" : ""}${owned ? " owned" : ""}" data-item="${it.id}" ${!owned && s.stars < it.price ? "disabled" : ""}>
+              const unlocked = shopItemUnlocked(profileName, it);
+              const label = on ? "벗기" : owned ? "꾸미기" : !unlocked ? `📆 개근 ${it.perfect}번` : it.price ? `⭐ ${it.price}` : "🎁 받기";
+              return `<button class="shop-item${on ? " on" : ""}${owned ? " owned" : ""}" data-item="${it.id}" ${!owned && (!unlocked || s.stars < it.price) ? "disabled" : ""}>
                 <span class="shop-emoji"${it.bg ? ` style="background:${it.bg}"` : ""}>${it.emoji}</span>
                 <b>${it.name}</b>
                 <small>${label}</small>

@@ -579,8 +579,11 @@ const battleActions = {
       battle.phase = "ready";
     } else {
       battle.done = true;
+      const [a, b] = battle.players;
+      if (a.score !== b.score) recordBattleWin((a.score > b.score ? a : b).name);
       burstConfetti(50);
       playSound("badge");
+      battle.players.forEach((p) => announceBadges(checkNewBadges(p.name)));
     }
     set({});
   },
@@ -588,6 +591,137 @@ const battleActions = {
   setup: openBattleSetup,
   quit: () => set({ screen: "battleSetup" }),
   home: goHome,
+};
+
+// ── 🔤 끝말잇기 ──
+const startChain = (levelId) => set({ chain: newWordChain(levelId), screen: "wordChain" });
+
+function chainAccept(game, pick) {
+  game.used.push(pick.w.word);
+  game.history.push({ who: "me", w: pick.w, levelId: pick.levelId });
+  game.turns += 1;
+  game.message = "";
+  playSound("correct");
+  recordActivity(currentProfile());
+  const cpu = chainComputerMove(game);
+  if (!cpu) {
+    speak(pick.w.word, { rate: 0.85 });
+    finishChain(game, "win");
+    return;
+  }
+  game.used.push(cpu.w.word);
+  game.history.push({ who: "cpu", ...cpu });
+  speak(`${pick.w.word}. ${cpu.w.word}`, { rate: 0.8 });
+  game.hintUsed = false;
+  game.options = chainOptions(game);
+  if (!game.options.some((o) => o.ok)) finishChain(game, "win");
+}
+
+function finishChain(game, result) {
+  game.done = true;
+  game.result = result;
+  game.isNewBest = recordBestCount(currentProfile(), "wordchain", game.levelId, game.turns, game.turns);
+  if (result === "win") burstConfetti(50);
+  announceBadges(checkNewBadges(currentProfile()));
+}
+
+const chainActions = {
+  pick: (i) => {
+    const { chain: game } = store.getState();
+    const o = game.options[i];
+    if (game.done || !o || o.wrong) return;
+    if (o.ok) chainAccept(game, o);
+    else {
+      o.wrong = true;
+      game.lives -= 1;
+      game.message = `❌ <b>${o.w.word}</b>는 <b>${o.w.word[0]}</b>로 시작해요. <b>${chainNeed(game)}</b>로 시작하는 단어를 골라요!`;
+      playSound("wrong");
+      if (game.lives <= 0) finishChain(game, "lose");
+    }
+    set({});
+  },
+  type: (text) => {
+    const { chain: game } = store.getState();
+    const word = text.trim().toLowerCase();
+    if (game.done || !word) return;
+    const found = findWordByText(word);
+    if (word[0] !== chainNeed(game)) game.message = `✋ <b>${chainNeed(game)}</b>로 시작하는 단어를 써 주세요.`;
+    else if (game.used.includes(word)) game.message = `✋ <b>${word}</b>는 이미 나온 단어예요.`;
+    else if (!found || !/^[a-z]{3,}$/.test(found.w.word)) game.message = `🤔 <b>${escapeHtml(word)}</b>는 단어장에 없는 단어예요. (세 글자 이상 한 단어)`;
+    else {
+      chainAccept(game, found);
+      if (!game.done) game.message = `✍️ 직접 써서 이었어요! <b>${found.w.word}</b> = ${found.w.meaningKo}`;
+    }
+    set({});
+  },
+  hint: () => {
+    const { chain: game } = store.getState();
+    const wrong = game.options.filter((o) => !o.ok && !o.hidden && !o.wrong);
+    if (game.hintUsed || !wrong.length) return;
+    wrong[0].hidden = true;
+    game.hintUsed = true;
+    set({});
+  },
+  again: () => startChain(store.getState().chain.levelId),
+  list: () => set({ screen: "chainList" }),
+  home: goHome,
+  quit: () => set({ screen: "chainList" }),
+};
+
+// ── 🎱 단어 빙고 ──
+const startBingoSolo = (levelId) => set({ bingo: newBingo([newBingoPlayer(currentProfile(), levelId)]), screen: "bingo" });
+const startBingoDuo = (other) => set({ bingo: newBingo([currentProfile(), other].map((n) => newBingoPlayer(n, battleLevelOf(n)))), screen: "bingo" });
+
+const bingoActions = {
+  ready: () => {
+    store.getState().bingo.phase = "play";
+    set({});
+  },
+  tap: (i) => {
+    const { bingo: game } = store.getState();
+    if (game.done || game.phase !== "play") return;
+    const p = game.players[game.turn];
+    const target = p.queue[0];
+    p.taps += 1;
+    recordActivity(p.name);
+    if (i === target) {
+      p.marked[i] = true;
+      p.hits += 1;
+      p.queue.shift();
+      game.wrongCell = null;
+      playSound("correct");
+      recordAnswerOutcome(p.name, p.board[i].id, p.levelId, true);
+      if (bingoLineCount(p) > 0) {
+        game.done = true;
+        game.winner = p;
+        if (game.players.length === 1) game.isNewBest = recordSectionResult(p.name, "bingo", p.levelId, p.hits, p.taps);
+        else recordBattleWin(p.name);
+        burstConfetti(60);
+        playSound("badge");
+        game.players.forEach((pl) => announceBadges(checkNewBadges(pl.name)));
+        set({});
+        return;
+      }
+    } else {
+      game.wrongCell = i;
+      p.queue.push(p.queue.shift());
+      playSound("wrong");
+      recordAnswerOutcome(p.name, p.board[target].id, p.levelId, false);
+      showToast(`<span class="toast-emoji">🔊</span><span>방금 들린 단어는 <b>${p.board[target].word}</b> (${p.board[target].meaningKo})였어요</span>`);
+    }
+    if (game.players.length > 1) {
+      game.turn = (game.turn + 1) % game.players.length;
+      game.phase = "ready";
+    }
+    set({});
+  },
+  again: () => {
+    const { bingo } = store.getState();
+    set({ bingo: newBingo(bingo.players.map((p) => newBingoPlayer(p.name, p.levelId))) });
+  },
+  setup: () => set({ screen: "bingoSetup" }),
+  home: goHome,
+  quit: () => set({ screen: "bingoSetup" }),
 };
 
 // ── 📓 영어 일기 ──
@@ -1074,6 +1208,8 @@ const QUIZ_QUIT_TARGET = {
   spelling: (s) => (s.spelling.done ? null : "spellingList"),
   speed: (s) => (s.speed.done || s.speed.ready ? null : "speedList"),
   battle: (s) => (s.battle.done ? null : "battleSetup"),
+  wordChain: (s) => (s.chain.done ? null : "chainList"),
+  bingo: (s) => (s.bingo.done ? null : "bingoSetup"),
 };
 
 function parentScreen(state) {
@@ -1085,7 +1221,11 @@ function parentScreen(state) {
     case "irregular": case "verbPattern": case "speakingList": case "listeningList": case "writingList":
     case "idioms": case "affixes": case "examList": case "goals": case "crosswordList": case "family": case "practiceList":
     case "pictureList": case "stickers": case "memory": case "spellingList":
-    case "topicList": case "numbersList": case "soundsList": case "storyList": case "diaryList": case "speedList": case "battleSetup": case "shop": return "home";
+    case "topicList": case "numbersList": case "soundsList": case "storyList": case "diaryList": case "speedList": case "battleSetup": case "shop":
+    case "chainList": case "bingoSetup": case "calendar": case "printSetup": return "home";
+    case "wordChain": return "chainList";
+    case "bingo": return "bingoSetup";
+    case "printSheet": return "printSetup";
     case "topicView": return "topicList";
     case "storyRead": return "storyList";
     case "diaryWrite": return "diaryList";
@@ -1139,7 +1279,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -1257,6 +1397,7 @@ function render() {
           openWrongNote: () => set({ screen: "wrongNote" }),
           openTopic: (topicId) => set({ grammarTopicId: topicId, screen: "grammarNote" }),
           openVocab,
+          openCalendar: () => set({ calendarOffset: 0, screen: "calendar" }),
         },
       }),
 
@@ -1313,6 +1454,10 @@ function render() {
           openDiary: () => set({ screen: "diaryList" }),
           openSpeed: () => set({ screen: "speedList" }),
           openBattle: openBattleSetup,
+          openCalendar: () => set({ calendarOffset: 0, screen: "calendar" }),
+          openChain: () => set({ screen: "chainList" }),
+          openBingo: () => set({ screen: "bingoSetup" }),
+          openPrint: () => set({ screen: "printSetup" }),
           startWeekly,
           refresh: () => set({}),
           openNext: openNextStep,
@@ -1530,6 +1675,31 @@ function render() {
         profileName: state.profileName,
         write: (tplId) => set({ diaryDraft: { tplId, picks: findDiaryTemplate(tplId).lines.map(() => null) }, screen: "diaryWrite" }),
         back: goHome,
+      }),
+    chainList: () => renderWordChainListScreen(root, { profileName: state.profileName, start: startChain, back: goHome }),
+    wordChain: () => renderWordChainScreen(root, { game: state.chain, actions: chainActions }),
+    bingoSetup: () => renderBingoSetupScreen(root, { profileName: state.profileName, startSolo: startBingoSolo, startDuo: startBingoDuo, back: goHome }),
+    bingo: () => renderBingoScreen(root, { game: state.bingo, actions: bingoActions }),
+    calendar: () => renderCalendarScreen(root, { profileName: state.profileName, offset: state.calendarOffset || 0, setOffset: (calendarOffset) => set({ calendarOffset }), back: goHome }),
+    printSetup: () =>
+      renderPrintSetupScreen(root, {
+        profileName: state.profileName,
+        opts: state.printOpts || { source: getPreferredLevel(state.profileName) || LEVELS[0].id, kind: "en-ko", count: 20 },
+        setOpts: (patch) => set({ printOpts: { ...(state.printOpts || { source: getPreferredLevel(state.profileName) || LEVELS[0].id, kind: "en-ko", count: 20 }), ...patch } }),
+        make: () => {
+          const opts = state.printOpts || { source: getPreferredLevel(state.profileName) || LEVELS[0].id, kind: "en-ko", count: 20 };
+          set({ printOpts: opts, printSheet: buildPrintSheet(state.profileName, opts), screen: "printSheet" });
+        },
+        back: goHome,
+      }),
+    printSheet: () =>
+      renderPrintSheetScreen(root, {
+        profileName: state.profileName,
+        sheet: state.printSheet,
+        actions: {
+          back: () => set({ screen: "printSetup" }),
+          again: () => set({ printSheet: buildPrintSheet(state.profileName, state.printOpts) }),
+        },
       }),
     diaryWrite: () => renderDiaryWriteScreen(root, { draft: state.diaryDraft, actions: diaryActions }),
     shop: () =>

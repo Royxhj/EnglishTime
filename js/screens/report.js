@@ -151,6 +151,39 @@ function renderReportScreen(root, { profileName, actions }) {
       </section>
 
       <section class="settings-card">
+        <h2 class="section-title">🎮 놀이 · 이야기 · 일기</h2>
+        <ul class="bar-list">
+          ${(() => {
+            const chapters = STORY_SERIES.flatMap((s) => s.chapters);
+            const storyDone = chapters.filter((c) => storyChapterPassed(profileName, c.id)).length;
+            const avgPct = (section, ids) => {
+              const bests = ids.map((id) => getSectionBest(profileName, section, id)).filter(Boolean);
+              return bests.length ? Math.round((bests.reduce((a, b) => a + b.correct / b.total, 0) / bests.length) * 100) : null;
+            };
+            const rows = [
+              { name: "📚 이야기책 장", pct: pct(storyDone, chapters.length), value: `${storyDone}/${chapters.length}` },
+              { name: "🗂️ 주제별 단어", pct: pct(sectionDone("topic", TOPIC_WORD_GROUPS), TOPIC_WORD_GROUPS.length), value: `${sectionDone("topic", TOPIC_WORD_GROUPS)}/${TOPIC_WORD_GROUPS.length}` },
+              { name: "🔢 숫자 · 시간 정답률", pct: avgPct("numbers", NUMBER_SETS.map((s) => s.id)), value: null },
+              { name: "👂 소리 구별 정답률", pct: avgPct("sounds", ["all", ...SOUND_PAIR_SETS.map((s) => s.id)]), value: null },
+              { name: "🗣️ 소리 내어 읽은 글", pct: null, value: `${Object.values(profile.aloud.best).filter((b) => b.correct === b.total).length}편` },
+            ];
+            return rows
+              .map((r) => `<li><span class="bar-name">${r.name}</span>${barHtml(r.pct, "var(--primary)")}<span class="bar-value">${r.value ?? (r.pct === null ? "–" : `${r.pct}%`)}</span></li>`)
+              .join("");
+          })()}
+        </ul>
+        <div class="family-stats report-fun">
+          <div><b>${Math.max(0, ...Object.values(profile.speed.best).map((b) => b.correct))}</b><small>⏱️ 60초 퀴즈 최고</small></div>
+          <div><b>${Math.max(0, ...Object.values(profile.wordchain.best).map((b) => b.correct))}</b><small>🔤 끝말잇기 최고</small></div>
+          <div><b>${profile.battleWins}</b><small>⚔️ 가족 대결 승리</small></div>
+          <div><b>${profile.diary.length}</b><small>📓 쓴 일기</small></div>
+          <div><b>${Object.keys(profile.bingo.best).length}</b><small>🎱 빙고 단계</small></div>
+          <div><b>${profile.perfectMonths.length}</b><small>📆 개근한 달</small></div>
+        </div>
+        <button class="secondary-btn" id="calendarBtn">📆 출석 달력 보기</button>
+      </section>
+
+      <section class="settings-card">
         <h2 class="section-title">배지 ${earnedCount} / ${BADGES.length}</h2>
         <div class="badge-grid">
           ${badges
@@ -176,6 +209,7 @@ function renderReportScreen(root, { profileName, actions }) {
 
   root.querySelector("#backBtn").addEventListener("click", actions.back);
   root.querySelector("#wrongNoteBtn").addEventListener("click", actions.openWrongNote);
+  root.querySelector("#calendarBtn").addEventListener("click", actions.openCalendar);
   root.querySelector("#vocabBtn")?.addEventListener("click", actions.openVocab);
   root.querySelectorAll("[data-topic]").forEach((btn) => btn.addEventListener("click", () => actions.openTopic(btn.dataset.topic)));
 }

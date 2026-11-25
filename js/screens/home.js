@@ -112,7 +112,7 @@ function todayCardHtml(profileName, { daily, dueWrong, wrongTotal, next }) {
       done: !!daily,
       emoji: "☀️",
       title: "오늘의 학습",
-      desc: daily ? `${daily.correct} / ${daily.total} 정답 · 한 번 더 할 수 있어요` : `단어 ${DAILY_WORDS} + 문법 ${DAILY_GRAMMAR}문제 · 약 5분`,
+      desc: daily ? `${daily.correct} / ${daily.total} 정답 · 한 번 더 할 수 있어요` : `단어 ${DAILY_WORDS} + ${new Date().getDate() % 2 ? "소리" : "숫자"} ${DAILY_EXTRA} + 문법 ${DAILY_GRAMMAR}문제 · 약 5분`,
     },
   ];
   if (wrongTotal > 0) {
@@ -182,7 +182,7 @@ function renderHomeScreen(root, ctx) {
           <div>
             <h1 class="home-title">${profileName}님, 안녕하세요!</h1>
             <p class="home-stats">
-              ${stats.streak > 0 ? `<span class="chip chip-fire">🔥 ${stats.streak}일 연속</span>` : `<span class="chip">오늘 첫 공부를 시작해요</span>`}
+              <button class="chip chip-btn-cal${stats.streak > 0 ? " chip-fire" : ""}" id="calendarBtn" aria-label="출석 달력">${stats.streak > 0 ? `🔥 ${stats.streak}일 연속` : "오늘 첫 공부를 시작해요"} 📆</button>
               <span class="chip">오늘 ${stats.today}문제</span>
               ${badgeCount > 0 ? `<span class="chip">🏅 ${badgeCount}</span>` : ""}
             </p>
@@ -232,12 +232,15 @@ function renderHomeScreen(root, ctx) {
           ${isKid ? homeTile({ id: "memoryBtn", emoji: "🃏", title: "짝 맞추기", meta: "카드 뒤집기 게임" }) : ""}
           ${homeTile({ id: "speedBtn", emoji: "⏱️", title: "60초 퀴즈", meta: "1분 동안 많이 맞히기" })}
           ${homeTile({ id: "battleBtn", emoji: "⚔️", title: "가족 대결", meta: getFamily().length > 1 ? "번갈아 풀기" : "가족 2명부터", disabled: getFamily().length < 2 })}
+          ${homeTile({ id: "chainBtn", emoji: "🔤", title: "끝말잇기", meta: "컴퓨터와 단어 잇기" })}
+          ${homeTile({ id: "bingoBtn", emoji: "🎱", title: "단어 빙고", meta: "듣고 칸 지우기" })}
           ${homeTile({ id: "spellingBtn", emoji: "🎯", title: "스펠링 게임", meta: "글자 맞혀 단어 완성" })}
           ${homeTile({ id: "weeklyBtn", emoji: "📅", title: "주간 단어 시험", meta: weeklyBest ? `이번 주 ${ratioLabel(weeklyBest)}` : `이번 주 본 단어 ${weeklySeenCount(profileName)}개` })}
           ${homeTile({ id: "wordsBtn", emoji: "✏️", title: "단어 시험", meta: wrongWords > 0 ? `오답 ${wrongWords}개` : wordBest !== null ? `최고 ${wordBest}점` : "고르기 · 철자 · 받아쓰기", warn: wrongWords > 0 })}
           ${homeTile({ id: "chunksBtn", emoji: "✂️", title: "끊어 읽기", meta: `${chunkDone} / ${CHUNK_SETS.length} 완료` })}
           ${homeTile({ id: "crosswordBtn", emoji: "🧩", title: "가로세로 낱말", meta: "매번 새 퍼즐" })}
           ${homeTile({ id: "examBtn", emoji: "📋", title: "단원 모의고사", meta: "20문제 · 100점" })}
+          ${homeTile({ id: "printBtn", emoji: "🖨️", title: "시험지 인쇄", meta: "종이로 풀기" })}
         </div>
       </section>
       ${
@@ -257,6 +260,10 @@ function renderHomeScreen(root, ctx) {
   bind("backBtn", actions.backToProfile);
   bind("stickerBtn", actions.openStickers);
   bind("shopBtn", actions.openShop);
+  bind("calendarBtn", actions.openCalendar);
+  bind("chainBtn", actions.openChain);
+  bind("bingoBtn", actions.openBingo);
+  bind("printBtn", actions.openPrint);
   bind("storyBtn", actions.openStories);
   bind("topicBtn", actions.openTopics);
   bind("numbersBtn", actions.openNumbers);
