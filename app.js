@@ -21386,6 +21386,71 @@ const SCHOOL_TALKS = [
 
 ;
 
+/* ── data/houseItems.js ── */
+// 🏠 우리 집 물건 찾기: 방마다 생활 물건. art는 그림 문자, 그림 문자가 없는 물건은 svg(아래 HOUSE_SVG)
+const HOUSE_ROOMS = [
+  {
+    id: "living", emoji: "🛋️", title: "거실", en: "living room", bg: "#fff1d6",
+    items: [["sofa", "소파", "🛋️"], ["TV", "텔레비전", "📺"], ["lamp", "전등, 스탠드", "svg:lamp"], ["clock", "시계", "🕰️"], ["window", "창문", "🪟"], ["door", "문", "🚪"], ["plant", "화분, 식물", "🪴"], ["picture", "그림, 액자", "🖼️"], ["rug", "깔개, 러그", "svg:rug"], ["curtain", "커튼", "svg:curtain"], ["bookshelf", "책장", "svg:bookshelf"], ["remote control", "리모컨", "svg:remote"]],
+  },
+  {
+    id: "kitchen", emoji: "🍳", title: "부엌", en: "kitchen", bg: "#e6f6ea",
+    items: [["refrigerator", "냉장고", "svg:fridge"], ["stove", "가스레인지", "svg:stove"], ["microwave", "전자레인지", "svg:microwave"], ["sink", "싱크대, 개수대", "svg:sink"], ["table", "식탁, 탁자", "svg:table"], ["chair", "의자", "🪑"], ["cup", "컵", "☕"], ["plate", "접시", "🍽️"], ["bowl", "그릇, 사발", "🥣"], ["spoon", "숟가락", "🥄"], ["chopsticks", "젓가락", "🥢"], ["knife", "칼", "🔪"], ["frying pan", "프라이팬", "🍳"]],
+  },
+  {
+    id: "bathroom", emoji: "🛁", title: "욕실", en: "bathroom", bg: "#e3f2fd",
+    items: [["toilet", "변기", "🚽"], ["bathtub", "욕조", "🛁"], ["shower", "샤워기", "🚿"], ["toothbrush", "칫솔", "🪥"], ["soap", "비누", "🧼"], ["towel", "수건", "svg:towel"], ["mirror", "거울", "🪞"], ["faucet", "수도꼭지", "svg:faucet"], ["sponge", "스펀지", "🧽"], ["toilet paper", "화장지, 휴지", "🧻"], ["razor", "면도기", "🪒"]],
+  },
+  {
+    id: "bedroom", emoji: "🛏️", title: "침실", en: "bedroom", bg: "#f3e8fd",
+    items: [["bed", "침대", "🛏️"], ["pillow", "베개", "svg:pillow"], ["blanket", "이불, 담요", "svg:blanket"], ["closet", "옷장", "svg:closet"], ["drawer", "서랍(장)", "svg:drawer"], ["hanger", "옷걸이", "svg:hanger"], ["alarm clock", "자명종, 알람 시계", "⏰"], ["teddy bear", "곰 인형", "🧸"], ["slippers", "슬리퍼", "svg:slippers"], ["pajamas", "잠옷", "svg:pajamas"]],
+  },
+  {
+    id: "study", emoji: "📚", title: "공부방", en: "study room", bg: "#fff8e1",
+    items: [["desk", "책상", "svg:desk"], ["computer", "컴퓨터", "💻"], ["book", "책", "📖"], ["pencil", "연필", "✏️"], ["eraser", "지우개", "svg:eraser"], ["scissors", "가위", "✂️"], ["ruler", "자", "📏"], ["calendar", "달력", "📅"], ["backpack", "책가방", "🎒"], ["notebook", "공책", "📓"], ["crayon", "크레파스", "🖍️"], ["paper clip", "클립", "📎"], ["pen", "펜", "🖊️"]],
+  },
+  {
+    id: "entrance", emoji: "🚪", title: "현관 · 옷", en: "entrance", bg: "#fdecea",
+    items: [["shoes", "신발", "👟"], ["umbrella", "우산", "☂️"], ["key", "열쇠", "🔑"], ["coat", "외투, 코트", "🧥"], ["cap", "모자(야구 모자)", "🧢"], ["socks", "양말", "🧦"], ["handbag", "핸드백, 가방", "👜"], ["glasses", "안경", "👓"], ["gloves", "장갑", "🧤"], ["scarf", "목도리", "🧣"], ["stairs", "계단", "svg:stairs"], ["mailbox", "우편함", "📫"]],
+  },
+  {
+    id: "tools", emoji: "🧹", title: "청소 · 도구", en: "tools", bg: "#eef1f4",
+    items: [["broom", "빗자루", "🧹"], ["bucket", "양동이", "🪣"], ["basket", "바구니", "🧺"], ["trash can", "쓰레기통", "🗑️"], ["washing machine", "세탁기", "svg:washer"], ["ladder", "사다리", "🪜"], ["hammer", "망치", "🔨"], ["light bulb", "전구", "💡"], ["battery", "건전지", "🔋"], ["plug", "플러그", "🔌"], ["box", "상자", "📦"], ["flashlight", "손전등", "🔦"]],
+  },
+];
+
+// 그림 문자가 없는 물건 그림 (64×64)
+const HOUSE_SVG = {
+  lamp: `<path d="M22 10h20l8 18H14z" fill="#ffd166"/><rect x="30" y="28" width="4" height="24" fill="#8d6e63"/><rect x="20" y="52" width="24" height="5" rx="2" fill="#6d4c41"/>`,
+  rug: `<ellipse cx="32" cy="36" rx="28" ry="16" fill="#e57373"/><ellipse cx="32" cy="36" rx="20" ry="10" fill="#ffcc80"/><ellipse cx="32" cy="36" rx="10" ry="5" fill="#81c784"/>`,
+  curtain: `<rect x="6" y="8" width="52" height="4" rx="2" fill="#6d4c41"/><path d="M8 12h20c-4 14 2 30-2 44H8z" fill="#64b5f6"/><path d="M56 12H36c4 14-2 30 2 44h18z" fill="#64b5f6"/><path d="M14 12v44M50 12v44" stroke="#42a5f5" stroke-width="2"/>`,
+  bookshelf: `<rect x="10" y="6" width="44" height="52" rx="2" fill="#8d6e63"/><rect x="14" y="10" width="36" height="13" fill="#fff3e0"/><rect x="14" y="27" width="36" height="13" fill="#fff3e0"/><rect x="14" y="44" width="36" height="10" fill="#fff3e0"/><rect x="16" y="12" width="5" height="11" fill="#e57373"/><rect x="22" y="13" width="5" height="10" fill="#64b5f6"/><rect x="28" y="11" width="4" height="12" fill="#81c784"/><rect x="18" y="29" width="6" height="11" fill="#ffd54f"/><rect x="25" y="30" width="5" height="10" fill="#ba68c8"/><rect x="36" y="46" width="6" height="8" fill="#4db6ac"/>`,
+  remote: `<rect x="22" y="6" width="20" height="52" rx="8" fill="#455a64"/><circle cx="32" cy="16" r="4" fill="#ef5350"/><circle cx="27" cy="28" r="2.5" fill="#cfd8dc"/><circle cx="37" cy="28" r="2.5" fill="#cfd8dc"/><circle cx="27" cy="36" r="2.5" fill="#cfd8dc"/><circle cx="37" cy="36" r="2.5" fill="#cfd8dc"/><circle cx="27" cy="44" r="2.5" fill="#cfd8dc"/><circle cx="37" cy="44" r="2.5" fill="#cfd8dc"/>`,
+  fridge: `<rect x="16" y="4" width="32" height="56" rx="4" fill="#cfd8dc"/><line x1="16" y1="24" x2="48" y2="24" stroke="#90a4ae" stroke-width="2"/><rect x="20" y="10" width="3" height="9" rx="1.5" fill="#78909c"/><rect x="20" y="29" width="3" height="14" rx="1.5" fill="#78909c"/>`,
+  stove: `<rect x="10" y="20" width="44" height="38" rx="3" fill="#eceff1" stroke="#90a4ae" stroke-width="2"/><rect x="10" y="12" width="44" height="8" rx="2" fill="#607d8b"/><circle cx="22" cy="16" r="2.5" fill="#ff7043"/><circle cx="42" cy="16" r="2.5" fill="#ff7043"/><rect x="16" y="30" width="32" height="20" rx="2" fill="#37474f"/><rect x="20" y="34" width="24" height="12" fill="#ffab91" opacity="0.7"/>`,
+  microwave: `<rect x="6" y="16" width="52" height="32" rx="4" fill="#eceff1" stroke="#90a4ae" stroke-width="2"/><rect x="11" y="21" width="32" height="22" rx="2" fill="#37474f"/><circle cx="51" cy="26" r="3" fill="#90a4ae"/><circle cx="51" cy="36" r="3" fill="#90a4ae"/>`,
+  sink: `<path d="M8 30h48l-6 20H14z" fill="#b0bec5"/><rect x="6" y="26" width="52" height="6" rx="2" fill="#90a4ae"/><path d="M30 26V12h12v4h-8v10" fill="none" stroke="#607d8b" stroke-width="4" stroke-linejoin="round"/>`,
+  table: `<rect x="6" y="22" width="52" height="7" rx="3" fill="#a1887f"/><rect x="12" y="29" width="5" height="26" fill="#8d6e63"/><rect x="47" y="29" width="5" height="26" fill="#8d6e63"/>`,
+  towel: `<rect x="8" y="10" width="48" height="4" rx="2" fill="#90a4ae"/><rect x="16" y="12" width="32" height="44" rx="3" fill="#4fc3f7"/><rect x="16" y="44" width="32" height="5" fill="#fff"/><rect x="16" y="20" width="32" height="3" fill="#b3e5fc"/>`,
+  faucet: `<path d="M12 22h26a8 8 0 0 1 8 8v6" fill="none" stroke="#90a4ae" stroke-width="8" stroke-linecap="round"/><rect x="18" y="8" width="12" height="6" rx="3" fill="#607d8b"/><rect x="22" y="12" width="4" height="8" fill="#607d8b"/><path d="M46 44c-3 5-3 8 0 10 3-2 3-5 0-10z" fill="#4fc3f7"/>`,
+  pillow: `<path d="M8 22c8-6 40-6 48 0 4 6 4 14 0 20-8 6-40 6-48 0-4-6-4-14 0-20z" fill="#e1f5fe" stroke="#81d4fa" stroke-width="2"/><path d="M20 30c8 3 16 3 24 0" stroke="#b3e5fc" stroke-width="2" fill="none"/>`,
+  blanket: `<rect x="6" y="14" width="52" height="38" rx="4" fill="#ffb74d"/><path d="M6 26h52M6 38h52M20 14v38M38 14v38" stroke="#ffe0b2" stroke-width="3"/>`,
+  closet: `<rect x="12" y="4" width="40" height="56" rx="2" fill="#a1887f"/><line x1="32" y1="4" x2="32" y2="60" stroke="#6d4c41" stroke-width="2"/><circle cx="28" cy="32" r="2" fill="#ffd54f"/><circle cx="36" cy="32" r="2" fill="#ffd54f"/>`,
+  drawer: `<rect x="10" y="10" width="44" height="46" rx="2" fill="#bcaaa4"/><rect x="14" y="14" width="36" height="11" fill="#d7ccc8"/><rect x="14" y="28" width="36" height="11" fill="#d7ccc8"/><rect x="14" y="42" width="36" height="11" fill="#d7ccc8"/><rect x="28" y="18" width="8" height="3" rx="1.5" fill="#6d4c41"/><rect x="28" y="32" width="8" height="3" rx="1.5" fill="#6d4c41"/><rect x="28" y="46" width="8" height="3" rx="1.5" fill="#6d4c41"/>`,
+  hanger: `<path d="M32 22v-4a5 5 0 1 0-5-5" fill="none" stroke="#78909c" stroke-width="3" stroke-linecap="round"/><path d="M32 22L6 44h52z" fill="none" stroke="#78909c" stroke-width="4" stroke-linejoin="round"/>`,
+  slippers: `<ellipse cx="22" cy="34" rx="10" ry="20" fill="#f48fb1"/><ellipse cx="42" cy="34" rx="10" ry="20" fill="#f48fb1"/><path d="M13 26q9-8 18 0v6H13z" fill="#ec407a"/><path d="M33 26q9-8 18 0v6H33z" fill="#ec407a"/>`,
+  pajamas: `<path d="M20 8h24l12 12-7 7-5-5v36H20V22l-5 5-7-7z" fill="#9fa8da"/><circle cx="28" cy="24" r="2" fill="#fff"/><circle cx="36" cy="34" r="2" fill="#fff"/><circle cx="27" cy="44" r="2" fill="#fff"/><circle cx="37" cy="50" r="2" fill="#fff"/>`,
+  desk: `<rect x="4" y="20" width="56" height="6" rx="2" fill="#a1887f"/><rect x="8" y="26" width="4" height="30" fill="#8d6e63"/><rect x="38" y="26" width="18" height="30" fill="#bcaaa4"/><rect x="41" y="30" width="12" height="8" fill="#d7ccc8"/><rect x="41" y="42" width="12" height="8" fill="#d7ccc8"/>`,
+  eraser: `<path d="M10 40l20-20 24 0-20 20z" fill="#f48fb1"/><path d="M10 40h24v8H10z" fill="#ec407a"/><path d="M34 40l20-20v8L34 48z" fill="#ad1457"/><path d="M24 20h30l-8 8H16z" fill="#90caf9" opacity="0.9"/>`,
+  stairs: `<path d="M6 58V46h13V34h13V22h13V10h13v48z" fill="#a1887f"/><path d="M6 46h13M19 34h13M32 22h13M45 10h13" stroke="#6d4c41" stroke-width="2"/>`,
+  washer: `<rect x="10" y="6" width="44" height="52" rx="4" fill="#eceff1" stroke="#90a4ae" stroke-width="2"/><rect x="10" y="6" width="44" height="10" rx="4" fill="#cfd8dc"/><circle cx="32" cy="37" r="14" fill="#90caf9" stroke="#78909c" stroke-width="3"/><circle cx="46" cy="11" r="2" fill="#78909c"/>`,
+};
+
+// 방마다 id · 물건 객체로 바꿔 둔다
+for (const r of HOUSE_ROOMS) r.items = r.items.map(([word, ko, art]) => ({ word, ko, art, room: r.id }));
+
+;
+
 /* ── js/state.js ── */
 function createStore(initialState) {
   let state = initialState;
@@ -21561,7 +21626,7 @@ function normalizeProfile(profile) {
   p.care = { day: typeof p.care.day === "string" ? p.care.day : "", pets: Number(p.care.pets) || 0, snacks: Number(p.care.snacks) || 0, bond: Math.max(0, Math.floor(Number(p.care.bond) || 0)) };
   if (p.petKind !== undefined && !(typeof p.petKind === "string" && /^[a-z]{2,10}$/.test(p.petKind))) delete p.petKind;
   if (p.diag && !(typeof p.diag === "object" && levelById(p.diag.levelId) && /^\d{4}-\d{2}-\d{2}$/.test(p.diag.date))) delete p.diag;
-  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster", "wordrain", "xmas", "pairs", "chant", "culture", "drawgame", "school"]) {
+  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster", "wordrain", "xmas", "pairs", "chant", "culture", "drawgame", "school", "house"]) {
     p[section] ||= { best: {}, wrong: {} };
     p[section].best ||= {};
     p[section].wrong ||= {};
@@ -22309,6 +22374,7 @@ const BADGES = [
   { id: "wordSearch", emoji: "🔍", title: "숨은 단어 탐험가", desc: "단어 찾기 퍼즐 완성하기", test: (p) => Object.keys(p.wordsearch.best).length >= 1 },
   { id: "wordGuess", emoji: "🕵️", title: "명탐정", desc: "단어 추리 5개 모두 맞히기", test: (p) => perfectCount(p.wordguess.best) >= 1 },
   { id: "riddle", emoji: "❓", title: "수수께끼 박사", desc: "영어 수수께끼 만점", test: (p) => perfectCount(p.riddle.best) >= 1 },
+  { id: "house", emoji: "🏠", title: "우리 집 박사", desc: "우리 집 물건 방 7곳에서 별 2개 이상", test: (p) => HOUSE_ROOMS.every((r) => ["listen", "look"].some((m) => { const b = p.house.best[`${r.id}:${m}`]; return b && b.correct / b.total >= 0.8; })) },
   { id: "school8", emoji: "🏫", title: "교과 표현 박사", desc: "교과 핵심 표현 8주제 퀴즈 통과", test: (p) => Object.values(p.school.best).filter((b) => b.correct / b.total >= 0.66).length >= 8 },
   { id: "vacation", emoji: "⛄", title: "계획 박사", desc: "방학 계획표 세우기", test: (p) => !!p.vacation },
   { id: "advent10", emoji: "🎄", title: "크리스마스 요정", desc: "어드벤트 달력 도장 10개", test: (p) => p.advent.length >= 10 },
@@ -23737,6 +23803,7 @@ function renderHomeScreen(root, ctx) {
       <section class="group">
         <h2 class="group-title">✏️ 문제 풀기</h2>
         <div class="tile-grid">
+          ${homeTile({ id: "houseBtn", emoji: "🏠", title: "우리 집 물건", meta: "그림 보고 · 듣고 맞히기" })}
           ${isKid ? homeTile({ id: "pictureBtn", emoji: "🎧", title: "그림 퀴즈", meta: "듣고 · 보고 고르기" }) : ""}
           ${isKid ? homeTile({ id: "memoryBtn", emoji: "🃏", title: "짝 맞추기", meta: "카드 뒤집기 게임" }) : ""}
           ${homeTile({ id: "pairsBtn", emoji: "🔗", title: "짝꿍 단어 잇기", meta: "반대말 · 비슷한 말" })}
@@ -23824,6 +23891,7 @@ function renderHomeScreen(root, ctx) {
   bind("roadmapBtn", actions.openRoadmap);
   bind("adventBtn", actions.openAdvent);
   bind("schoolBtn", actions.openSchool);
+  bind("houseBtn", actions.openHouse);
   bind("vacationBtn", actions.openVacation);
   bind("vacationCardBtn", actions.openVacation);
   bind("chantBtn", actions.openChants);
@@ -31328,6 +31396,7 @@ const HOME_TILE_ALIASES = {
   diagBtn: "test 진단 레벨",
   schoolBtn: "school 교과서 학교 교과",
   vacationBtn: "vacation 방학 계획",
+  houseBtn: "house home 집 가구 물건 생활 방",
 };
 
 function renderMenuVisibilitySettingsHtml(profileName) {
@@ -31591,6 +31660,214 @@ function buildSchoolQuestions(talkId) {
     selectedAnswer: null,
   }));
 }
+
+;
+
+/* ── js/screens/house.js ── */
+// 🏠 우리 집 물건 찾기: 방마다 생활 물건을 그림으로 둘러보고, 듣고 찾기 · 보고 맞히기
+const HOUSE_ROUND = 10;
+
+function houseArt(item, big) {
+  if (item.art.startsWith("svg:")) return `<svg class="house-svg${big ? " big" : ""}" viewBox="0 0 64 64" aria-hidden="true">${HOUSE_SVG[item.art.slice(4)]}</svg>`;
+  return `<span class="house-emoji${big ? " big" : ""}" aria-hidden="true">${item.art}</span>`;
+}
+
+const houseRoom = (id) => HOUSE_ROOMS.find((r) => r.id === id);
+const houseItemsOf = (roomId) => (roomId === "all" ? HOUSE_ROOMS.flatMap((r) => r.items) : houseRoom(roomId).items);
+
+function houseBest(profileName, roomId) {
+  return ["listen", "look"].map((m) => getSectionBest(profileName, "house", `${roomId}:${m}`)).filter(Boolean);
+}
+
+function renderHouseListScreen(root, { profileName, open, start, back }) {
+  const card = (r) => {
+    const bests = houseBest(profileName, r.id);
+    const pct = bests.length ? Math.max(...bests.map((b) => Math.round((b.correct / b.total) * 100))) : null;
+    return `
+      <button class="house-room-card" data-room="${r.id}" style="--room:${r.bg}">
+        <span class="house-room-emoji">${r.emoji}</span>
+        <b>${r.title}</b>
+        <small>${r.en} · ${r.items.length}개</small>
+        <span class="house-room-best">${pct === null ? "" : pct >= 100 ? "⭐⭐⭐" : pct >= 80 ? "⭐⭐" : "⭐"}</span>
+      </button>`;
+  };
+  root.innerHTML = `
+    <div class="screen screen-house">
+      <button class="back-btn" id="backBtn">← 홈</button>
+      <h1 class="title">🏠 우리 집 물건 찾기</h1>
+      <p class="subtitle">집 안에서 매일 보는 물건을 영어로! 방을 골라 둘러보고 게임해요</p>
+      <div class="house-room-grid">${HOUSE_ROOMS.map(card).join("")}</div>
+      <button class="secondary-btn" id="allListenBtn">🎲 모든 방 섞어서 · 듣고 찾기</button>
+      <button class="secondary-btn" id="allLookBtn">🎲 모든 방 섞어서 · 보고 맞히기</button>
+    </div>`;
+  root.querySelector("#backBtn").addEventListener("click", back);
+  root.querySelectorAll("[data-room]").forEach((b) => b.addEventListener("click", () => open(b.dataset.room)));
+  root.querySelector("#allListenBtn").addEventListener("click", () => start("all", "listen"));
+  root.querySelector("#allLookBtn").addEventListener("click", () => start("all", "look"));
+}
+
+function renderHouseRoomScreen(root, { profileName, roomId, start, back }) {
+  const r = houseRoom(roomId);
+  const score = (m) => {
+    const b = getSectionBest(profileName, "house", `${roomId}:${m}`);
+    return b ? ` <small>최고 ${b.correct}/${b.total}</small>` : "";
+  };
+  root.innerHTML = `
+    <div class="screen screen-house">
+      <button class="back-btn" id="backBtn">← 방 고르기</button>
+      <h1 class="title">${r.emoji} ${r.title} <small>${r.en}</small></h1>
+      <p class="subtitle">그림을 누르면 영어 이름을 들려줘요. 다 둘러봤으면 게임!</p>
+      <div class="house-room" style="--room:${r.bg}">
+        ${r.items.map((it, i) => `<button class="house-item" data-i="${i}">${houseArt(it)}<b>${it.word}</b><small>${it.ko}</small></button>`).join("")}
+      </div>
+      <div class="wl-tests">
+        <button class="primary-btn" id="listenBtn">🔊 듣고 찾기${score("listen")}</button>
+        <button class="primary-btn" id="lookBtn">👀 보고 맞히기${score("look")}</button>
+      </div>
+    </div>`;
+  root.querySelector("#backBtn").addEventListener("click", back);
+  root.querySelectorAll("[data-i]").forEach((b) =>
+    b.addEventListener("click", () => {
+      const it = r.items[Number(b.dataset.i)];
+      speak(it.word, { rate: 0.85 });
+      b.classList.remove("pop");
+      void b.offsetWidth;
+      b.classList.add("pop");
+    })
+  );
+  root.querySelector("#listenBtn").addEventListener("click", () => start(roomId, "listen"));
+  root.querySelector("#lookBtn").addEventListener("click", () => start(roomId, "look"));
+}
+
+// 문제: 듣고 찾기는 방 안 물건(최대 9개) 중에서, 보고 맞히기는 영어 보기 4개
+function newHouseGame(roomId, mode) {
+  const items = houseItemsOf(roomId);
+  const targets = shuffle(items).slice(0, Math.min(HOUSE_ROUND, items.length));
+  const rounds = targets.map((t) => {
+    const others = shuffle(items.filter((x) => x !== t && x.art !== t.art));
+    const board = shuffle([t, ...others.slice(0, mode === "listen" ? 8 : 3)]);
+    return { t, board, tries: 0, done: false, wrong: [] };
+  });
+  return { roomId, mode, rounds, index: 0, firstTry: 0, done: false, isNewBest: false };
+}
+
+function renderHouseGameScreen(root, { game, actions }) {
+  const r = game.roomId === "all" ? { emoji: "🎲", title: "모든 방", bg: "#f5f0ff" } : houseRoom(game.roomId);
+  if (game.done) {
+    const total = game.rounds.length;
+    const stars = game.firstTry === total ? 3 : game.firstTry >= total * 0.8 ? 2 : 1;
+    const missed = game.rounds.filter((x) => x.tries > 1).map((x) => x.t);
+    root.innerHTML = `
+      <div class="screen screen-house">
+        <h1 class="title">${r.emoji} ${r.title} 결과</h1>
+        <div class="house-stars">${"⭐".repeat(stars)}${"☆".repeat(3 - stars)}</div>
+        <div class="result-banner ${stars >= 2 ? "correct" : "wrong"}" role="status">한 번에 맞힌 물건 ${game.firstTry} / ${total}${game.isNewBest ? " · 🏆 최고 기록!" : ""}</div>
+        ${missed.length ? `<h2 class="section-title">다시 보기</h2><div class="house-room" style="--room:${r.bg}">${missed.map((it, i) => `<button class="house-item" data-m="${i}">${houseArt(it)}<b>${it.word}</b><small>${it.ko}</small></button>`).join("")}</div>` : ""}
+        <div class="result-actions">
+          <button class="primary-btn" id="againBtn">🔁 다시 하기</button>
+          <button class="secondary-btn" id="otherBtn">${game.mode === "listen" ? "👀 보고 맞히기로" : "🔊 듣고 찾기로"}</button>
+          <button class="secondary-btn" id="listBtn">방 고르기</button>
+        </div>
+      </div>`;
+    root.querySelectorAll("[data-m]").forEach((b) => b.addEventListener("click", () => speak(missed[Number(b.dataset.m)].word, { rate: 0.85 })));
+    root.querySelector("#againBtn").addEventListener("click", actions.again);
+    root.querySelector("#otherBtn").addEventListener("click", actions.other);
+    root.querySelector("#listBtn").addEventListener("click", actions.list);
+    return;
+  }
+  const round = game.rounds[game.index];
+  const t = round.t;
+  const top = `
+    <div class="cw-top">
+      <button class="back-btn" id="quitBtn">× 그만하기</button>
+      <span class="cw-progress">${r.emoji} ${game.index + 1} / ${game.rounds.length} · ⭐ ${game.firstTry}</span>
+    </div>`;
+  if (game.mode === "listen") {
+    root.innerHTML = `
+      <div class="screen screen-house no-anim">
+        ${top}
+        <div class="house-ask">
+          <button class="listen-btn" id="sayBtn" ${speechSupported ? "" : "disabled"}>🔊 다시 듣기</button>
+          <button class="listen-btn" id="slowBtn" ${speechSupported ? "" : "disabled"}>🐢 천천히</button>
+          ${round.done ? `<p class="house-answer">🎉 <b>${t.word}</b> · ${t.ko}</p>` : round.tries ? `<p class="house-hint">다시 잘 들어 봐요! 💪</p>` : `<p class="house-hint">들린 물건을 찾아 눌러요</p>`}
+        </div>
+        <div class="house-room play" style="--room:${r.bg}">
+          ${round.board.map((it, i) => `<button class="house-item${round.done && it === t ? " correct" : ""}${round.wrong.includes(i) ? " wrong" : ""}" data-b="${i}" ${round.done || round.wrong.includes(i) ? "disabled" : ""} aria-label="그림 ${i + 1}">${houseArt(it)}${round.wrong.includes(i) || (round.done && it === t) ? `<small>${it.word}</small>` : ""}</button>`).join("")}
+        </div>
+        ${round.done ? `<button class="primary-btn" id="nextBtn">${game.index + 1 < game.rounds.length ? "다음 →" : "결과 보기"}</button>` : ""}
+      </div>`;
+  } else {
+    root.innerHTML = `
+      <div class="screen screen-house no-anim">
+        ${top}
+        <div class="house-look" style="--room:${r.bg}">${houseArt(t, true)}${round.done ? `<p class="house-answer"><b>${t.word}</b> · ${t.ko}</p>` : `<p class="house-hint">이건 영어로 뭘까요?</p>`}</div>
+        <div class="choice-grid">
+          ${round.board.map((it, i) => `<button class="choice-btn${round.done && it === t ? " correct" : ""}${round.wrong.includes(i) ? " wrong" : ""}" data-b="${i}" ${round.done || round.wrong.includes(i) ? "disabled" : ""}>${it.word}</button>`).join("")}
+        </div>
+        ${round.done ? `<button class="primary-btn" id="nextBtn">${game.index + 1 < game.rounds.length ? "다음 →" : "결과 보기"}</button>` : ""}
+      </div>`;
+  }
+  root.querySelector("#quitBtn").addEventListener("click", actions.quit);
+  root.querySelector("#sayBtn")?.addEventListener("click", () => speak(t.word, { rate: 0.85 }));
+  root.querySelector("#slowBtn")?.addEventListener("click", () => speak(t.word, { rate: 0.55 }));
+  root.querySelectorAll("[data-b]").forEach((b) => b.addEventListener("click", () => actions.pick(Number(b.dataset.b))));
+  root.querySelector("#nextBtn")?.addEventListener("click", actions.next);
+  root.querySelector("#nextBtn")?.focus({ preventScroll: true });
+  if (game.mode === "listen" && !round.done && game.spokenFor !== game.index) {
+    game.spokenFor = game.index;
+    setTimeout(() => speak(t.word, { rate: 0.85 }), 350);
+  }
+}
+
+const houseActions = {
+  pick: (i) => {
+    const { house: game } = store.getState();
+    const round = game.rounds[game.index];
+    if (round.done || round.wrong.includes(i)) return;
+    round.tries += 1;
+    const ok = round.board[i] === round.t;
+    recordActivity(currentProfile());
+    // 기본 단어장에 있는 단어면 오답노트와도 이어 준다
+    const known = findWordByText(round.t.word.toLowerCase());
+    if (known && round.tries === 1) recordAnswerOutcome(currentProfile(), known.w.id, known.levelId, ok);
+    if (ok) {
+      round.done = true;
+      if (round.tries === 1) game.firstTry += 1;
+      playSound("correct");
+      speak(round.t.word, { rate: 0.85 });
+    } else {
+      round.wrong.push(i);
+      playSound("wrong");
+      if (game.mode === "listen") setTimeout(() => speak(round.t.word, { rate: 0.75 }), 400);
+      else speak(round.board[i].word, { rate: 0.9 });
+    }
+    set({});
+  },
+  next: () => {
+    const { house: game } = store.getState();
+    if (game.index + 1 < game.rounds.length) game.index += 1;
+    else {
+      game.done = true;
+      game.isNewBest = recordSectionResult(currentProfile(), "house", `${game.roomId}:${game.mode}`, game.firstTry, game.rounds.length);
+      if (game.firstTry === game.rounds.length) burstConfetti(60);
+      announceBadges(checkNewBadges(currentProfile()));
+    }
+    set({});
+  },
+  again: () => {
+    const { house: game } = store.getState();
+    set({ house: newHouseGame(game.roomId, game.mode) });
+  },
+  other: () => {
+    const { house: game } = store.getState();
+    set({ house: newHouseGame(game.roomId, game.mode === "listen" ? "look" : "listen") });
+  },
+  list: () => set({ screen: "houseList" }),
+  quit: () => {
+    const { house: game } = store.getState();
+    set({ screen: game.roomId === "all" ? "houseList" : "houseRoom", houseRoomId: game.roomId });
+  },
+};
 
 ;
 
@@ -34661,6 +34938,7 @@ const QUIZ_QUIT_TARGET = {
   diagnosis: (s) => (!s.diag || s.diag.done ? null : "home"),
   wordRain: (s) => (s.wordrain.done ? null : "wordRainList"),
   pairs: (s) => (s.pairs.done ? null : "pairsList"),
+  houseGame: (s) => (s.house.done ? null : s.house.roomId === "all" ? "houseList" : "houseRoom"),
   draw: (s) => (s.draw.done ? null : "drawSetup"),
 };
 
@@ -34679,7 +34957,9 @@ function parentScreen(state) {
     case "wordLists": case "typingList": case "monster":
     case "diagnosis": case "roadmap": case "wordRainList":
     case "advent": case "pairsList": case "drawSetup": case "chantList": case "cultureList":
-    case "schoolList": case "vacation": return "home";
+    case "schoolList": case "vacation": case "houseList": return "home";
+    case "houseRoom": return "houseList";
+    case "houseGame": return state.house?.roomId === "all" ? "houseList" : "houseRoom";
     case "schoolTalk": return "schoolList";
     case "pairs": return "pairsList";
     case "draw": return "drawSetup";
@@ -34750,7 +35030,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation", "houseList",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -34939,6 +35219,7 @@ function render() {
           openWordLists: () => set({ screen: "wordLists" }),
           openDiagnosis: () => set({ diag: null, screen: "diagnosis" }),
           openSchool: () => set({ screen: "schoolList" }),
+          openHouse: () => set({ screen: "houseList" }),
           openVacation: () => set({ vacationEdit: false, screen: "vacation" }),
           openAdvent: () => set({ adventDay: adventInfo().openUpTo || null, screen: "advent" }),
           openPairs: () => set({ screen: "pairsList" }),
@@ -35183,6 +35464,21 @@ function render() {
         write: (tplId) => set({ diaryDraft: { tplId, picks: findDiaryTemplate(tplId).lines.map(() => null) }, screen: "diaryWrite" }),
         back: goHome,
       }),
+    houseList: () =>
+      renderHouseListScreen(root, {
+        profileName: state.profileName,
+        open: (houseRoomId) => set({ houseRoomId, screen: "houseRoom" }),
+        start: (roomId, mode) => set({ house: newHouseGame(roomId, mode), houseRoomId: roomId, screen: "houseGame" }),
+        back: goHome,
+      }),
+    houseRoom: () =>
+      renderHouseRoomScreen(root, {
+        profileName: state.profileName,
+        roomId: state.houseRoomId,
+        start: (roomId, mode) => set({ house: newHouseGame(roomId, mode), screen: "houseGame" }),
+        back: () => set({ screen: "houseList" }),
+      }),
+    houseGame: () => renderHouseGameScreen(root, { game: state.house, actions: houseActions }),
     schoolList: () => renderSchoolListScreen(root, { profileName: state.profileName, open: (schoolTalkId) => set({ schoolTalkId, screen: "schoolTalk" }), back: goHome }),
     schoolTalk: () =>
       renderSchoolTalkScreen(root, {

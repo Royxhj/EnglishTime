@@ -2415,3 +2415,29 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .school-line.now p { outline: 2px solid var(--primary); }
 .school-who { font-size: 22px; }
 .screen-school .rec-row { justify-content: flex-start; margin: -4px 0 8px 38px; }
+
+/* ── 🏠 우리 집 물건 찾기 ── */
+.house-room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.house-room-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; border: none; border-radius: 18px; padding: 14px 8px; background: var(--room); color: #333; box-shadow: var(--shadow); font: inherit; cursor: pointer; }
+.house-room-emoji { font-size: 40px; line-height: 1.1; }
+.house-room-card small { color: #666; font-size: 12px; }
+.house-room-best { position: absolute; top: 6px; right: 8px; font-size: 12px; }
+.house-room { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: var(--room); border-radius: 20px; padding: 10px; box-shadow: var(--shadow); }
+.house-item { display: flex; flex-direction: column; align-items: center; gap: 2px; border: 3px solid transparent; border-radius: 16px; background: rgba(255, 255, 255, 0.85); color: #333; padding: 8px 4px; font: inherit; cursor: pointer; min-width: 0; }
+.house-item b { font-size: 15px; overflow-wrap: anywhere; text-align: center; }
+.house-item small { font-size: 11px; color: #666; text-align: center; overflow-wrap: anywhere; }
+.house-item.pop { animation: petBounce 0.4s ease; }
+.house-item.correct { border-color: var(--correct); background: #e6f7ea; }
+.house-item.wrong { opacity: 0.45; animation: shake 0.4s ease; }
+.house-room.play .house-item { aspect-ratio: 1; justify-content: center; }
+.house-emoji { font-size: 40px; line-height: 1.1; }
+.house-emoji.big { font-size: 96px; }
+.house-svg { width: 46px; height: 46px; }
+.house-svg.big { width: 120px; height: 120px; }
+.house-ask { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.house-ask p { flex-basis: 100%; text-align: center; margin: 0; }
+.house-hint { color: var(--muted); font-size: 14px; }
+.house-answer { font-size: 18px; }
+.house-look { display: flex; flex-direction: column; align-items: center; gap: 6px; background: var(--room); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); color: #333; }
+.house-look p { margin: 0; }
+.house-stars { text-align: center; font-size: 44px; letter-spacing: 6px; }
