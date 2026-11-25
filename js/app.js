@@ -102,6 +102,7 @@ const startIrregularTest = (setId) => startMc({ type: "irregular", id: setId }, 
 const startTopicQuiz = (topicId) => startMc({ type: "topic", id: topicId }, buildTopicQuestions(topicId));
 const startNumbers = (setId) => startMc({ type: "numbers", id: setId }, buildNumberQuestions(setId));
 const startSounds = (setId) => startMc({ type: "sounds", id: setId }, buildSoundQuestions(setId));
+const startRiddles = (setId) => startMc({ type: "riddle", id: setId }, buildRiddleQuestions(setId));
 const startStoryQuiz = (chapterId) => startMc({ type: "story", id: chapterId }, buildReadingQuestions(findStoryChapter(chapterId).chapter));
 const openStoryChapter = (chapterId) => set({ storyChapterId: chapterId, screen: "storyRead" });
 
@@ -154,6 +155,10 @@ function mcSourceInfo(source) {
     const ss = SOUND_PAIR_SETS.find((x) => x.id === source.id);
     return { label: ss ? `${ss.emoji} ${ss.title}` : "🎲 소리 구별 모두 섞기", level: null, quitTo: "soundsList", listScreen: "soundsList" };
   }
+  if (source.type === "riddle") {
+    const rs = RIDDLE_SETS.find((x) => x.id === source.id);
+    return { label: `❓ ${rs.label}`, level: null, quitTo: "riddleList", listScreen: "riddleList" };
+  }
   if (source.type === "story") {
     const { series, chapter } = findStoryChapter(source.id);
     return { label: `${series.emoji} ${series.title} ${chapter.no}장`, level: levelById(series.levelId), contextHtml: passageContextHtml(chapter), quitTo: "storyRead", listScreen: "storyList" };
@@ -199,7 +204,7 @@ function nextMcQuestion() {
   if (mc.source.type === "listening") isNewBest = recordSectionResult(currentProfile(), "listening", mc.source.id, correct, total);
   if (mc.source.type === "verbPattern") isNewBest = recordSectionResult(currentProfile(), "verbPattern", mc.source.id, correct, total);
   if (mc.source.type === "daily") recordDaily(currentProfile(), correct, total);
-  if (["topic", "numbers", "sounds", "story"].includes(mc.source.type)) isNewBest = recordSectionResult(currentProfile(), mc.source.type, mc.source.id, correct, total);
+  if (["topic", "numbers", "sounds", "story", "riddle"].includes(mc.source.type)) isNewBest = recordSectionResult(currentProfile(), mc.source.type, mc.source.id, correct, total);
   if (mc.source.type === "weekly") isNewBest = recordSectionResult(currentProfile(), "weekly", mc.source.id, correct, total);
   set({ mc: { ...mc, isNewBest }, screen: "mcResult" });
   announceBadges(checkNewBadges(currentProfile()));
@@ -329,6 +334,17 @@ function mcResultActions(source, hasWrong) {
         { label: "📋 단어 다시 보기", onClick: () => set({ topicId: source.id, screen: "topicView" }) },
         ...(next ? [{ label: `다음 주제: ${next.emoji} ${next.title}`, onClick: () => set({ topicId: next.id, screen: "topicView" }) }] : []),
         { label: "주제 목록", onClick: () => set({ screen: "topicList" }) },
+      ],
+    };
+  }
+  if (source.type === "riddle") {
+    const next = RIDDLE_SETS[RIDDLE_SETS.findIndex((x) => x.id === source.id) + 1];
+    return {
+      actions: [
+        { label: "🔁 새 수수께끼로 다시", primary: true, onClick: () => startRiddles(source.id) },
+        ...(next ? [{ label: `다음: ${next.emoji} ${next.label}`, onClick: () => startRiddles(next.id) }] : []),
+        { label: "수수께끼 목록", onClick: () => set({ screen: "riddleList" }) },
+        { label: "🏠 홈으로", onClick: goHome },
       ],
     };
   }
@@ -1210,6 +1226,9 @@ const QUIZ_QUIT_TARGET = {
   battle: (s) => (s.battle.done ? null : "battleSetup"),
   wordChain: (s) => (s.chain.done ? null : "chainList"),
   bingo: (s) => (s.bingo.done ? null : "bingoSetup"),
+  wordSearch: (s) => (s.wordsearch.done ? null : "wordSearchList"),
+  wordGuess: (s) => (s.guess.done ? null : "wordGuessList"),
+  dictation: (s) => (s.dictation.done ? null : "dictationList"),
 };
 
 function parentScreen(state) {
@@ -1222,7 +1241,11 @@ function parentScreen(state) {
     case "idioms": case "affixes": case "examList": case "goals": case "crosswordList": case "family": case "practiceList":
     case "pictureList": case "stickers": case "memory": case "spellingList":
     case "topicList": case "numbersList": case "soundsList": case "storyList": case "diaryList": case "speedList": case "battleSetup": case "shop":
-    case "chainList": case "bingoSetup": case "calendar": case "printSetup": return "home";
+    case "chainList": case "bingoSetup": case "calendar": case "printSetup":
+    case "wordSearchList": case "wordGuessList": case "riddleList": case "dictationList": return "home";
+    case "wordSearch": return "wordSearchList";
+    case "wordGuess": return "wordGuessList";
+    case "dictation": return "dictationList";
     case "wordChain": return "chainList";
     case "bingo": return "bingoSetup";
     case "printSheet": return "printSetup";
@@ -1279,7 +1302,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -1456,6 +1479,10 @@ function render() {
           openBattle: openBattleSetup,
           openCalendar: () => set({ calendarOffset: 0, screen: "calendar" }),
           openChain: () => set({ screen: "chainList" }),
+          openWordSearch: () => set({ screen: "wordSearchList" }),
+          openWordGuess: () => set({ screen: "wordGuessList" }),
+          openRiddles: () => set({ screen: "riddleList" }),
+          openDictation: () => set({ screen: "dictationList" }),
           openBingo: () => set({ screen: "bingoSetup" }),
           openPrint: () => set({ screen: "printSetup" }),
           startWeekly,
@@ -1676,6 +1703,21 @@ function render() {
         write: (tplId) => set({ diaryDraft: { tplId, picks: findDiaryTemplate(tplId).lines.map(() => null) }, screen: "diaryWrite" }),
         back: goHome,
       }),
+    wordSearchList: () =>
+      renderWordSearchListScreen(root, {
+        profileName: state.profileName,
+        start: (levelId) => {
+          const game = buildWordSearch(levelId);
+          if (game) set({ wordsearch: game, screen: "wordSearch" });
+        },
+        back: goHome,
+      }),
+    wordSearch: () => renderWordSearchScreen(root, { game: state.wordsearch, actions: wordSearchActions }),
+    wordGuessList: () => renderWordGuessListScreen(root, { profileName: state.profileName, start: (levelId) => set({ guess: newWordGuess(levelId), screen: "wordGuess" }), back: goHome }),
+    wordGuess: () => renderWordGuessScreen(root, { game: state.guess, actions: wordGuessActions }),
+    riddleList: () => renderRiddleListScreen(root, { profileName: state.profileName, start: startRiddles, back: goHome }),
+    dictationList: () => renderDictationListScreen(root, { profileName: state.profileName, start: (levelId) => set({ dictation: newDictation(levelId), screen: "dictation" }), back: goHome }),
+    dictation: () => renderDictationScreen(root, { game: state.dictation, actions: dictationActions }),
     chainList: () => renderWordChainListScreen(root, { profileName: state.profileName, start: startChain, back: goHome }),
     wordChain: () => renderWordChainScreen(root, { game: state.chain, actions: chainActions }),
     bingoSetup: () => renderBingoSetupScreen(root, { profileName: state.profileName, startSolo: startBingoSolo, startDuo: startBingoDuo, back: goHome }),

@@ -2113,3 +2113,63 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
   .print-list { columns: 2; }
   .print-answers { break-before: page; border-top: none; margin-top: 0; }
 }
+
+/* ── ⭐ 내 메뉴 고정 ── */
+.tile { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; position: relative; }
+.tile.pinned::after { content: "📌"; position: absolute; top: 4px; right: 6px; font-size: 11px; }
+.pin-group.pin-empty #pinGrid { display: none; }
+.pin-group:not(.pin-empty) .pin-tip { display: none; }
+.pin-group.pin-empty .group-title { display: none; }
+.pin-tip { margin: 0; font-size: 13px; color: var(--muted); background: var(--surface-2); border-radius: 12px; padding: 8px 12px; }
+
+/* ── 🔍 단어 찾기 ── */
+.ws-grid { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 3px; touch-action: none; user-select: none; -webkit-user-select: none; background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); padding: 6px; }
+.ws-cell { aspect-ratio: 1; border: none; border-radius: 8px; background: var(--surface-2); color: var(--text); font: inherit; font-weight: 800; font-size: clamp(14px, 4.4vw, 20px); text-transform: uppercase; padding: 0; min-width: 0; cursor: pointer; touch-action: none; }
+.ws-cell.found { background: color-mix(in srgb, var(--wc) 45%, var(--card-bg)); }
+.ws-cell.drag, .ws-cell.sel { background: color-mix(in srgb, var(--primary) 55%, var(--card-bg)); color: #fff; }
+.ws-cell.hint { outline: 3px dashed var(--wrong); outline-offset: -3px; }
+.ws-cell:disabled { cursor: default; }
+.ws-words { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.ws-word { display: flex; align-items: center; gap: 6px; background: var(--card-bg); border-radius: 12px; box-shadow: var(--shadow); padding: 6px 10px; font-size: 14px; min-width: 0; }
+.ws-word small { color: var(--muted); font-size: 12px; margin-left: auto; text-align: right; }
+.ws-word.found { background: color-mix(in srgb, var(--wc) 25%, var(--card-bg)); }
+.ws-word.found b { text-decoration: line-through; }
+.ws-blank { letter-spacing: 1px; color: var(--muted); }
+
+/* ── 🕵️ 단어 추리 ── */
+.guess-pond { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 24px; background: color-mix(in srgb, #4dabf7 18%, var(--card-bg)); border-radius: 16px; padding: 8px; }
+.guess-frog { font-size: 30px; }
+.guess-frog.splash { animation: shake 0.4s ease; }
+.guess-clue { display: flex; align-items: center; gap: 14px; justify-content: center; background: var(--card-bg); border-radius: 20px; box-shadow: var(--shadow); padding: 14px; }
+.guess-emoji { font-size: 48px; line-height: 1; }
+.guess-clue p { margin: 0; display: flex; flex-direction: column; font-size: 20px; }
+.guess-clue small { color: var(--muted); font-size: 13px; }
+.guess-slots { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.guess-slot { width: 34px; height: 42px; border-bottom: 3px solid var(--primary); display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 800; }
+.guess-slot.open { color: var(--correct); }
+.guess-slot.miss { color: var(--wrong); }
+.guess-keys { display: flex; flex-direction: column; gap: 6px; }
+.guess-row { display: flex; justify-content: center; gap: 4px; }
+.guess-key { flex: 1; max-width: 40px; min-width: 0; height: 44px; border: none; border-radius: 8px; background: var(--card-bg); color: var(--text); box-shadow: var(--shadow); font: inherit; font-size: 18px; font-weight: 800; cursor: pointer; padding: 0; }
+.guess-key.hit { background: var(--correct); color: #fff; }
+.guess-key.miss { opacity: 0.35; }
+.guess-results { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.guess-results li { display: flex; align-items: center; gap: 6px; background: var(--card-bg); border-radius: 12px; box-shadow: var(--shadow); padding: 8px 12px; }
+.guess-results small { color: var(--muted); }
+.guess-results .chip-btn { margin-left: auto; }
+
+/* ── ❓ 수수께끼 ── */
+.riddle-ko { margin-top: 6px; }
+.riddle-ko summary { cursor: pointer; color: var(--primary-dark, var(--primary)); font-weight: 700; font-size: 14px; }
+
+/* ── 🎧 문장 받아쓰기 ── */
+.dict-form { display: flex; flex-direction: column; gap: 8px; }
+.dict-input { font: inherit; font-size: 18px; padding: 10px 12px; border-radius: 12px; border: 2px solid color-mix(in srgb, var(--primary) 40%, transparent); background: var(--card-bg); color: var(--text); resize: vertical; min-height: 80px; }
+.dict-answer { margin: 4px 0; font-size: 15px; color: var(--muted); }
+.dict-review { padding-left: 20px; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.dict-review li { line-height: 1.5; }
+.dict-review small { display: block; color: var(--muted); font-size: 13px; }
+
+/* ── 📨 주간 요약 ── */
+.summary-preview { white-space: pre-wrap; font-family: inherit; font-size: 13px; background: var(--surface-2); border-radius: 12px; padding: 10px 12px; margin: 6px 0; overflow-wrap: anywhere; }
+.summary-btns { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }

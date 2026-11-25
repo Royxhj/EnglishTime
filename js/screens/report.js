@@ -42,6 +42,16 @@ function renderReportScreen(root, { profileName, actions }) {
         <div class="stat-card"><span class="stat-value">🏅 ${earnedCount}</span><span class="stat-label">배지 / ${BADGES.length}</span></div>
       </div>
 
+      <section class="settings-card summary-card">
+        <h2 class="section-title">📨 이번 주 요약</h2>
+        <p class="settings-help">공부한 날 · 푼 문제 · 자주 틀린 단어를 글로 정리해요. 가족 단톡방에 붙여 넣어 보세요.</p>
+        <pre class="summary-preview">${escapeHtml(weeklySummaryText(profileName))}</pre>
+        <div class="summary-btns">
+          <button class="secondary-btn" id="copySummaryBtn">📋 복사하기</button>
+          ${navigator.share ? `<button class="secondary-btn" id="shareSummaryBtn">📤 보내기</button>` : ""}
+        </div>
+      </section>
+
       <section class="settings-card">
         <h2 class="section-title">📚 공부 기록</h2>
         <ul class="bar-list">
@@ -165,6 +175,9 @@ function renderReportScreen(root, { profileName, actions }) {
               { name: "🗂️ 주제별 단어", pct: pct(sectionDone("topic", TOPIC_WORD_GROUPS), TOPIC_WORD_GROUPS.length), value: `${sectionDone("topic", TOPIC_WORD_GROUPS)}/${TOPIC_WORD_GROUPS.length}` },
               { name: "🔢 숫자 · 시간 정답률", pct: avgPct("numbers", NUMBER_SETS.map((s) => s.id)), value: null },
               { name: "👂 소리 구별 정답률", pct: avgPct("sounds", ["all", ...SOUND_PAIR_SETS.map((s) => s.id)]), value: null },
+              { name: "🎧 문장 받아쓰기 점수", pct: avgPct("sentdict", LEVELS.map((lv) => lv.id)), value: null },
+              { name: "🕵️ 단어 추리 정답률", pct: avgPct("wordguess", LEVELS.map((lv) => lv.id)), value: null },
+              { name: "❓ 수수께끼 정답률", pct: avgPct("riddle", RIDDLE_SETS.map((x) => x.id)), value: null },
               { name: "🗣️ 소리 내어 읽은 글", pct: null, value: `${Object.values(profile.aloud.best).filter((b) => b.correct === b.total).length}편` },
             ];
             return rows
@@ -174,11 +187,12 @@ function renderReportScreen(root, { profileName, actions }) {
         </ul>
         <div class="family-stats report-fun">
           <div><b>${Math.max(0, ...Object.values(profile.speed.best).map((b) => b.correct))}</b><small>⏱️ 60초 퀴즈 최고</small></div>
-          <div><b>${Math.max(0, ...Object.values(profile.wordchain.best).map((b) => b.correct))}</b><small>🔤 끝말잇기 최고</small></div>
+          <div><b>${Math.max(0, ...Object.values(profile.wordchain.best).map((b) => b.correct))}</b><small>🐍 끝말잇기 최고</small></div>
           <div><b>${profile.battleWins}</b><small>⚔️ 가족 대결 승리</small></div>
           <div><b>${profile.diary.length}</b><small>📓 쓴 일기</small></div>
           <div><b>${Object.keys(profile.bingo.best).length}</b><small>🎱 빙고 단계</small></div>
           <div><b>${profile.perfectMonths.length}</b><small>📆 개근한 달</small></div>
+          <div><b>${Object.values(profile.wordsearch.best).reduce((a, b) => a + b.total, 0)}</b><small>🔍 단어 찾기 완성</small></div>
         </div>
         <button class="secondary-btn" id="calendarBtn">📆 출석 달력 보기</button>
       </section>
@@ -210,6 +224,8 @@ function renderReportScreen(root, { profileName, actions }) {
   root.querySelector("#backBtn").addEventListener("click", actions.back);
   root.querySelector("#wrongNoteBtn").addEventListener("click", actions.openWrongNote);
   root.querySelector("#calendarBtn").addEventListener("click", actions.openCalendar);
+  root.querySelector("#copySummaryBtn").addEventListener("click", () => shareWeeklySummary(profileName, "copy"));
+  root.querySelector("#shareSummaryBtn")?.addEventListener("click", () => shareWeeklySummary(profileName, "share"));
   root.querySelector("#vocabBtn")?.addEventListener("click", actions.openVocab);
   root.querySelectorAll("[data-topic]").forEach((btn) => btn.addEventListener("click", () => actions.openTopic(btn.dataset.topic)));
 }

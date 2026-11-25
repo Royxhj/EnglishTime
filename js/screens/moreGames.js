@@ -1,6 +1,6 @@
-// 🔤 영어 끝말잇기 · 🎱 단어 빙고 · 📆 출석 달력 · 🖨️ 인쇄용 단어 시험지
+// 🐍 영어 끝말잇기 · 🎱 단어 빙고 · 📆 출석 달력 · 🖨️ 인쇄용 단어 시험지
 
-// ── 🔤 영어 끝말잇기: 앞 단어의 마지막 글자로 시작하는 단어를 이어 간다 ──
+// ── 🐍 영어 끝말잇기: 앞 단어의 마지막 글자로 시작하는 단어를 이어 간다 ──
 const CHAIN_LIVES = 3;
 let chainByLetter = null;
 
@@ -75,7 +75,7 @@ function renderWordChainListScreen(root, { profileName, start, back }) {
   root.innerHTML = `
     <div class="screen screen-chain">
       <button class="back-btn" id="backBtn">← 홈</button>
-      <h1 class="title">🔤 영어 끝말잇기</h1>
+      <h1 class="title">🐍 영어 끝말잇기</h1>
       <p class="subtitle">컴퓨터 🤖와 번갈아 단어를 이어요 · apple → egg → green …</p>
       <section class="lesson-section"><p class="lesson-point-text">앞 단어의 <b>마지막 글자</b>로 시작하는 단어를 골라요. 틀리면 ❤️가 하나 줄고, 직접 써도 돼요. 컴퓨터가 막히면 내가 이겨요!</p></section>
       ${levelSplitHtml(mine.map(card).join(""), others.map(card).join(""), others.length)}
@@ -94,7 +94,7 @@ function renderWordChainScreen(root, { game, actions }) {
   if (game.done) {
     root.innerHTML = `
       <div class="screen screen-chain"${levelThemeStyle(level)}>
-        <h1 class="title">🔤 끝말잇기 결과</h1>
+        <h1 class="title">🐍 끝말잇기 결과</h1>
         <div class="result-banner ${game.result === "win" ? "correct" : "wrong"}" role="status">
           ${game.result === "win" ? `🎉 컴퓨터가 "${chainNeed(game)}"로 시작하는 단어를 못 찾았어요. 내가 이겼어요!` : "💔 하트를 다 썼어요. 다음엔 이길 수 있어요!"}
         </div>

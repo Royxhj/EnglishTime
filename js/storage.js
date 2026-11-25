@@ -135,7 +135,8 @@ function normalizeProfile(profile) {
   p.shop.equip ||= {};
   if (!Array.isArray(p.perfectMonths)) p.perfectMonths = [];
   p.battleWins ||= 0;
-  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud"]) {
+  if (!Array.isArray(p.homePins)) p.homePins = [];
+  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict"]) {
     p[section] ||= { best: {}, wrong: {} };
     p[section].best ||= {};
     p[section].wrong ||= {};
@@ -325,6 +326,15 @@ function recordBestCount(profileName, section, id, correct, total) {
     const isNewBest = correct > 0 && (!prev || correct > prev.correct);
     if (isNewBest) profile[section].best[id] = { correct, total };
     return isNewBest;
+  });
+}
+
+// 단어 찾기: 단계별로 완성한 횟수를 센다 ({ correct: 횟수, total: 횟수 })
+function recordWordSearchDone(profileName, levelId) {
+  updateProfile(profileName, (profile) => {
+    profile.lessonDay = dateKey();
+    const n = (profile.wordsearch.best[levelId]?.total || 0) + 1;
+    profile.wordsearch.best[levelId] = { correct: n, total: n };
   });
 }
 
@@ -567,6 +577,25 @@ function recordBattleWin(profileName) {
   });
 }
 
+// ⭐ 홈 '내 메뉴'에 고정한 타일 id (꾹 눌러 고정/해제)
+const HOME_PIN_MAX = 8;
+const isPinId = (id) => typeof id === "string" && /^[a-zA-Z]{2,30}Btn$/.test(id);
+function getHomePins(profileName) {
+  return getProfileData(profileName).homePins.filter(isPinId);
+}
+
+function toggleHomePin(profileName, id) {
+  if (!isPinId(id)) return false;
+  return updateProfile(profileName, (profile) => {
+    if (profile.homePins.includes(id)) {
+      profile.homePins = profile.homePins.filter((x) => x !== id);
+      return false;
+    }
+    profile.homePins = [...profile.homePins, id].slice(-HOME_PIN_MAX);
+    return true;
+  });
+}
+
 function saveBadges(profileName, ids) {
   updateProfile(profileName, (profile) => {
     for (const id of ids) profile.badges[id] ||= dateKey();
@@ -644,6 +673,7 @@ function importBackup(data) {
       .slice(0, DIARY_KEEP);
     p.perfectMonths = p.perfectMonths.filter((m) => typeof m === "string" && /^\d{4}-\d{2}$/.test(m)).slice(0, 120);
     p.battleWins = Math.max(0, Math.floor(Number(p.battleWins) || 0));
+    p.homePins = [...new Set(p.homePins.filter(isPinId))].slice(0, HOME_PIN_MAX);
     const owned = p.shop.owned.filter((id) => shopItem(id));
     p.shop = {
       spent: Math.max(0, Number(p.shop.spent) || 0),

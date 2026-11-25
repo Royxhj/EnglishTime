@@ -36,9 +36,13 @@ const BADGES = [
   { id: "shopFirst", emoji: "🛍️", title: "첫 쇼핑", desc: "별 상점에서 처음 꾸미기", test: (p) => p.shop.owned.length >= 1 },
   { id: "soundsPerfect", emoji: "👂", title: "소리 탐정", desc: "소리 구별 10문제 만점", test: (p) => perfectCount(p.sounds.best) >= 1 },
   { id: "numbersAll", emoji: "🔢", title: "숫자 박사", desc: "숫자 · 시간 6묶음 모두 80% 이상", test: (p) => NUMBER_SETS.every((s) => ratioAtLeast(p.numbers.best[s.id], 0.8)) },
-  { id: "chain10", emoji: "🔤", title: "끝말잇기 왕", desc: "끝말잇기에서 10개 이어 가기", test: (p) => Object.values(p.wordchain.best).some((b) => b.correct >= 10) },
+  { id: "chain10", emoji: "🐍", title: "끝말잇기 왕", desc: "끝말잇기에서 10개 이어 가기", test: (p) => Object.values(p.wordchain.best).some((b) => b.correct >= 10) },
   { id: "bingo", emoji: "🎱", title: "빙고!", desc: "단어 빙고 완성하기", test: (p) => Object.keys(p.bingo.best).length >= 1 },
   { id: "aloudAll", emoji: "🗣️", title: "낭독왕", desc: "지문 · 이야기 한 장을 모두 소리 내어 읽기", test: (p) => Object.values(p.aloud.best).some((b) => b.correct === b.total) },
+  { id: "wordSearch", emoji: "🔍", title: "숨은 단어 탐험가", desc: "단어 찾기 퍼즐 완성하기", test: (p) => Object.keys(p.wordsearch.best).length >= 1 },
+  { id: "wordGuess", emoji: "🕵️", title: "명탐정", desc: "단어 추리 5개 모두 맞히기", test: (p) => perfectCount(p.wordguess.best) >= 1 },
+  { id: "riddle", emoji: "❓", title: "수수께끼 박사", desc: "영어 수수께끼 만점", test: (p) => perfectCount(p.riddle.best) >= 1 },
+  { id: "dictation", emoji: "📝", title: "받아쓰기 달인", desc: "문장 받아쓰기 90점 이상", test: (p) => Object.values(p.sentdict.best).some((b) => b.correct / b.total >= 0.9) },
   { id: "perfectMonth", emoji: "📆", title: "개근상", desc: "한 달 동안 하루도 빠짐없이 공부하기", test: (p) => p.perfectMonths.length >= 1 },
   { id: "goalWeek", emoji: "🎯", title: "목표 달성", desc: "이번 주 목표 모두 이루기", test: (p, name) => {
       const s = goalSummary(name);
