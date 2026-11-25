@@ -209,11 +209,11 @@ function shopStatus(profileName) {
 }
 
 // 꾸민 캐릭터: 모자 + 캐릭터 + 친구
-function dressedPetHtml(profileName, petEmoji, big) {
+function dressedPetHtml(profileName, petEmoji, big, scale = 1) {
   const { equip } = shopStatus(profileName);
   const hat = shopItem(equip.hat);
   const pal = shopItem(equip.pal);
-  return `<span class="pet-avatar${big ? " big" : ""}">${hat ? `<span class="pet-hat" aria-hidden="true">${hat.emoji}</span>` : ""}<span class="pet-emoji" aria-hidden="true">${petEmoji}</span>${pal ? `<span class="pet-pal" aria-hidden="true">${pal.emoji}</span>` : ""}</span>`;
+  return `<span class="pet-avatar${big ? " big" : ""}">${hat ? `<span class="pet-hat" aria-hidden="true">${hat.emoji}</span>` : ""}<span class="pet-emoji" aria-hidden="true"${scale !== 1 ? ` style="display:inline-block;transform:scale(${scale});transform-origin:bottom center"` : ""}>${petEmoji}</span>${pal ? `<span class="pet-pal" aria-hidden="true">${pal.emoji}</span>` : ""}</span>`;
 }
 
 function petBackgroundStyle(profileName) {
@@ -231,7 +231,7 @@ function renderShopScreen(root, { profileName, actions }) {
       <h1 class="title">⭐ 별 상점</h1>
       <p class="subtitle">문제를 ${STAR_EVERY}개 풀 때마다 ⭐ 1개 · 다음 별까지 ${s.toNext}문제</p>
       <section class="pet-big${theme.cls}"${theme.style}>
-        ${dressedPetHtml(profileName, pet.stage.emoji, true)}
+        ${dressedPetHtml(profileName, pet.stage.emoji, true, pet.stage.scale)}
         <p class="shop-stars">⭐ <b>${s.stars}</b>개 있어요</p>
       </section>
       ${SHOP_CATS.map(
