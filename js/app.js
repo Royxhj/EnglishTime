@@ -859,7 +859,9 @@ const roleplayActions = {
 
 // "이어서 하기" 열기 (홈 · 오늘의 학습 결과에서 같이 쓴다)
 function openNextStep(step) {
-  if (step.type === "lesson") startBasic(step.id);
+  if (step.type === "passage") set({ passageId: step.id, readingMode: "read", screen: "passage" });
+  else if (step.type === "story") openStoryChapter(step.id);
+  else if (step.type === "lesson") startBasic(step.id);
   else if (step.type === "listening") startListening(step.id);
   else if (step.type === "exam") startExam(step.id);
   else if (step.type === "crossword") startCrossword(step.id);
@@ -1255,6 +1257,8 @@ const QUIZ_QUIT_TARGET = {
   wordListTest: (s) => (s.wlTest.done ? null : "wordListView"),
   typing: (s) => (s.typing.done ? null : "typingList"),
   monster: (s) => (s.monster.done ? null : "home"),
+  diagnosis: (s) => (!s.diag || s.diag.done ? null : "home"),
+  wordRain: (s) => (s.wordrain.done ? null : "wordRainList"),
 };
 
 function parentScreen(state) {
@@ -1269,7 +1273,10 @@ function parentScreen(state) {
     case "topicList": case "numbersList": case "soundsList": case "storyList": case "diaryList": case "speedList": case "battleSetup": case "shop":
     case "chainList": case "bingoSetup": case "calendar": case "printSetup":
     case "wordSearchList": case "wordGuessList": case "riddleList": case "dictationList":
-    case "wordLists": case "typingList": case "monster": return "home";
+    case "wordLists": case "typingList": case "monster":
+    case "diagnosis": case "roadmap": case "wordRainList": return "home";
+    case "certificate": return "report";
+    case "wordRain": return "wordRainList";
     case "wordListEdit": return state.wordListId && findWordList(state.profileName, state.wordListId) ? "wordListView" : "wordLists";
     case "wordListView": return "wordLists";
     case "wordListTest": return "wordListView";
@@ -1333,7 +1340,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -1402,6 +1409,12 @@ function render() {
     lastViewKey = viewKey;
   }
 
+  // 🔒 부모님 잠금: 잠긴 화면은 비밀번호를 먼저 묻는다
+  if (LOCKED_SCREENS.includes(state.screen) && !parentUnlocked()) {
+    renderParentLockScreen(root, { onUnlock: () => set({}), onCancel: () => set({ screen: parentScreen(state) || "home" }) });
+    return;
+  }
+
   const screens = {
     profile: () =>
       renderProfileScreen(root, {
@@ -1452,6 +1465,7 @@ function render() {
           openTopic: (topicId) => set({ grammarTopicId: topicId, screen: "grammarNote" }),
           openVocab,
           openCalendar: () => set({ calendarOffset: 0, screen: "calendar" }),
+          openCertificate: () => set({ certOffset: new Date().getDate() <= 7 ? -1 : 0, screen: "certificate" }),
         },
       }),
 
@@ -1512,6 +1526,9 @@ function render() {
           openChain: () => set({ screen: "chainList" }),
           openWordSearch: () => set({ screen: "wordSearchList" }),
           openWordLists: () => set({ screen: "wordLists" }),
+          openDiagnosis: () => set({ diag: null, screen: "diagnosis" }),
+          openRoadmap: () => set({ screen: "roadmap" }),
+          openWordRain: () => set({ screen: "wordRainList" }),
           openTyping: () => set({ screen: "typingList" }),
           startMonster: () => set({ monster: newMonsterBattle(state.profileName), screen: "monster" }),
           openWordGuess: () => set({ screen: "wordGuessList" }),
@@ -1737,6 +1754,11 @@ function render() {
         write: (tplId) => set({ diaryDraft: { tplId, picks: findDiaryTemplate(tplId).lines.map(() => null) }, screen: "diaryWrite" }),
         back: goHome,
       }),
+    diagnosis: () => renderDiagnosisScreen(root, { profileName: state.profileName, game: state.diag, actions: diagnosisActions }),
+    roadmap: () => renderRoadmapScreen(root, { profileName: state.profileName, actions: { back: goHome, open: openNextStep, diagnose: () => set({ diag: null, screen: "diagnosis" }) } }),
+    wordRainList: () => renderWordRainListScreen(root, { profileName: state.profileName, start: (levelId) => set({ wordrain: newWordRain(levelId), screen: "wordRain" }), back: goHome }),
+    wordRain: () => renderWordRainScreen(root, { game: state.wordrain, actions: wordRainActions }),
+    certificate: () => renderCertificateScreen(root, { profileName: state.profileName, offset: state.certOffset || 0, setOffset: (certOffset) => set({ certOffset }), back: () => set({ screen: "report" }) }),
     wordLists: () =>
       renderWordListsScreen(root, {
         profileName: state.profileName,

@@ -98,7 +98,7 @@ function levelProgressHtml(profileName) {
       <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${prog.percent}" aria-label="${shortLevelLabel(prog.level)} 단계 진행률">
         <span class="progress-fill" style="width:${prog.percent}%"></span>
       </div>
-      <p class="progress-parts">${prog.parts.map((p) => `${p.label} ${p.done}/${p.total}`).join(" · ")}</p>
+      <p class="progress-parts">${prog.parts.map((p) => `${p.label} ${p.done}/${p.total}`).join(" · ")} <button class="link-btn" id="roadmapLink">🗺️ 지도 보기</button></p>
       ${prog.percent >= 80 && nextLevel ? `<button class="link-btn" id="levelUpBtn">🚀 거의 다 했어요! ${shortLevelLabel(nextLevel)} 단계로 올라가기</button>` : ""}
     </section>`;
 }
@@ -192,6 +192,7 @@ function renderHomeScreen(root, ctx) {
         </div>
       </div>
 
+      ${backupReminderHtml()}
       ${isKid ? petCardHtml(profileName) : ""}
       ${levelProgressHtml(profileName)}
       ${todayCardHtml(profileName, { daily, dueWrong, wrongTotal, next })}
@@ -207,6 +208,8 @@ function renderHomeScreen(root, ctx) {
         <h2 class="group-title">📚 배우기</h2>
         <div class="tile-grid">
           ${show.phonics ? homeTile({ id: "phonicsBtn", emoji: "🔤", title: "파닉스", meta: `${lessonDoneCount(profileName, PHONICS_TOPICS)} / ${PHONICS_TOPICS.length}` }) : ""}
+          ${homeTile({ id: "roadmapBtn", emoji: "🗺️", title: "학습 지도", meta: level ? "다음 정거장 보기" : "단계를 먼저 정해요" })}
+          ${homeTile({ id: "diagBtn", emoji: "🎯", title: "단계 진단", meta: getProfileData(profileName).diag ? `추천 ${shortLevelLabel(levelById(getProfileData(profileName).diag.levelId))}` : "나에게 맞는 단계" })}
           ${homeTile({ id: "wordListsBtn", emoji: "📝", title: "우리 집 단어장", meta: getWordLists(profileName).length ? `${getWordLists(profileName).length}개 단어장` : "학교 단어 넣기" })}
           ${homeTile({ id: "vocabBtn", emoji: "📇", title: "단어장", meta: vocab.due > 0 ? `복습 ${vocab.due}개` : vocab.learned > 0 ? `외운 단어 ${vocab.mastered}` : "카드로 외우기", warn: vocab.due > 0 })}
           ${homeTile({ id: "notesBtn", emoji: "📘", title: "문법", meta: level ? `내 단계 ${lessonDoneCount(profileName, myBasics)} / ${myBasics.length}` : `${lessonDoneCount(profileName, BASIC_TOPICS)} / ${BASIC_TOPICS.length}` })}
@@ -241,6 +244,7 @@ function renderHomeScreen(root, ctx) {
         <div class="tile-grid">
           ${isKid ? homeTile({ id: "pictureBtn", emoji: "🎧", title: "그림 퀴즈", meta: "듣고 · 보고 고르기" }) : ""}
           ${isKid ? homeTile({ id: "memoryBtn", emoji: "🃏", title: "짝 맞추기", meta: "카드 뒤집기 게임" }) : ""}
+          ${homeTile({ id: "rainBtn", emoji: "🌧️", title: "단어 비", meta: "떨어지기 전에 터뜨려요" })}
           ${homeTile({ id: "monsterBtn", emoji: "👾", title: "오답 몬스터", meta: wrongWords > 0 ? `오답 ${wrongWords}개로 싸우기` : "단어로 몬스터 잡기", warn: wrongWords > 0 })}
           ${homeTile({ id: "speedBtn", emoji: "⏱️", title: "60초 퀴즈", meta: "1분 동안 많이 맞히기" })}
           ${homeTile({ id: "battleBtn", emoji: "⚔️", title: "가족 대결", meta: getFamily().length > 1 ? "번갈아 풀기" : "가족 2명부터", disabled: getFamily().length < 2 })}
@@ -299,6 +303,7 @@ function renderHomeScreen(root, ctx) {
   bind("todayReview", () => (daily ? actions.openWrongNote() : actions.startDaily()));
   bind("todayNext", () => actions.openNext(next));
   bind("levelUpBtn", actions.levelUp);
+  bind("roadmapLink", actions.openRoadmap);
   bind("familyBtn", actions.openFamily);
   bind("practiceBtn", actions.openPractice);
   bind("wordsBtn", () => actions.openWords("choice"));
@@ -318,6 +323,10 @@ function renderHomeScreen(root, ctx) {
   bind("verbPatternBtn", actions.openVerbPattern);
   bind("chunksBtn", actions.openChunks);
   bind("wordListsBtn", actions.openWordLists);
+  bind("roadmapBtn", actions.openRoadmap);
+  bind("diagBtn", actions.openDiagnosis);
+  bind("rainBtn", actions.openWordRain);
+  bindBackupReminder(root);
   bind("typingBtn", actions.openTyping);
   bind("monsterBtn", actions.startMonster);
   bindTodayPhrase(root, profileName);

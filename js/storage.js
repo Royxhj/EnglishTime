@@ -139,7 +139,8 @@ function normalizeProfile(profile) {
   if (!Array.isArray(p.wordLists)) p.wordLists = [];
   if (!Array.isArray(p.missionWeeks)) p.missionWeeks = [];
   p.bonusStars ||= 0;
-  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster"]) {
+  if (p.diag && !(typeof p.diag === "object" && levelById(p.diag.levelId) && /^\d{4}-\d{2}-\d{2}$/.test(p.diag.date))) delete p.diag;
+  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster", "wordrain"]) {
     p[section] ||= { best: {}, wrong: {} };
     p[section].best ||= {};
     p[section].wrong ||= {};
@@ -365,6 +366,13 @@ function deleteWordList(profileName, id) {
   updateProfile(profileName, (profile) => {
     profile.wordLists = profile.wordLists.filter((l) => l.id !== id);
     for (const m of ["choice", "spell", "dict"]) delete profile.wordlist.best[`${id}:${m}`];
+  });
+}
+
+// 🎯 단계 진단 결과 (마지막 한 번만)
+function saveDiagnosis(profileName, levelId, scores) {
+  updateProfile(profileName, (profile) => {
+    profile.diag = { date: dateKey(), levelId, scores: Object.fromEntries(Object.entries(scores).filter(([k]) => levelById(k)).map(([k, v]) => [k, Math.max(0, Math.min(9, Number(v) || 0))])) };
   });
 }
 
@@ -742,6 +750,9 @@ function importBackup(data) {
   if (typeof data.settings?.sound === "boolean") settings.sound = data.settings.sound;
   if (typeof data.settings?.vibrate === "boolean") settings.vibrate = data.settings.vibrate;
   if (typeof data.settings?.readingSlow === "boolean") settings.readingSlow = data.settings.readingSlow;
+  // 이 기기의 부모님 잠금은 유지하고, 방금 불러왔으니 백업한 것으로 친다
+  if (getSettings().pinHash) settings.pinHash = getSettings().pinHash;
+  settings.lastBackup = dateKey();
 
   writeJson(FAMILY_KEY, family);
   writeAll(profiles);

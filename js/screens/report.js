@@ -197,7 +197,10 @@ function renderReportScreen(root, { profileName, actions }) {
           <div><b>${profile.monster.best.all?.total || 0}</b><small>👾 무찌른 몬스터</small></div>
           <div><b>${profile.missionWeeks.length}</b><small>🎯 가족 미션 성공</small></div>
         </div>
-        <button class="secondary-btn" id="calendarBtn">📆 출석 달력 보기</button>
+        <div class="summary-btns">
+          <button class="secondary-btn" id="calendarBtn">📆 출석 달력 보기</button>
+          <button class="secondary-btn" id="certBtn">📜 이달의 상장</button>
+        </div>
       </section>
 
       <section class="settings-card">
@@ -227,6 +230,7 @@ function renderReportScreen(root, { profileName, actions }) {
   root.querySelector("#backBtn").addEventListener("click", actions.back);
   root.querySelector("#wrongNoteBtn").addEventListener("click", actions.openWrongNote);
   root.querySelector("#calendarBtn").addEventListener("click", actions.openCalendar);
+  root.querySelector("#certBtn").addEventListener("click", actions.openCertificate);
   root.querySelector("#copySummaryBtn").addEventListener("click", () => shareWeeklySummary(profileName, "copy"));
   root.querySelector("#shareSummaryBtn")?.addEventListener("click", () => shareWeeklySummary(profileName, "share"));
   root.querySelector("#vocabBtn")?.addEventListener("click", actions.openVocab);

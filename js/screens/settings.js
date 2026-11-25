@@ -21,6 +21,7 @@ function downloadBackup() {
   const a = document.createElement("a");
   a.href = url;
   a.download = `영어공부-백업-${dateKey()}.json`;
+  updateSettings({ lastBackup: dateKey() });
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -126,8 +127,10 @@ function renderSettingsScreen(root, { profileName, actions }) {
         <div id="installGuide"></div>
       </section>
 
+      ${parentLockSettingsHtml()}
+
       <section class="settings-card">
-        <h2 class="section-title">기록 백업</h2>
+        <h2 class="section-title">기록 백업 ${getSettings().lastBackup ? `<small>(마지막 백업 ${getSettings().lastBackup})</small>` : ""}</h2>
         <p class="settings-help">기록은 이 기기의 브라우저에만 저장돼요. 브라우저 데이터를 지우면 사라지니, 가끔 파일로 저장해 두세요. 다른 기기에서 불러오면 기록을 옮길 수 있어요.</p>
         <div class="settings-actions">
           <button class="secondary-btn" id="exportBtn">💾 파일로 저장</button>
@@ -149,6 +152,7 @@ function renderSettingsScreen(root, { profileName, actions }) {
   `;
 
   bindTextSizeControl(root);
+  bindParentLockSettings(root, () => set({}));
   mountInstallGuide(root.querySelector("#installGuide"));
   root.querySelector("#backBtn").addEventListener("click", actions.back);
   root.querySelector("#editMemberBtn").addEventListener("click", actions.editMember);
@@ -219,6 +223,7 @@ function renderSettingsScreen(root, { profileName, actions }) {
     const code = await makeTransferCode();
     try {
       await navigator.clipboard.writeText(code);
+      updateSettings({ lastBackup: dateKey() });
       showToast(`<span class="toast-emoji">📋</span><span>코드를 복사했어요 (${code.length.toLocaleString()}자). 메신저에 붙여넣어 보내세요.</span>`);
     } catch {
       // 복사가 막힌 브라우저에서는 칸에 넣고 전체 선택해 둔다

@@ -42,6 +42,8 @@ const BADGES = [
   { id: "wordSearch", emoji: "🔍", title: "숨은 단어 탐험가", desc: "단어 찾기 퍼즐 완성하기", test: (p) => Object.keys(p.wordsearch.best).length >= 1 },
   { id: "wordGuess", emoji: "🕵️", title: "명탐정", desc: "단어 추리 5개 모두 맞히기", test: (p) => perfectCount(p.wordguess.best) >= 1 },
   { id: "riddle", emoji: "❓", title: "수수께끼 박사", desc: "영어 수수께끼 만점", test: (p) => perfectCount(p.riddle.best) >= 1 },
+  { id: "diag", emoji: "🎯", title: "나를 알아요", desc: "단계 진단 테스트 끝내기", test: (p) => !!p.diag },
+  { id: "rain30", emoji: "🌧️", title: "비구름 대장", desc: "단어 비에서 30개 터뜨리기", test: (p) => Object.values(p.wordrain.best).some((b) => b.correct >= 30) },
   { id: "wordList", emoji: "🏠", title: "우리 집 단어 박사", desc: "우리 집 단어장 시험 90점 이상", test: (p) => Object.values(p.wordlist.best).some((b) => b.correct / b.total >= 0.9) },
   { id: "typing100", emoji: "⌨️", title: "타자왕", desc: "타자 연습 1분에 100타 넘기", test: (p) => Object.values(p.typing.best).some((b) => b.correct >= 100) },
   { id: "monster", emoji: "👾", title: "몬스터 사냥꾼", desc: "오답 몬스터 무찌르기", test: (p) => Object.keys(p.monster.best).length >= 1 },
