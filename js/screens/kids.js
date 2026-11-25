@@ -150,15 +150,19 @@ function petStatus(profileName) {
 function petCardHtml(profileName) {
   const s = petStatus(profileName);
   const pct = s.next ? Math.round(((s.total - s.stage.min) / (s.next.min - s.stage.min)) * 100) : 100;
+  const theme = petBackgroundStyle(profileName);
   return `
-    <section class="pet-card">
-      <span class="pet-emoji" aria-hidden="true">${s.stage.emoji}</span>
+    <section class="pet-card${theme.cls}"${theme.style}>
+      ${dressedPetHtml(profileName, s.stage.emoji)}
       <div class="pet-text">
         <b>내 친구: ${s.stage.name}</b>
         <small>${s.next ? `문제 ${s.left}개 더 풀면 ${s.next.emoji}로 자라요!` : "최고 단계까지 자랐어요! 🎉"}</small>
         <span class="progress-track"><span class="progress-fill" style="width:${pct}%"></span></span>
       </div>
-      <button class="pet-sticker-btn" id="stickerBtn" aria-label="스티커북">📒 <b>${s.stickers}</b></button>
+      <div class="pet-btns">
+        <button class="pet-sticker-btn" id="shopBtn" aria-label="별 상점, 별 ${shopStatus(profileName).stars}개">⭐ <b>${shopStatus(profileName).stars}</b></button>
+        <button class="pet-sticker-btn" id="stickerBtn" aria-label="스티커북">📒 <b>${s.stickers}</b></button>
+      </div>
     </section>`;
 }
 
@@ -169,8 +173,8 @@ function renderStickerScreen(root, { profileName, back }) {
       <button class="back-btn" id="backBtn">← 홈</button>
       <h1 class="title">📒 스티커북</h1>
       <p class="subtitle">문제를 ${STICKER_EVERY}개 풀 때마다 스티커가 하나씩 생겨요 · ${s.stickers} / ${STICKERS.length}</p>
-      <section class="pet-big">
-        <span class="pet-emoji">${s.stage.emoji}</span>
+      <section class="pet-big${petBackgroundStyle(profileName).cls}"${petBackgroundStyle(profileName).style}>
+        ${dressedPetHtml(profileName, s.stage.emoji, true)}
         <p><b>${s.stage.name}</b> · 지금까지 ${s.total}문제</p>
         <p class="settings-help">${s.next ? `${s.left}문제 더 풀면 ${s.next.emoji} ${s.next.name}(으)로 자라요` : "최고 단계예요!"} · 다음 스티커까지 ${s.toNextSticker}문제</p>
       </section>

@@ -1936,3 +1936,101 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .spell-summary li.miss { outline: 2px solid color-mix(in srgb, var(--wrong) 50%, transparent); }
 .spell-sum-emoji { font-size: 26px; }
 .spell-sum-mark { margin-left: auto; }
+
+/* ── 꾸민 캐릭터 · 별 상점 ── */
+.pet-avatar { position: relative; display: inline-flex; align-items: flex-end; flex-shrink: 0; padding-top: 14px; }
+.pet-avatar .pet-hat { position: absolute; top: -4px; left: 50%; transform: translateX(-50%); font-size: 26px; line-height: 1; }
+.pet-avatar .pet-pal { font-size: 24px; margin-left: -6px; line-height: 1; }
+.pet-avatar.big { padding-top: 34px; }
+.pet-avatar.big .pet-hat { font-size: 48px; top: -6px; }
+.pet-avatar.big .pet-pal { font-size: 44px; }
+.pet-btns { display: flex; flex-direction: column; gap: 6px; }
+.pet-themed { color: #2a2620; }
+.pet-themed small, .pet-themed .settings-help { color: #5b5446; }
+.pet-themed .pet-sticker-btn { background: rgba(255, 255, 255, 0.85); color: #2a2620; }
+.shop-stars { font-size: 18px; margin: 6px 0 0; }
+.shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 8px 0 16px; }
+.shop-item { border: none; border-radius: 16px; background: var(--card-bg); color: var(--text); box-shadow: var(--shadow); padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; min-width: 0; }
+.shop-item b { font-size: 13px; }
+.shop-item small { font-size: 12px; color: var(--muted); font-weight: 700; }
+.shop-item.owned small { color: var(--primary-dark); }
+.shop-item.on { outline: 3px solid var(--primary); }
+.shop-item:disabled { opacity: 0.45; cursor: default; }
+.shop-emoji { font-size: 32px; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+/* ── 주제별 단어 ── */
+.topic-word-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin: 12px 0 90px; }
+.topic-word { border: none; border-radius: 14px; background: var(--card-bg); color: var(--text); box-shadow: var(--shadow); padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; min-width: 0; }
+.topic-word b { font-size: 15px; overflow-wrap: anywhere; }
+.topic-word small { font-size: 12px; color: var(--muted); text-align: center; }
+.topic-word-emoji { font-size: 30px; }
+.topic-word-level { font-size: 10px; color: var(--muted); background: var(--surface-2); border-radius: 999px; padding: 1px 6px; margin-top: 2px; }
+
+/* ── 소리 구별 ── */
+.sound-preview { background: var(--card-bg); border-radius: 14px; box-shadow: var(--shadow); padding: 10px 14px; margin: 8px 0; }
+.sound-preview summary { font-weight: 800; cursor: pointer; }
+.sound-pairs { display: grid; gap: 6px; margin-top: 8px; }
+.sound-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.chip-btn { border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent); background: var(--card-bg); color: var(--text); border-radius: 12px; padding: 8px 10px; font-size: 15px; font-weight: 700; cursor: pointer; text-align: left; min-width: 0; overflow-wrap: anywhere; }
+.chip-btn small { color: var(--muted); font-weight: 600; font-size: 12px; }
+.chip-btn.on { background: color-mix(in srgb, var(--primary) 20%, var(--card-bg)); border-color: var(--primary); }
+
+/* ── 60초 스피드 퀴즈 ── */
+.speed-timer { text-align: center; font-size: 40px; font-weight: 900; color: var(--primary-dark); margin: 6px 0 4px; }
+.speed-card { background: var(--card-bg); border-radius: 20px; box-shadow: var(--shadow); padding: 18px; margin: 12px 0; text-align: center; }
+.speed-card.flash-ok { animation: speedOk 0.35s; }
+.speed-card.flash-bad { animation: speedBad 0.35s; }
+@keyframes speedOk { from { background: color-mix(in srgb, var(--correct) 30%, var(--card-bg)); } }
+@keyframes speedBad { from { background: color-mix(in srgb, var(--wrong) 30%, var(--card-bg)); } }
+.speed-emoji { font-size: 48px; }
+.speed-word { font-size: 30px; font-weight: 900; margin: 4px 0 0; overflow-wrap: anywhere; }
+.speed-ready { background: var(--card-bg); border-radius: 20px; box-shadow: var(--shadow); padding: 20px; text-align: center; display: grid; gap: 14px; }
+.speed-final { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0; }
+.speed-final div { background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); padding: 12px 4px; display: flex; flex-direction: column; align-items: center; }
+.speed-final b { font-size: 28px; }
+.speed-final small { color: var(--muted); font-size: 12px; }
+
+/* ── 가족 대결 ── */
+.battle-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin: 12px 0 90px; }
+.battle-member { --accent: var(--primary); border: 3px solid transparent; border-radius: 18px; background: var(--card-bg); color: var(--text); box-shadow: var(--shadow); padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; min-width: 0; }
+.battle-member.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 15%, var(--card-bg)); }
+.battle-member small { color: var(--muted); font-size: 12px; }
+.battle-member-emoji { font-size: 32px; }
+.battle-board { display: flex; align-items: center; gap: 8px; margin: 10px 0; }
+.battle-side { --accent: var(--primary); flex: 1; min-width: 0; background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); padding: 8px; display: flex; flex-direction: column; align-items: center; border: 3px solid transparent; }
+.battle-side.turn { border-color: var(--accent); }
+.battle-side b { font-size: 14px; overflow-wrap: anywhere; text-align: center; }
+.battle-score { font-size: 28px; font-weight: 900; color: var(--accent); }
+.battle-vs { font-weight: 900; color: var(--muted); }
+.battle-ready { --accent: var(--primary); background: color-mix(in srgb, var(--accent) 12%, var(--card-bg)); border-radius: 20px; padding: 24px 16px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 12px; }
+.battle-ready p { font-size: 24px; margin: 0; }
+.battle-ready small { color: var(--muted); }
+.battle-ready-emoji { font-size: 64px; }
+
+/* ── 이야기책 ── */
+.story-series { --accent: var(--primary); background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px; margin: 12px 0; border-left: 6px solid var(--accent); }
+.story-head { display: flex; align-items: center; gap: 10px; }
+.story-head div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.story-head b { font-size: 17px; }
+.story-head small { color: var(--muted); font-size: 12px; }
+.story-cover { font-size: 36px; }
+.story-chapters { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 6px; }
+.story-chapter { width: 100%; border: none; border-radius: 12px; background: var(--surface-2); color: var(--text); padding: 10px 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; text-align: left; font-size: 15px; }
+.story-chapter:disabled { opacity: 0.55; cursor: default; }
+.story-chapter.done { background: color-mix(in srgb, var(--correct) 14%, var(--card-bg)); }
+.story-ch-no { font-weight: 800; color: var(--accent); white-space: nowrap; }
+.story-ch-title { flex: 1; min-width: 0; font-weight: 700; }
+
+/* ── 영어 일기 ── */
+.screen-diary { padding-bottom: 90px; }
+.diary-line { background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); padding: 12px 14px; margin: 10px 0; }
+.diary-line.filled { outline: 2px solid color-mix(in srgb, var(--correct) 40%, transparent); }
+.diary-en { font-size: 18px; font-weight: 800; margin: 0; overflow-wrap: anywhere; }
+.diary-ko { font-size: 13px; color: var(--muted); margin: 2px 0 8px; }
+.diary-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.diary-actions { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; }
+.diary-entry { background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); padding: 12px 14px; margin: 10px 0; }
+.diary-entry .diary-en { font-size: 16px; }
+.diary-entry .diary-ko { margin-bottom: 6px; }
+.diary-entry-head { display: flex; justify-content: space-between; align-items: center; font-weight: 800; color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+.screen.no-anim { animation: none; }

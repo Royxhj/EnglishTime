@@ -170,6 +170,8 @@ function renderHomeScreen(root, ctx) {
   const myTalks = TALK_TOPICS.filter((t) => TALK_GROUP_LEVELS[t.group]?.includes(level));
   const show = { phonics: !level || ["elementary-low", "elementary-mid", "elementary-high", "middle"].includes(level), advanced: !isKid, practice: ["high", "adult"].includes(level) };
   const weeklyBest = getSectionBest(profileName, "weekly", weekDateKeys()[0]);
+  const storyDone = STORY_SERIES.flatMap((x) => x.chapters).filter((c) => storyChapterPassed(profileName, c.id)).length;
+  const storyTotal = STORY_SERIES.reduce((n, x) => n + x.chapters.length, 0);
   const passagesDone = (list) => list.filter((p) => isPassageRead(profileName, p.id) || getSectionBest(profileName, "reading", p.id)).length;
 
   root.innerHTML = `
@@ -201,6 +203,9 @@ function renderHomeScreen(root, ctx) {
           ${homeTile({ id: "notesBtn", emoji: "📘", title: "문법", meta: level ? `내 단계 ${lessonDoneCount(profileName, myBasics)} / ${myBasics.length}` : `${lessonDoneCount(profileName, BASIC_TOPICS)} / ${BASIC_TOPICS.length}` })}
           ${homeTile({ id: "talkBtn", emoji: "💬", title: "대화 표현", meta: level && myTalks.length ? `내 단계 ${lessonDoneCount(profileName, myTalks)} / ${myTalks.length}` : `${lessonDoneCount(profileName, TALK_TOPICS)} / ${TALK_TOPICS.length}` })}
           ${homeTile({ id: "readBtn", emoji: "📖", title: "읽기", meta: level ? `내 단계 ${passagesDone(myPassages)} / ${myPassages.length}` : `${passagesDone(READING_PASSAGES)} / ${READING_PASSAGES.length}` })}
+          ${homeTile({ id: "storyBtn", emoji: "📚", title: "이야기책", meta: `${storyDone} / ${storyTotal}장` })}
+          ${homeTile({ id: "topicBtn", emoji: "🗂️", title: "주제별 단어", meta: `${sectionCount(profileName, "topic", TOPIC_WORD_GROUPS)} / ${TOPIC_WORD_GROUPS.length} 주제` })}
+          ${homeTile({ id: "numbersBtn", emoji: "🔢", title: "숫자 · 시간", meta: `${sectionCount(profileName, "numbers", NUMBER_SETS)} / ${NUMBER_SETS.length} 묶음` })}
           ${homeTile({ id: "irregularBtn", emoji: "🔁", title: "불규칙 동사", meta: `${sectionCount(profileName, "irregular", IRREGULAR_SETS)} / ${IRREGULAR_SETS.length} 단계` })}
           ${show.advanced ? homeTile({ id: "verbPatternBtn", emoji: "🔀", title: "to부정사 · 동명사", meta: `${sectionCount(profileName, "verbPattern", VERB_PATTERN_GROUPS)} / ${VERB_PATTERN_GROUPS.length} 묶음` }) : ""}
           ${homeTile({ id: "idiomsBtn", emoji: "🔗", title: "숙어 · 표현", meta: `${sectionCount(profileName, "idiom", IDIOM_SETS)} / ${IDIOM_SETS.length} 단계` })}
@@ -215,6 +220,8 @@ function renderHomeScreen(root, ctx) {
           ${homeTile({ id: "speakingBtn", emoji: "🎙️", title: "따라 말하기", meta: `${sectionCount(profileName, "speaking", TALK_GROUPS)} / ${TALK_GROUPS.length} 묶음` })}
           ${homeTile({ id: "listeningBtn", emoji: "🎧", title: "듣기 평가", meta: `${LISTENING_SETS.filter((s) => getSectionBest(profileName, "listening", s.levelId)).length} / ${LISTENING_SETS.length} 단계` })}
           ${homeTile({ id: "writingBtn", emoji: "✍️", title: "영작 연습", meta: "뜻 보고 문장 만들기" })}
+          ${homeTile({ id: "soundsBtn", emoji: "👂", title: "소리 구별", meta: "ship · sheep" })}
+          ${homeTile({ id: "diaryBtn", emoji: "📓", title: "영어 일기", meta: getDiaryEntries(profileName).length ? `${getDiaryEntries(profileName).length}편 썼어요` : "골라서 일기 쓰기" })}
         </div>
       </section>
 
@@ -223,6 +230,8 @@ function renderHomeScreen(root, ctx) {
         <div class="tile-grid">
           ${isKid ? homeTile({ id: "pictureBtn", emoji: "🎧", title: "그림 퀴즈", meta: "듣고 · 보고 고르기" }) : ""}
           ${isKid ? homeTile({ id: "memoryBtn", emoji: "🃏", title: "짝 맞추기", meta: "카드 뒤집기 게임" }) : ""}
+          ${homeTile({ id: "speedBtn", emoji: "⏱️", title: "60초 퀴즈", meta: "1분 동안 많이 맞히기" })}
+          ${homeTile({ id: "battleBtn", emoji: "⚔️", title: "가족 대결", meta: getFamily().length > 1 ? "번갈아 풀기" : "가족 2명부터", disabled: getFamily().length < 2 })}
           ${homeTile({ id: "spellingBtn", emoji: "🎯", title: "스펠링 게임", meta: "글자 맞혀 단어 완성" })}
           ${homeTile({ id: "weeklyBtn", emoji: "📅", title: "주간 단어 시험", meta: weeklyBest ? `이번 주 ${ratioLabel(weeklyBest)}` : `이번 주 본 단어 ${weeklySeenCount(profileName)}개` })}
           ${homeTile({ id: "wordsBtn", emoji: "✏️", title: "단어 시험", meta: wrongWords > 0 ? `오답 ${wrongWords}개` : wordBest !== null ? `최고 ${wordBest}점` : "고르기 · 철자 · 받아쓰기", warn: wrongWords > 0 })}
@@ -247,6 +256,14 @@ function renderHomeScreen(root, ctx) {
   const bind = (id, fn) => root.querySelector(`#${id}`)?.addEventListener("click", fn);
   bind("backBtn", actions.backToProfile);
   bind("stickerBtn", actions.openStickers);
+  bind("shopBtn", actions.openShop);
+  bind("storyBtn", actions.openStories);
+  bind("topicBtn", actions.openTopics);
+  bind("numbersBtn", actions.openNumbers);
+  bind("soundsBtn", actions.openSounds);
+  bind("diaryBtn", actions.openDiary);
+  bind("speedBtn", actions.openSpeed);
+  bind("battleBtn", actions.openBattle);
   bind("pictureBtn", actions.openPicture);
   bind("memoryBtn", () => actions.startMemory(level && level.startsWith("elementary") ? level : "elementary-low"));
   bind("spellingBtn", actions.openSpelling);

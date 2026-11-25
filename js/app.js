@@ -99,6 +99,11 @@ const startListening = (levelId) => startMc({ type: "listening", id: levelId }, 
 const startDrillReview = () => startMc({ type: "drillReview" }, buildDrillReviewQuestions(currentProfile()));
 const startVerbPatternTest = (id) => startMc({ type: "verbPattern", id }, buildVerbPatternQuestions(id));
 const startIrregularTest = (setId) => startMc({ type: "irregular", id: setId }, buildIrregularQuestions(setId));
+const startTopicQuiz = (topicId) => startMc({ type: "topic", id: topicId }, buildTopicQuestions(topicId));
+const startNumbers = (setId) => startMc({ type: "numbers", id: setId }, buildNumberQuestions(setId));
+const startSounds = (setId) => startMc({ type: "sounds", id: setId }, buildSoundQuestions(setId));
+const startStoryQuiz = (chapterId) => startMc({ type: "story", id: chapterId }, buildReadingQuestions(findStoryChapter(chapterId).chapter));
+const openStoryChapter = (chapterId) => set({ storyChapterId: chapterId, screen: "storyRead" });
 
 function mcSourceInfo(source) {
   if (source.type === "grammar") {
@@ -136,6 +141,22 @@ function mcSourceInfo(source) {
   if (source.type === "listening") {
     const level = levelById(source.id);
     return { label: `🎧 듣기 평가 · ${shortLevelLabel(level)}`, level, quitTo: "listeningList", listScreen: "listeningList" };
+  }
+  if (source.type === "topic") {
+    const g = TOPIC_WORD_GROUPS.find((x) => x.id === source.id);
+    return { label: `${g.emoji} ${g.title}`, level: null, quitTo: "topicView", listScreen: "topicList" };
+  }
+  if (source.type === "numbers") {
+    const ns = NUMBER_SETS.find((x) => x.id === source.id);
+    return { label: `${ns.emoji} ${ns.title}`, level: levelById(ns.levelId), quitTo: "numbersList", listScreen: "numbersList" };
+  }
+  if (source.type === "sounds") {
+    const ss = SOUND_PAIR_SETS.find((x) => x.id === source.id);
+    return { label: ss ? `${ss.emoji} ${ss.title}` : "🎲 소리 구별 모두 섞기", level: null, quitTo: "soundsList", listScreen: "soundsList" };
+  }
+  if (source.type === "story") {
+    const { series, chapter } = findStoryChapter(source.id);
+    return { label: `${series.emoji} ${series.title} ${chapter.no}장`, level: levelById(series.levelId), contextHtml: passageContextHtml(chapter), quitTo: "storyRead", listScreen: "storyList" };
   }
   if (source.type === "drillReview") return { label: "📝 기초 · 동사 오답 복습", level: null, quitTo: "wrongNote", listScreen: "wrongNote" };
   if (source.type === "verbPattern") return { label: vpTestLabel(source.id), level: null, quitTo: "verbPattern", listScreen: "verbPattern" };
@@ -178,6 +199,7 @@ function nextMcQuestion() {
   if (mc.source.type === "listening") isNewBest = recordSectionResult(currentProfile(), "listening", mc.source.id, correct, total);
   if (mc.source.type === "verbPattern") isNewBest = recordSectionResult(currentProfile(), "verbPattern", mc.source.id, correct, total);
   if (mc.source.type === "daily") recordDaily(currentProfile(), correct, total);
+  if (["topic", "numbers", "sounds", "story"].includes(mc.source.type)) isNewBest = recordSectionResult(currentProfile(), mc.source.type, mc.source.id, correct, total);
   if (mc.source.type === "weekly") isNewBest = recordSectionResult(currentProfile(), "weekly", mc.source.id, correct, total);
   set({ mc: { ...mc, isNewBest }, screen: "mcResult" });
   announceBadges(checkNewBadges(currentProfile()));
@@ -299,6 +321,41 @@ function mcResultActions(source, hasWrong) {
       ],
     };
   }
+  if (source.type === "topic") {
+    const next = TOPIC_WORD_GROUPS[TOPIC_WORD_GROUPS.findIndex((g) => g.id === source.id) + 1];
+    return {
+      actions: [
+        { ...retry, onClick: () => startTopicQuiz(source.id) },
+        { label: "📋 단어 다시 보기", onClick: () => set({ topicId: source.id, screen: "topicView" }) },
+        ...(next ? [{ label: `다음 주제: ${next.emoji} ${next.title}`, onClick: () => set({ topicId: next.id, screen: "topicView" }) }] : []),
+        { label: "주제 목록", onClick: () => set({ screen: "topicList" }) },
+      ],
+    };
+  }
+  if (source.type === "numbers" || source.type === "sounds") {
+    const list = source.type === "numbers" ? "numbersList" : "soundsList";
+    const start = source.type === "numbers" ? startNumbers : startSounds;
+    return {
+      actions: [
+        { label: "🔁 새 문제로 다시", primary: true, onClick: () => start(source.id) },
+        { label: "다른 묶음 고르기", onClick: () => set({ screen: list }) },
+        { label: "🏠 홈으로", onClick: goHome },
+      ],
+    };
+  }
+  if (source.type === "story") {
+    const { series, chapter } = findStoryChapter(source.id);
+    const next = series.chapters[chapter.no];
+    const passed = storyChapterPassed(currentProfile(), chapter.id);
+    return {
+      actions: [
+        ...(next && passed ? [{ label: `📖 다음 장: ${next.emoji} ${next.title}`, primary: true, onClick: () => openStoryChapter(next.id) }] : []),
+        { label: passed ? "🔁 다시 풀기" : `🔁 다시 풀기 (${STORY_PASS}개 맞히면 다음 장)`, primary: !(next && passed), onClick: () => startStoryQuiz(chapter.id) },
+        { label: "📖 이 장 다시 읽기", onClick: () => openStoryChapter(chapter.id) },
+        { label: "이야기 목록", onClick: () => set({ screen: "storyList" }) },
+      ],
+    };
+  }
   if (source.type === "weekly") {
     const wrongLeft = getWrongWords(currentProfile()).length;
     return {
@@ -414,6 +471,141 @@ const spellingActions = {
   again: () => startSpelling(store.getState().spelling.levelId),
   list: () => set({ screen: "spellingList" }),
   quit: () => set({ screen: "home" }),
+};
+
+// ── ⏱️ 60초 스피드 퀴즈 ──
+let speedTimer = null;
+
+function speedTick() {
+  const { screen, speed } = store.getState();
+  if (screen !== "speed" || !speed || speed.done || speed.ready) {
+    clearInterval(speedTimer);
+    speedTimer = null;
+    return;
+  }
+  const left = speedSecondsLeft(speed);
+  const timeEl = document.getElementById("speedTime");
+  if (timeEl) timeEl.textContent = left;
+  const bar = document.getElementById("speedBar");
+  if (bar) bar.style.width = `${(left / SPEED_SECONDS) * 100}%`;
+  if (left <= 0) finishSpeed();
+}
+
+function finishSpeed() {
+  const { speed } = store.getState();
+  clearInterval(speedTimer);
+  speedTimer = null;
+  if (speed.done) return;
+  speed.done = true;
+  speed.isNewBest = recordBestCount(currentProfile(), "speed", speed.levelId, speed.correct, speed.correct + speed.wrong);
+  if (speed.isNewBest) burstConfetti(40);
+  set({});
+  announceBadges(checkNewBadges(currentProfile()));
+}
+
+const startSpeed = (levelId) => set({ speed: newSpeedGame(levelId), screen: "speed" });
+
+const speedActions = {
+  go: () => {
+    const { speed } = store.getState();
+    speed.ready = false;
+    speed.endsAt = Date.now() + SPEED_SECONDS * 1000;
+    clearInterval(speedTimer);
+    speedTimer = setInterval(speedTick, 250);
+    set({});
+  },
+  answer: (choice) => {
+    const { speed } = store.getState();
+    if (speed.done || speed.ready) return;
+    if (speedSecondsLeft(speed) <= 0) {
+      finishSpeed();
+      return;
+    }
+    const { w } = speed.q;
+    const ok = choice === w.meaningKo;
+    if (ok) {
+      speed.correct += 1;
+      speed.combo += 1;
+      speed.maxCombo = Math.max(speed.maxCombo, speed.combo);
+      playSound("correct");
+    } else {
+      speed.wrong += 1;
+      speed.combo = 0;
+      if (!speed.missed.some((m) => m.id === w.id)) speed.missed.push(w);
+      playSound("wrong");
+    }
+    recordAnswerOutcome(currentProfile(), w.id, speed.levelId, ok);
+    recordActivity(currentProfile());
+    speed.flash = ok ? "ok" : "bad";
+    speed.q = speedQuestion(speed.levelId, w.id);
+    set({});
+  },
+  again: () => startSpeed(store.getState().speed.levelId),
+  list: () => set({ screen: "speedList" }),
+  quit: () => set({ screen: "speedList" }),
+};
+
+// ── ⚔️ 가족 대결 ──
+function openBattleSetup() {
+  const me = currentProfile();
+  const other = getFamily().find((m) => m.name !== me);
+  const prev = (store.getState().battlePick || []).filter((n) => findMember(n));
+  set({ battlePick: prev.length === 2 ? prev : [me, ...(other ? [other.name] : [])], screen: "battleSetup" });
+}
+
+const battleActions = {
+  ready: () => {
+    store.getState().battle.phase = "question";
+    set({});
+  },
+  answer: (choice) => {
+    const { battle } = store.getState();
+    const q = battle.questions[battle.index];
+    if (battle.phase !== "question") return;
+    q.selectedAnswer = choice;
+    const ok = choice === q.correctAnswer;
+    const player = battle.players[q.player];
+    if (ok) player.score += 1;
+    recordAnswerOutcome(player.name, q.id, q.levelId, ok);
+    recordActivity(player.name);
+    speak(q.listenText, { rate: 0.85 });
+    battle.phase = "answered";
+    set({});
+  },
+  next: () => {
+    const { battle } = store.getState();
+    if (battle.index + 1 < battle.questions.length) {
+      battle.index += 1;
+      battle.phase = "ready";
+    } else {
+      battle.done = true;
+      burstConfetti(50);
+      playSound("badge");
+    }
+    set({});
+  },
+  again: () => set({ battle: buildBattle(store.getState().battle.players.map((p) => p.name)) }),
+  setup: openBattleSetup,
+  quit: () => set({ screen: "battleSetup" }),
+  home: goHome,
+};
+
+// ── 📓 영어 일기 ──
+const diaryActions = {
+  pick: (line, opt) => {
+    store.getState().diaryDraft.picks[line] = opt;
+    set({});
+  },
+  save: () => {
+    const { diaryDraft } = store.getState();
+    saveDiary(currentProfile(), { d: dateKey(), t: diaryDraft.tplId, p: [...diaryDraft.picks] });
+    recordActivity(currentProfile());
+    burstConfetti(40);
+    playSound("correct");
+    showToast(`<span class="toast-emoji">📓</span><span>일기장에 저장했어요!</span>`);
+    set({ screen: "diaryList" });
+  },
+  back: () => set({ screen: "diaryList" }),
 };
 
 let memoryBusy = false;
@@ -880,6 +1072,8 @@ const QUIZ_QUIT_TARGET = {
   writingSession: () => "writingList",
   roleplay: () => "practiceList",
   spelling: (s) => (s.spelling.done ? null : "spellingList"),
+  speed: (s) => (s.speed.done || s.speed.ready ? null : "speedList"),
+  battle: (s) => (s.battle.done ? null : "battleSetup"),
 };
 
 function parentScreen(state) {
@@ -890,7 +1084,13 @@ function parentScreen(state) {
     case "settings": case "wrongNote": case "report": case "vocab": case "grammarNotes": case "phonics": case "talk":
     case "irregular": case "verbPattern": case "speakingList": case "listeningList": case "writingList":
     case "idioms": case "affixes": case "examList": case "goals": case "crosswordList": case "family": case "practiceList":
-    case "pictureList": case "stickers": case "memory": case "spellingList": return "home";
+    case "pictureList": case "stickers": case "memory": case "spellingList":
+    case "topicList": case "numbersList": case "soundsList": case "storyList": case "diaryList": case "speedList": case "battleSetup": case "shop": return "home";
+    case "topicView": return "topicList";
+    case "storyRead": return "storyList";
+    case "diaryWrite": return "diaryList";
+    case "speed": return "speedList";
+    case "battle": return "battleSetup";
     case "spelling": return "spellingList";
     case "roleplayResult": return "practiceList";
     case "crossword": return "crosswordList";
@@ -939,7 +1139,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -999,10 +1199,10 @@ function render() {
   }
 
   // 지문 듣기 중에 다른 화면으로 가면 소리를 멈춘다.
-  if ((lastScreen === "passage" || lastScreen === "basicLesson") && state.screen !== lastScreen) stopSpeaking();
+  if (["passage", "basicLesson", "storyRead"].includes(lastScreen) && state.screen !== lastScreen) stopSpeaking();
   lastScreen = state.screen;
 
-  const viewKey = [state.screen, state.currentIndex, state.mc?.index, state.chunk?.index, state.passageId, state.grammarTopicId, state.vocabSession?.index, state.vocabTab, state.basic?.phase, state.basic?.slide, state.basic?.pIndex].join(":");
+  const viewKey = [state.screen, state.currentIndex, state.mc?.index, state.chunk?.index, state.passageId, state.grammarTopicId, state.vocabSession?.index, state.vocabTab, state.basic?.phase, state.basic?.slide, state.basic?.pIndex, state.topicId, state.storyChapterId, state.diaryDraft?.tplId].join(":");
   if (viewKey !== lastViewKey) {
     window.scrollTo(0, 0);
     lastViewKey = viewKey;
@@ -1105,6 +1305,14 @@ function render() {
           startPicture,
           startMemory,
           openSpelling: () => set({ screen: "spellingList" }),
+          openShop: () => set({ screen: "shop" }),
+          openStories: () => set({ screen: "storyList" }),
+          openTopics: () => set({ screen: "topicList" }),
+          openNumbers: () => set({ screen: "numbersList" }),
+          openSounds: () => set({ screen: "soundsList" }),
+          openDiary: () => set({ screen: "diaryList" }),
+          openSpeed: () => set({ screen: "speedList" }),
+          openBattle: openBattleSetup,
           startWeekly,
           refresh: () => set({}),
           openNext: openNextStep,
@@ -1289,6 +1497,57 @@ function render() {
     spellingList: () => renderSpellingListScreen(root, { profileName: state.profileName, start: startSpelling, back: goHome }),
     spelling: () => renderSpellingScreen(root, { game: state.spelling, actions: spellingActions }),
     stickers: () => renderStickerScreen(root, { profileName: state.profileName, back: goHome }),
+
+    topicList: () => renderTopicListScreen(root, { profileName: state.profileName, open: (topicId) => set({ topicId, screen: "topicView" }), back: goHome }),
+    topicView: () => renderTopicViewScreen(root, { topicId: state.topicId, startQuiz: () => startTopicQuiz(state.topicId), back: () => set({ screen: "topicList" }) }),
+    numbersList: () => renderNumbersListScreen(root, { profileName: state.profileName, start: startNumbers, back: goHome }),
+    soundsList: () => renderSoundsListScreen(root, { profileName: state.profileName, start: startSounds, back: goHome }),
+    speedList: () => renderSpeedListScreen(root, { profileName: state.profileName, start: startSpeed, back: goHome }),
+    speed: () => renderSpeedScreen(root, { game: state.speed, actions: speedActions }),
+    battleSetup: () =>
+      renderBattleSetupScreen(root, {
+        profileName: state.profileName,
+        picked: state.battlePick || [],
+        toggle: (name) => {
+          const picked = state.battlePick || [];
+          set({ battlePick: picked.includes(name) ? picked.filter((n) => n !== name) : [...picked, name].slice(-2) });
+        },
+        start: () => set({ battle: buildBattle(state.battlePick), screen: "battle" }),
+        back: goHome,
+      }),
+    battle: () => renderBattleScreen(root, { battle: state.battle, actions: battleActions }),
+    storyList: () => renderStoryListScreen(root, { profileName: state.profileName, open: openStoryChapter, back: goHome }),
+    storyRead: () =>
+      renderPassageScreen(root, {
+        profileName: state.profileName,
+        passage: findStoryChapter(state.storyChapterId).chapter,
+        startQuiz: () => startStoryQuiz(state.storyChapterId),
+        backToList: () => set({ screen: "storyList" }),
+        goHome,
+      }),
+    diaryList: () =>
+      renderDiaryListScreen(root, {
+        profileName: state.profileName,
+        write: (tplId) => set({ diaryDraft: { tplId, picks: findDiaryTemplate(tplId).lines.map(() => null) }, screen: "diaryWrite" }),
+        back: goHome,
+      }),
+    diaryWrite: () => renderDiaryWriteScreen(root, { draft: state.diaryDraft, actions: diaryActions }),
+    shop: () =>
+      renderShopScreen(root, {
+        profileName: state.profileName,
+        actions: {
+          back: goHome,
+          tap: (itemId) => {
+            if (shopStatus(state.profileName).owned.includes(itemId)) toggleShopEquip(state.profileName, itemId);
+            else if (buyShopItem(state.profileName, itemId)) {
+              burstConfetti(30);
+              playSound("badge");
+              showToast(`<span class="toast-emoji">${shopItem(itemId).emoji}</span><span>${shopItem(itemId).name} 샀어요!</span>`);
+            }
+            set({});
+          },
+        },
+      }),
 
     practiceList: () => renderPracticeListScreen(root, { profileName: state.profileName, startRoleplay, startEmail, back: goHome }),
     roleplay: () => renderRoleplayScreen(root, { session: state.roleplay, actions: roleplayActions }),

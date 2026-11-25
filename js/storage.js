@@ -128,7 +128,12 @@ function normalizeProfile(profile) {
   p.readingRead ||= {};
   p.notesRead ||= {};
   p.wordSeen ||= {};
-  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly"]) {
+  if (!Array.isArray(p.diary)) p.diary = [];
+  p.shop ||= {};
+  p.shop.spent ||= 0;
+  if (!Array.isArray(p.shop.owned)) p.shop.owned = [];
+  p.shop.equip ||= {};
+  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed"]) {
     p[section] ||= { best: {}, wrong: {} };
     p[section].best ||= {};
     p[section].wrong ||= {};
@@ -307,6 +312,17 @@ function recordSectionResult(profileName, section, id, correct, total) {
     // 첫 도전의 낮은 점수에는 "신기록" 축하를 띄우지 않는다.
     const hadPriorScore = !!prev && prev.correct > 0;
     return isNewBest && (hadPriorScore || correct / total >= 0.6);
+  });
+}
+
+// 개수가 많을수록 좋은 기록 (스피드 퀴즈: 1분 동안 맞힌 수)
+function recordBestCount(profileName, section, id, correct, total) {
+  return updateProfile(profileName, (profile) => {
+    profile.lessonDay = dateKey();
+    const prev = profile[section].best[id];
+    const isNewBest = correct > 0 && (!prev || correct > prev.correct);
+    if (isNewBest) profile[section].best[id] = { correct, total };
+    return isNewBest;
   });
 }
 
@@ -492,6 +508,41 @@ function isNoteRead(profileName, topicId) {
   return !!getProfileData(profileName).notesRead[topicId];
 }
 
+// ── 영어 일기 · 별 상점 ──
+function saveDiary(profileName, entry) {
+  updateProfile(profileName, (profile) => {
+    profile.diary.unshift(entry);
+    profile.diary = profile.diary.slice(0, DIARY_KEEP);
+    profile.lessonDay = dateKey();
+  });
+}
+
+function getDiaryEntries(profileName) {
+  return getProfileData(profileName).diary.filter((e) => findDiaryTemplate(e.t));
+}
+
+// 별이 모자라거나 없는 물건이면 false
+function buyShopItem(profileName, itemId) {
+  const item = shopItem(itemId);
+  if (!item || shopStatus(profileName).stars < item.price) return false;
+  updateProfile(profileName, (profile) => {
+    if (profile.shop.owned.includes(itemId)) return;
+    profile.shop.spent += item.price;
+    profile.shop.owned.push(itemId);
+    profile.shop.equip[item.cat] = itemId;
+  });
+  return true;
+}
+
+function toggleShopEquip(profileName, itemId) {
+  const item = shopItem(itemId);
+  updateProfile(profileName, (profile) => {
+    if (!item || !profile.shop.owned.includes(itemId)) return;
+    if (profile.shop.equip[item.cat] === itemId) delete profile.shop.equip[item.cat];
+    else profile.shop.equip[item.cat] = itemId;
+  });
+}
+
 function saveBadges(profileName, ids) {
   updateProfile(profileName, (profile) => {
     for (const id of ids) profile.badges[id] ||= dateKey();
@@ -562,6 +613,17 @@ function importBackup(data) {
         .filter(([id]) => drillQuestionById(id))
         .map(([id, e]) => [id, { id, hits: Number(e?.hits) || 0, missed: Number(e?.missed) || 1, lastMissed: cleanText(e?.lastMissed, 10) }])
     );
+    // 일기는 고른 표현 번호만, 상점은 있는 물건만 남긴다
+    p.diary = p.diary
+      .filter((e) => e && findDiaryTemplate(e.t) && /^\d{4}-\d{2}-\d{2}$/.test(e.d) && Array.isArray(e.p) && findDiaryTemplate(e.t).lines.every((l, i) => Number.isInteger(e.p[i]) && e.p[i] >= 0 && e.p[i] < l.options.length))
+      .map((e) => ({ d: e.d, t: e.t, p: e.p.slice(0, findDiaryTemplate(e.t).lines.length) }))
+      .slice(0, DIARY_KEEP);
+    const owned = p.shop.owned.filter((id) => shopItem(id));
+    p.shop = {
+      spent: Math.max(0, Number(p.shop.spent) || 0),
+      owned,
+      equip: Object.fromEntries(Object.entries(p.shop.equip).filter(([cat, id]) => owned.includes(id) && shopItem(id).cat === cat)),
+    };
     const goals = p.goals || {};
     p.goals = {
       counts: Object.fromEntries(GOAL_COUNTS.map((c) => [c.key, c.options.includes(Number(goals.counts?.[c.key])) ? Number(goals.counts[c.key]) : 0])),
