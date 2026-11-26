@@ -2636,3 +2636,24 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .scene-line .culture-line { margin-bottom: 2px; }
 .scene-line .rec-row { justify-content: flex-start; margin: 4px 0 0 38px; }
 .scene-hidden { display: inline-block; padding: 2px 10px; border-radius: 8px; background: var(--muted); color: var(--card-bg); cursor: pointer; }
+
+/* ✨ 캐릭터 등급 (전설 다음): 그림 둘레에 등급마다 다른 빛 */
+.pet-aura-wrap { display: inline-block; }
+.pet-tier { position: relative; display: inline-block; border-radius: 50%; isolation: isolate; }
+.pet-tier::before { content: ""; position: absolute; inset: -10px; border-radius: 50%; background: radial-gradient(circle, var(--aura) 0%, transparent 70%); z-index: -1; animation: auraPulse 2.4s ease-in-out infinite; pointer-events: none; }
+.pet-tier .pet-emoji { filter: drop-shadow(0 0 6px var(--aura-edge)); }
+.tier-mythic { --aura: rgba(151, 117, 250, 0.6); --aura-edge: #9775fa; }
+.tier-ancient { --aura: rgba(245, 159, 0, 0.55); --aura-edge: #f59f00; }
+.tier-transcend { --aura: rgba(255, 255, 255, 0.5); --aura-edge: #f783ac; }
+.tier-transcend::before { background: conic-gradient(#ff6b6b, #ffd43b, #69db7c, #4dabf7, #9775fa, #ff6b6b); opacity: 0.55; filter: blur(8px); animation: auraSpin 4s linear infinite; }
+.tier-immortal { --aura: rgba(255, 107, 107, 0.6); --aura-edge: #fa5252; }
+.tier-immortal::before { background: radial-gradient(circle at 50% 70%, rgba(255, 212, 59, 0.7), rgba(250, 82, 82, 0.55) 45%, transparent 72%); }
+.tier-celestial { --aura: rgba(116, 192, 252, 0.6); --aura-edge: #74c0fc; }
+.tier-celestial::after, .tier-origin::after { content: "✨"; position: absolute; top: -6px; right: -8px; font-size: 18px; animation: auraPulse 1.6s ease-in-out infinite; pointer-events: none; }
+.tier-origin { --aura: rgba(95, 61, 196, 0.75); --aura-edge: #b197fc; }
+.tier-origin::before { background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0 6%, rgba(95, 61, 196, 0.8) 30%, rgba(20, 12, 60, 0.7) 55%, transparent 72%); }
+.tier-origin::after { content: "🌟"; }
+@keyframes auraPulse { 0%, 100% { transform: scale(0.92); opacity: 0.75; } 50% { transform: scale(1.08); opacity: 1; } }
+@keyframes auraSpin { to { transform: rotate(360deg); } }
+.pet-tiers span { display: inline-flex; flex-direction: column; align-items: center; }
+.pet-tiers b { font-size: 12px; }

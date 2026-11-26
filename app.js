@@ -23446,6 +23446,9 @@ const BADGES = [
   { id: "first", emoji: "🌱", title: "첫걸음", desc: "첫 문제 풀기", test: (p) => p.totalAnswered >= 1 },
   { id: "answered100", emoji: "💯", title: "백 문제", desc: "문제 100개 풀기", test: (p) => p.totalAnswered >= 100 },
   { id: "answered500", emoji: "🏔️", title: "오백 문제", desc: "문제 500개 풀기", test: (p) => p.totalAnswered >= 500 },
+  { id: "tierMythic", emoji: "🔮", title: "신화 친구", desc: "캐릭터 신화 등급 (문제 2,500개)", test: (p) => p.totalAnswered >= 2500 },
+  { id: "tierTranscend", emoji: "🌈", title: "초월 친구", desc: "캐릭터 초월 등급 (문제 6,000개)", test: (p) => p.totalAnswered >= 6000 },
+  { id: "tierOrigin", emoji: "🌌", title: "태초 친구", desc: "캐릭터 태초 등급 (문제 20,000개)", test: (p) => p.totalAnswered >= 20000 },
   { id: "day50", emoji: "⚡", title: "열공의 날", desc: "하루에 50문제 풀기", test: (p) => p.bestDay >= 50 },
   { id: "streak3", emoji: "🔥", title: "3일 연속", desc: "3일 연속 공부하기", test: (p) => p.bestStreak >= 3 },
   { id: "streak7", emoji: "🔥", title: "일주일 연속", desc: "7일 연속 공부하기", test: (p) => p.bestStreak >= 7 },
@@ -28328,6 +28331,16 @@ const petKindById = (id) => PET_KINDS.find((k) => k.id === id) || PET_KINDS[0];
 // 같은 그림으로 자라는 친구(개구리)는 scale로 크기가 커진다
 const petStages = (kindId) => petKindById(kindId).stages.map(([emoji, name, scale], i) => ({ min: PET_MINS[i], emoji, name, scale: scale || 1 }));
 const PET_STAGES = petStages("chick");
+// 전설(마지막 단계) 뒤로도 계속 오르는 등급: 그림은 그대로, 빛(오라)과 이름 앞 등급이 바뀐다
+const PET_TIERS = [
+  { id: "legend", min: 1500, name: "전설", icon: "🏅" },
+  { id: "mythic", min: 2500, name: "신화", icon: "🔮" },
+  { id: "ancient", min: 4000, name: "고대", icon: "🏺" },
+  { id: "transcend", min: 6000, name: "초월", icon: "🌈" },
+  { id: "immortal", min: 9000, name: "불멸", icon: "🔥" },
+  { id: "celestial", min: 13000, name: "천상", icon: "🌠" },
+  { id: "origin", min: 20000, name: "태초", icon: "🌌" },
+];
 const STICKERS = "🌟🍎🐶🐱🚗🎈🍦🦋🌈🐠🍓🚀🐻🌻🎁🦁🍩🐢⚽🎨🐧🍉🚂🐰🌙🦖🍪🎸🐳👑".match(/\p{Extended_Pictographic}/gu);
 const STICKER_EVERY = 15;
 
@@ -28338,21 +28351,27 @@ function petStatus(profileName) {
   const stages = petStages(kind.id);
   let stage = stages[0];
   for (const s of stages) if (total >= s.min) stage = s;
-  const next = stages[stages.indexOf(stage) + 1];
+  let next = stages[stages.indexOf(stage) + 1];
+  const tier = [...PET_TIERS].reverse().find((t) => total >= t.min) || null;
+  const nextTier = PET_TIERS.find((t) => total < t.min) || null;
+  // 마지막 단계에 닿으면 이름 앞에 등급을 붙이고(신화 유니콘), 다음 목표는 다음 등급
+  if (tier && tier.id !== "legend") stage = { ...stage, name: `${tier.name} ${stage.name.replace(/^전설의 /, "")}` };
+  if (!next && nextTier) next = { min: nextTier.min, emoji: nextTier.icon, name: `${nextTier.name} 등급`, tier: nextTier };
   const stickers = Math.min(STICKERS.length, Math.floor(total / STICKER_EVERY));
-  return { total, kind, stages, chosen: !!p.petKind, stage, next, left: next ? next.min - total : 0, stickers, toNextSticker: STICKER_EVERY - (total % STICKER_EVERY) };
+  const prevMin = next?.tier ? tier.min : stage.min;
+  return { total, kind, stages, chosen: !!p.petKind, stage, next, prevMin, tier, aura: tier && tier.id !== "legend" ? ` pet-tier tier-${tier.id}` : "", left: next ? next.min - total : 0, stickers, toNextSticker: STICKER_EVERY - (total % STICKER_EVERY) };
 }
 
 function petCardHtml(profileName) {
   const s = petStatus(profileName);
-  const pct = s.next ? Math.round(((s.total - s.stage.min) / (s.next.min - s.stage.min)) * 100) : 100;
+  const pct = s.next ? Math.round(((s.total - s.prevMin) / (s.next.min - s.prevMin)) * 100) : 100;
   const theme = petBackgroundStyle(profileName);
   return `
     <section class="pet-card${theme.cls}"${theme.style}>
-      <button class="pet-pick-btn" id="petPickBtn" aria-label="친구 바꾸기">${dressedPetHtml(profileName, s.stage.emoji, false, s.stage.scale)}</button>
+      <button class="pet-pick-btn${s.aura}" id="petPickBtn" aria-label="친구 바꾸기">${dressedPetHtml(profileName, s.stage.emoji, false, s.stage.scale)}</button>
       <div class="pet-text">
-        <b>내 친구: ${s.stage.name}</b>
-        <small>${s.chosen ? "" : "🐾 캐릭터를 눌러 좋아하는 동물로 바꿔 봐요! · "}${s.next ? `문제 ${s.left}개 더 풀면 ${s.next.emoji}로 자라요!` : "최고 단계까지 자랐어요! 🎉"}</small>
+        <b>내 친구: ${s.tier ? `${s.tier.icon} ` : ""}${s.stage.name}</b>
+        <small>${s.chosen ? "" : "🐾 캐릭터를 눌러 좋아하는 동물로 바꿔 봐요! · "}${s.next?.tier ? `문제 ${s.left}개 더 풀면 ${s.next.emoji} ${s.next.name}이 돼요!` : s.next ? `문제 ${s.left}개 더 풀면 ${s.next.emoji}로 자라요!` : "🌌 가장 높은 태초 등급이에요! 🎉"}</small>
         <span class="progress-track"><span class="progress-fill" style="width:${pct}%"></span></span>
       </div>
       <div class="pet-btns">
@@ -28365,16 +28384,16 @@ function petCardHtml(profileName) {
 
 function renderStickerScreen(root, { profileName, back, choosePet }) {
   const s = petStatus(profileName);
-  const stageIndex = s.stages.indexOf(s.stage);
+  const stageIndex = s.stages.findIndex((x) => x.min === s.stage.min);
   root.innerHTML = `
     <div class="screen screen-stickers">
       <button class="back-btn" id="backBtn">← 홈</button>
       <h1 class="title">📒 스티커북</h1>
       <p class="subtitle">문제를 ${STICKER_EVERY}개 풀 때마다 스티커가 하나씩 생겨요 · ${s.stickers} / ${STICKERS.length}</p>
       <section class="pet-big${petBackgroundStyle(profileName).cls}"${petBackgroundStyle(profileName).style}>
-        ${dressedPetHtml(profileName, s.stage.emoji, true, s.stage.scale)}
-        <p><b>${s.stage.name}</b> · 지금까지 ${s.total}문제</p>
-        <p class="settings-help">${s.next ? `${s.left}문제 더 풀면 ${s.next.emoji} ${s.next.name}(으)로 자라요` : "최고 단계예요!"} · 다음 스티커까지 ${s.toNextSticker}문제</p>
+        <span class="pet-aura-wrap${s.aura}">${dressedPetHtml(profileName, s.stage.emoji, true, s.stage.scale)}</span>
+        <p><b>${s.tier ? `${s.tier.icon} ` : ""}${s.stage.name}</b> · 지금까지 ${s.total}문제</p>
+        <p class="settings-help">${s.next?.tier ? `${s.left}문제 더 풀면 ${s.next.emoji} ${s.next.name}이 돼요` : s.next ? `${s.left}문제 더 풀면 ${s.next.emoji} ${s.next.name}(으)로 자라요` : "가장 높은 태초 등급이에요!"} · 다음 스티커까지 ${s.toNextSticker}문제</p>
       </section>
       <h2 class="section-title">🐾 친구 고르기 <small>자란 만큼 그대로 바뀌어요</small></h2>
       <div class="pet-kinds">
@@ -28386,6 +28405,8 @@ function renderStickerScreen(root, { profileName, back, choosePet }) {
       </div>
       <h2 class="section-title">자라는 순서</h2>
       <p class="pet-stages">${s.stages.map((p) => `<span class="${s.total >= p.min ? "got" : ""}"><i style="display:inline-block;transform:scale(${p.scale})">${p.emoji}</i><small>${p.min}</small></span>`).join("")}</p>
+      <h2 class="section-title">✨ 전설 다음 등급 <small>다 자란 뒤에도 계속 올라가요</small></h2>
+      <p class="pet-stages pet-tiers">${PET_TIERS.map((t) => `<span class="${s.total >= t.min ? "got" : ""}"><i>${t.icon}</i><b>${t.name}</b><small>${t.min.toLocaleString()}</small></span>`).join("")}</p>
     </div>`;
   root.querySelector("#backBtn").addEventListener("click", back);
   root.querySelectorAll("[data-kind]").forEach((b) => b.addEventListener("click", () => choosePet(b.dataset.kind)));
@@ -29365,7 +29386,7 @@ function renderShopScreen(root, { profileName, actions }) {
       <h1 class="title">⭐ 별 상점</h1>
       <p class="subtitle">문제를 ${STAR_EVERY}개 풀 때마다 ⭐ 1개 · 다음 별까지 ${s.toNext}문제</p>
       <section class="pet-big${theme.cls}"${theme.style}>
-        ${dressedPetHtml(profileName, pet.stage.emoji, true, pet.stage.scale)}
+        <span class="pet-aura-wrap${pet.aura}">${dressedPetHtml(profileName, pet.stage.emoji, true, pet.stage.scale)}</span>
         <p class="shop-stars">⭐ <b>${s.stars}</b>개 있어요</p>
       </section>
       ${SHOP_CATS.map(
