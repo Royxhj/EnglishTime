@@ -2586,3 +2586,53 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .tt-answer { background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); padding: 10px 12px; }
 .tt-answer summary { cursor: pointer; font-weight: 700; }
 .tt-answer .culture-line { margin-top: 8px; }
+
+/* 🧭 방향 보물찾기 */
+.map-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-width: 320px; margin: 0 auto; width: 100%; padding: 8px; box-sizing: border-box; border-radius: 18px; background: #d8f5a2; box-shadow: var(--shadow); }
+.map-cell { aspect-ratio: 1; border-radius: 10px; background: rgba(255, 255, 255, 0.55); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+.map-start { background: rgba(64, 192, 87, 0.45); }
+.map-me { font-size: 30px; animation: pop 0.2s ease; }
+.map-pad { display: grid; grid-template-columns: repeat(3, 56px); gap: 6px; justify-content: center; }
+.map-pad .chip-btn { height: 52px; text-align: center; font-size: 24px; padding: 0; }
+.map-dig { background: #fff3bf; }
+
+/* 📦 어디에 있을까? */
+.pos-scene { position: relative; width: 100%; max-width: 340px; aspect-ratio: 320 / 250; margin: 0 auto; border-radius: 18px; background: #fff8e1; box-shadow: var(--shadow); overflow: hidden; }
+.pos-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.pos-box { z-index: 2; pointer-events: none; }
+.pos-floor { fill: #e9d8a6; }
+.pos-wood { fill: #b07d4b; }
+.pos-cardboard { fill: #d4a373; stroke: #8b5e34; stroke-width: 2; }
+.pos-flap { fill: #e6b98a; stroke: #8b5e34; stroke-width: 2; }
+.pos-spot { position: absolute; width: 48px; height: 48px; transform: translate(-50%, -50%); border-radius: 50%; border: 3px dashed var(--primary); background: rgba(255, 255, 255, 0.55); cursor: pointer; padding: 0; }
+.pos-spot.filled { border-style: solid; background: transparent; }
+.pos-item { position: absolute; transform: translate(-50%, -50%); font-size: 40px; line-height: 1; pointer-events: none; animation: pop 0.25s ease; }
+
+/* 🔤 소리 합치기 */
+.blend-tiles { display: flex; justify-content: center; gap: 10px; }
+.blend-tile { width: 76px; height: 92px; border: none; border-radius: 16px; background: var(--card-bg); box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; font: inherit; color: var(--text); }
+.blend-tile b { font-size: 40px; line-height: 1; }
+.blend-tile small { font-size: 16px; font-weight: 800; color: var(--muted); }
+.blend-tile.on { background: color-mix(in srgb, var(--primary) 18%, var(--card-bg)); }
+.blend-tile.on small { color: var(--primary); }
+.blend-sum { text-align: center; font-size: 20px; font-weight: 800; margin: 0; }
+
+/* 🐾 동물 스무고개 */
+.animal-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.animal-card { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 6px 2px; border: none; border-radius: 12px; background: var(--card-bg); box-shadow: var(--shadow); cursor: pointer; font: inherit; color: var(--text); transition: opacity 0.3s, transform 0.3s; }
+.animal-card span { font-size: 30px; line-height: 1.2; }
+.animal-card small { font-size: 11px; font-weight: 700; }
+.animal-card.out { opacity: 0.18; transform: scale(0.9); }
+.animal-card.found { outline: 3px solid var(--correct); transform: scale(1.1); }
+.animal-log { list-style: none; margin: 0; padding: 8px 12px; border-radius: 14px; background: var(--card-bg); box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 4px; font-size: 15px; }
+.animal-qs { display: flex; flex-direction: column; gap: 6px; }
+.animal-qs .chip-btn:disabled { opacity: 0.4; }
+
+/* 🎬 상황별 영어 대화 */
+.scene-lines { display: flex; flex-direction: column; gap: 8px; }
+.scene-line { background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); padding: 8px 12px; margin-right: 32px; }
+.scene-line.mine { margin: 0 0 0 32px; background: color-mix(in srgb, var(--primary) 10%, var(--card-bg)); }
+.scene-who { font-size: 12px; font-weight: 800; color: var(--muted); }
+.scene-line .culture-line { margin-bottom: 2px; }
+.scene-line .rec-row { justify-content: flex-start; margin: 4px 0 0 38px; }
+.scene-hidden { display: inline-block; padding: 2px 10px; border-radius: 8px; background: var(--muted); color: var(--card-bg); cursor: pointer; }

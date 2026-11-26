@@ -22423,6 +22423,143 @@ READING_PASSAGES.push(
 
 ;
 
+/* ── data/funMore.js ── */
+// 🐾 동물 스무고개 · 📦 위치 놀이 물건 · 🎬 상황별 영어 대화
+// 동물 스무고개: 질문마다 예/아니오가 분명한 동물만 고른다 (잡식 동물처럼 애매한 것은 뺐다)
+const ANIMAL_QUESTIONS = [
+  { id: "legs", q: "Does it have legs?", ko: "다리가 있나요?", aux: "does" },
+  { id: "legs4", q: "Does it have four legs?", ko: "다리가 네 개인가요?", aux: "does" },
+  { id: "wings", q: "Does it have wings?", ko: "날개가 있나요?", aux: "does" },
+  { id: "fur", q: "Does it have fur?", ko: "털이 있나요?", aux: "does" },
+  { id: "sea", q: "Does it live in the sea?", ko: "바다에 사나요?", aux: "does" },
+  { id: "big", q: "Is it bigger than a person?", ko: "사람보다 큰가요?", aux: "is" },
+  { id: "farm", q: "Does it live on a farm?", ko: "농장에 사나요?", aux: "does" },
+  { id: "stripes", q: "Does it have stripes?", ko: "줄무늬가 있나요?", aux: "does" },
+  { id: "meat", q: "Does it eat meat?", ko: "고기를 먹나요?", aux: "does" },
+  { id: "neck", q: "Does it have a long neck?", ko: "목이 긴가요?", aux: "does" },
+];
+// [영어, 그림, 우리말, 예인 질문들]
+const ANIMAL_CARDS = [
+  ["cat", "🐱", "고양이", "legs legs4 fur meat"],
+  ["rabbit", "🐰", "토끼", "legs legs4 fur"],
+  ["lion", "🦁", "사자", "legs legs4 fur big meat"],
+  ["tiger", "🐯", "호랑이", "legs legs4 fur big stripes meat"],
+  ["cow", "🐮", "소", "legs legs4 fur big farm"],
+  ["sheep", "🐑", "양", "legs legs4 fur farm"],
+  ["zebra", "🦓", "얼룩말", "legs legs4 fur big stripes"],
+  ["giraffe", "🦒", "기린", "legs legs4 fur big neck"],
+  ["elephant", "🐘", "코끼리", "legs legs4 big"],
+  ["owl", "🦉", "부엉이", "legs wings meat"],
+  ["butterfly", "🦋", "나비", "legs wings"],
+  ["shark", "🦈", "상어", "sea big meat"],
+  ["snake", "🐍", "뱀", "meat"],
+].map(([word, emoji, ko, yes]) => ({ word, emoji, ko, yes: yes.split(" ") }));
+
+// 📦 위치 놀이: 넣을 물건 [영어, 그림, 우리말]
+const POS_ITEMS = [
+  ["cat", "🐱", "고양이"],
+  ["dog", "🐶", "강아지"],
+  ["ball", "⚽", "공"],
+  ["apple", "🍎", "사과"],
+  ["teddy bear", "🧸", "곰 인형"],
+  ["duck", "🦆", "오리"],
+  ["book", "📕", "책"],
+  ["rabbit", "🐰", "토끼"],
+];
+
+// 🎬 상황별 영어 대화: 두 번째 사람(B)이 '나'. lines: [화자(W/M), 영어, 우리말]
+const SCENE_DIALOGS = [
+  {
+    id: "sc-clinic", emoji: "🏥", title: "병원 접수", setting: "아이가 아파서 동네 병원에 처음 왔어요.",
+    lines: [
+      ["W", "Hi, how can I help you?", "안녕하세요, 무엇을 도와드릴까요?"],
+      ["M", "Hi, my son has a fever. We don't have an appointment.", "안녕하세요, 아들이 열이 나요. 예약은 안 했어요."],
+      ["W", "That's okay. Is this your first visit?", "괜찮아요. 처음 오셨나요?"],
+      ["M", "Yes, it is. Do I need to fill out a form?", "네. 서류를 작성해야 하나요?"],
+      ["W", "Yes, please fill this out and have a seat. The wait is about twenty minutes.", "네, 이걸 작성하시고 앉아 계세요. 20분쯤 기다리셔야 해요."],
+      ["M", "Okay, thank you.", "네, 감사합니다."],
+    ],
+  },
+  {
+    id: "sc-doctor", emoji: "🩺", title: "진료실에서", setting: "의사 선생님께 아이 증상을 설명해요.",
+    lines: [
+      ["M", "So, what seems to be the problem?", "어디가 불편해서 오셨어요?"],
+      ["W", "She's had a cough and a runny nose since yesterday.", "어제부터 기침하고 콧물이 나요."],
+      ["M", "Does she have a fever?", "열도 있나요?"],
+      ["W", "A little. It was thirty-eight degrees last night.", "조금요. 어젯밤에 38도였어요."],
+      ["M", "It looks like a cold. I'll give her some medicine. Make sure she gets plenty of rest.", "감기 같네요. 약을 처방해 드릴게요. 푹 쉬게 해 주세요."],
+      ["W", "How often should she take it?", "약은 얼마나 자주 먹여야 하나요?"],
+    ],
+  },
+  {
+    id: "sc-teacher", emoji: "🏫", title: "학부모 상담", setting: "아이 담임 선생님과 상담해요.",
+    lines: [
+      ["W", "Thank you for coming in today.", "오늘 와 주셔서 감사합니다."],
+      ["M", "Thank you for your time. How is Jun doing in class?", "시간 내 주셔서 감사해요. 준이는 수업 시간에 어떤가요?"],
+      ["W", "He's doing well. He's very curious and asks a lot of questions.", "잘하고 있어요. 호기심이 많고 질문을 많이 해요."],
+      ["M", "That's good to hear. Is there anything he needs to work on?", "다행이네요. 더 노력해야 할 부분이 있을까요?"],
+      ["W", "He could read a little more at home. Maybe twenty minutes a day.", "집에서 책을 조금 더 읽으면 좋겠어요. 하루 20분 정도요."],
+      ["M", "We'll try that. Please let me know if there's anything else.", "그렇게 해 볼게요. 다른 게 있으면 알려 주세요."],
+    ],
+  },
+  {
+    id: "sc-bank", emoji: "🏦", title: "은행에서", setting: "해외 은행 창구에서 계좌를 만들려고 해요.",
+    lines: [
+      ["M", "Good morning. What can I do for you today?", "안녕하세요. 무엇을 도와드릴까요?"],
+      ["W", "I'd like to open a bank account.", "계좌를 하나 만들고 싶어요."],
+      ["M", "Sure. Can I see your ID, please?", "네. 신분증 좀 보여 주시겠어요?"],
+      ["W", "Here's my passport. Do I need anything else?", "여권 여기 있어요. 다른 것도 필요한가요?"],
+      ["M", "Just a proof of address, like a utility bill.", "주소 증명만 있으면 돼요. 공과금 고지서 같은 거요."],
+      ["W", "I have my lease agreement. Will that work?", "임대 계약서가 있는데, 그걸로 될까요?"],
+    ],
+  },
+  {
+    id: "sc-delivery", emoji: "📦", title: "택배 기사 전화", setting: "택배 기사에게서 전화가 왔어요.",
+    lines: [
+      ["M", "Hello, I have a package for you, but nobody is answering the door.", "여보세요, 택배가 왔는데 아무도 문을 안 여시네요."],
+      ["W", "Oh, sorry. I'm not at home right now.", "아, 죄송해요. 지금 집에 없어요."],
+      ["M", "Would you like me to leave it at the door?", "문 앞에 두고 갈까요?"],
+      ["W", "Yes, please. Could you put it behind the plant?", "네, 그렇게 해 주세요. 화분 뒤에 놓아 주실 수 있나요?"],
+      ["M", "No problem. I'll send you a photo.", "알겠습니다. 사진 보내 드릴게요."],
+      ["W", "Thank you so much. Have a good day.", "정말 감사해요. 좋은 하루 보내세요."],
+    ],
+  },
+  {
+    id: "sc-neighbor", emoji: "🏡", title: "이웃과 인사", setting: "새로 이사 온 이웃을 엘리베이터에서 만났어요.",
+    lines: [
+      ["W", "Hi! Did you just move in?", "안녕하세요! 이번에 이사 오셨어요?"],
+      ["M", "Yes, we moved in last weekend. I'm Minho. I live on the fifth floor.", "네, 지난 주말에 왔어요. 저는 민호예요. 5층에 살아요."],
+      ["W", "Nice to meet you. I'm Sarah. Welcome to the building!", "반가워요. 저는 사라예요. 이사 오신 걸 환영해요!"],
+      ["M", "Thanks. Is there a good grocery store nearby?", "고마워요. 근처에 괜찮은 마트가 있나요?"],
+      ["W", "There's one just around the corner. It's open until ten.", "바로 모퉁이에 하나 있어요. 10시까지 해요."],
+      ["M", "Great, thanks for the tip. See you around!", "좋네요, 알려 주셔서 고마워요. 또 봬요!"],
+    ],
+  },
+  {
+    id: "sc-playdate", emoji: "🧸", title: "놀이 약속 잡기", setting: "아이 친구 엄마와 아이들 놀이 약속을 잡아요.",
+    lines: [
+      ["W", "Hi! The kids had so much fun at school. Would your daughter like to come over on Saturday?", "안녕하세요! 아이들이 학교에서 정말 재밌게 놀았대요. 토요일에 따님이 저희 집에 놀러 올래요?"],
+      ["M", "She'd love that! What time works for you?", "아주 좋아할 거예요! 몇 시가 괜찮으세요?"],
+      ["W", "How about from two to five?", "2시부터 5시까지 어때요?"],
+      ["M", "Perfect. Does your son have any allergies I should know about?", "좋아요. 아드님이 알레르기 있는 게 있나요?"],
+      ["W", "He's allergic to peanuts, but that's all. Thanks for asking!", "땅콩 알레르기가 있는데 그게 다예요. 물어봐 줘서 고마워요!"],
+    ],
+  },
+  {
+    id: "sc-salon", emoji: "💇", title: "미용실에서", setting: "여행 중 미용실에서 머리를 자르려고 해요.",
+    lines: [
+      ["M", "Hi, what would you like today?", "안녕하세요, 오늘 어떻게 해 드릴까요?"],
+      ["W", "Just a trim, please. About two centimeters.", "다듬기만 해 주세요. 2센티 정도요."],
+      ["M", "Sure. Would you like to keep the same style?", "네. 스타일은 그대로 할까요?"],
+      ["W", "Yes, but could you make the bangs a little shorter?", "네, 그런데 앞머리는 조금 더 짧게 해 주실래요?"],
+      ["M", "No problem. How's this?", "알겠습니다. 이 정도 어떠세요?"],
+      ["W", "That looks great. Thank you!", "아주 좋아요. 감사합니다!"],
+    ],
+  },
+];
+
+;
+
 /* ── js/state.js ── */
 function createStore(initialState) {
   let state = initialState;
@@ -22598,10 +22735,12 @@ function normalizeProfile(profile) {
   p.care = { day: typeof p.care.day === "string" ? p.care.day : "", pets: Number(p.care.pets) || 0, snacks: Number(p.care.snacks) || 0, bond: Math.max(0, Math.floor(Number(p.care.bond) || 0)) };
   if (p.petKind !== undefined && !(typeof p.petKind === "string" && /^[a-z]{2,10}$/.test(p.petKind))) delete p.petKind;
   if (p.diag && !(typeof p.diag === "object" && levelById(p.diag.levelId) && /^\d{4}-\d{2}-\d{2}$/.test(p.diag.date))) delete p.diag;
-  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster", "wordrain", "xmas", "pairs", "chant", "culture", "drawgame", "school", "house", "biz", "fishing", "coloring", "basket", "balloon", "parentTalk", "konglish", "linking", "dailyWrite", "board", "clock", "blocks", "storeGame", "tableTalk"]) {
-    p[section] ||= { best: {}, wrong: {} };
-    p[section].best ||= {};
-    p[section].wrong ||= {};
+  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster", "wordrain", "xmas", "pairs", "chant", "culture", "drawgame", "school", "house", "biz", "fishing", "coloring", "basket", "balloon", "parentTalk", "konglish", "linking", "dailyWrite", "board", "clock", "blocks", "storeGame", "tableTalk", "treasure", "position", "blend", "animal20", "scene"]) {
+    // 백업 파일에서 온 엉뚱한 값(글자 · 배열 · 숫자 아닌 점수)은 버린다
+    const obj = (v) => (v && typeof v === "object" && !Array.isArray(v) ? v : {});
+    const sec = obj(p[section]);
+    p[section] = { ...sec, best: obj(sec.best), wrong: obj(sec.wrong) };
+    for (const [id, b] of Object.entries(p[section].best)) if (!(b && Number.isFinite(b.correct) && Number.isFinite(b.total) && b.total > 0)) delete p[section].best[id];
   }
   return p;
 }
@@ -23346,6 +23485,11 @@ const BADGES = [
   { id: "wordSearch", emoji: "🔍", title: "숨은 단어 탐험가", desc: "단어 찾기 퍼즐 완성하기", test: (p) => Object.keys(p.wordsearch.best).length >= 1 },
   { id: "wordGuess", emoji: "🕵️", title: "명탐정", desc: "단어 추리 5개 모두 맞히기", test: (p) => perfectCount(p.wordguess.best) >= 1 },
   { id: "riddle", emoji: "❓", title: "수수께끼 박사", desc: "영어 수수께끼 만점", test: (p) => perfectCount(p.riddle.best) >= 1 },
+  { id: "treasure", emoji: "🧭", title: "보물 사냥꾼", desc: "방향 보물찾기 8개 모두 한 번에 찾기", test: (p) => perfectCount(p.treasure.best) >= 1 },
+  { id: "position", emoji: "📦", title: "위치 박사", desc: "어디에 있을까? 8문제 모두 한 번에", test: (p) => perfectCount(p.position.best) >= 1 },
+  { id: "blend", emoji: "🔤", title: "소리 마법사", desc: "소리 합치기 8단어 모두 한 번에", test: (p) => perfectCount(p.blend.best) >= 1 },
+  { id: "animal20", emoji: "🐾", title: "동물 탐정", desc: "동물 스무고개를 질문 4번 안에 맞히기", test: (p) => (p.animal20.best.all?.correct || 0) >= 7 },
+  { id: "scene", emoji: "🎬", title: "상황 대화 달인", desc: "상황별 영어 대화 퀴즈 4개 만점", test: (p) => perfectCount(p.scene.best) >= 4 },
   { id: "boardWin", emoji: "🎲", title: "말판 챔피언", desc: "주사위 말판 놀이에서 1등 하기", test: (p) => !!p.board.best.win },
   { id: "clock", emoji: "🕰️", title: "시계 박사", desc: "시계 맞추기 8문제 모두 한 번에", test: (p) => perfectCount(p.clock.best) >= 1 },
   { id: "blocks", emoji: "🧱", title: "문장 건축가", desc: "문장 블록 8문장 모두 한 번에 쌓기", test: (p) => perfectCount(p.blocks.best) >= 1 },
@@ -24776,6 +24920,7 @@ function renderHomeScreen(root, ctx) {
         <h2 class="group-title">🗣️ 말하기 · 듣기 · 쓰기</h2>
         <div class="tile-grid">
           ${homeTile({ id: "tableTalkBtn", emoji: "🍽️", title: "저녁 식탁 질문", meta: `카드 ${Object.keys(getProfileData(profileName).tableTalk.best).length} / ${TABLE_TALK.length}` })}
+          ${show.practice ? homeTile({ id: "sceneBtn", emoji: "🎬", title: "상황별 영어 대화", meta: "병원 · 학교 상담 · 은행" }) : ""}
           ${level === "adult" ? homeTile({ id: "parentTalkBtn", emoji: "👪", title: "아이와 쓰는 영어", meta: "아침부터 잠들 때까지" }) : ""}
           ${show.advanced ? homeTile({ id: "dailyWriteBtn", emoji: "🖊️", title: "하루 한 문장 영작", meta: `${Object.keys(getProfileData(profileName).dailyWrite.best).length}문장 써 봤어요` }) : ""}
           ${show.advanced ? homeTile({ id: "konglishBtn", emoji: "🚫", title: "콩글리시 바로잡기", meta: "핸드폰 → cell phone" }) : ""}
@@ -24793,35 +24938,51 @@ function renderHomeScreen(root, ctx) {
       </section>
 
       <section class="group">
-        <h2 class="group-title">✏️ 문제 풀기</h2>
+        <h2 class="group-title">🎮 게임 · 놀이</h2>
         <div class="tile-grid">
           ${homeTile({ id: "boardBtn", emoji: "🎲", title: "주사위 말판", meta: "가족이 함께 · 단어 맞히고 전진" })}
-          ${isKid ? homeTile({ id: "clockBtn", emoji: "🕰️", title: "시계 맞추기", meta: "What time is it?" }) : ""}
-          ${isKid ? homeTile({ id: "blocksBtn", emoji: "🧱", title: "문장 블록", meta: "단어 순서대로 쌓기" }) : ""}
-          ${isKid ? homeTile({ id: "storeGameBtn", emoji: "🛒", title: "영어 가게", meta: "값 듣고 돈 내기" }) : ""}
           ${isKid ? homeTile({ id: "fishingBtn", emoji: "🎣", title: "단어 낚시", meta: "물고기 단어 낚기" }) : ""}
           ${isKid ? homeTile({ id: "coloringBtn", emoji: "🖍️", title: "영어 색칠 놀이", meta: "듣고 색칠하기" }) : ""}
           ${isKid ? homeTile({ id: "basketBtn", emoji: "🧺", title: "과일 바구니", meta: "개수대로 담기" }) : ""}
           ${isKid ? homeTile({ id: "balloonBtn", emoji: "🎈", title: "알파벳 풍선", meta: "글자 풍선 터뜨리기" }) : ""}
-          ${homeTile({ id: "houseBtn", emoji: "🏠", title: "집 · 동네 물건", meta: "그림 보고 · 듣고 맞히기" })}
+          ${isKid ? homeTile({ id: "treasureBtn", emoji: "🧭", title: "방향 보물찾기", meta: "Go up two steps!" }) : ""}
+          ${isKid ? homeTile({ id: "posBtn", emoji: "📦", title: "어디에 있을까?", meta: "on · under · in" }) : ""}
+          ${isKid ? homeTile({ id: "blendBtn", emoji: "🔤", title: "소리 합치기", meta: "c-a-t → cat" }) : ""}
+          ${isKid ? homeTile({ id: "animalBtn", emoji: "🐾", title: "동물 스무고개", meta: "영어로 묻고 맞히기" }) : ""}
+          ${isKid ? homeTile({ id: "clockBtn", emoji: "🕰️", title: "시계 맞추기", meta: "What time is it?" }) : ""}
+          ${isKid ? homeTile({ id: "blocksBtn", emoji: "🧱", title: "문장 블록", meta: "단어 순서대로 쌓기" }) : ""}
+          ${isKid ? homeTile({ id: "storeGameBtn", emoji: "🛒", title: "영어 가게", meta: "값 듣고 돈 내기" }) : ""}
           ${isKid ? homeTile({ id: "pictureBtn", emoji: "🎧", title: "그림 퀴즈", meta: "듣고 · 보고 고르기" }) : ""}
           ${isKid ? homeTile({ id: "memoryBtn", emoji: "🃏", title: "짝 맞추기", meta: "카드 뒤집기 게임" }) : ""}
-          ${homeTile({ id: "pairsBtn", emoji: "🔗", title: "짝꿍 단어 잇기", meta: "반대말 · 비슷한 말" })}
           ${homeTile({ id: "drawBtn", emoji: "🎨", title: "그림 맞히기", meta: "가족이 그리고 맞혀요" })}
           ${homeTile({ id: "rainBtn", emoji: "🌧️", title: "단어 비", meta: "떨어지기 전에 터뜨려요" })}
           ${homeTile({ id: "monsterBtn", emoji: "👾", title: "오답 몬스터", meta: wrongWords > 0 ? `오답 ${wrongWords}개로 싸우기` : "단어로 몬스터 잡기", warn: wrongWords > 0 })}
-          ${homeTile({ id: "speedBtn", emoji: "⏱️", title: "60초 퀴즈", meta: "1분 동안 많이 맞히기" })}
           ${homeTile({ id: "battleBtn", emoji: "⚔️", title: "가족 대결", meta: getFamily().length > 1 ? "번갈아 풀기" : "가족 2명부터", disabled: getFamily().length < 2 })}
-          ${homeTile({ id: "chainBtn", emoji: "🐍", title: "끝말잇기", meta: "컴퓨터와 단어 잇기" })}
           ${homeTile({ id: "bingoBtn", emoji: "🎱", title: "단어 빙고", meta: "듣고 칸 지우기" })}
+        </div>
+      </section>
+
+      <section class="group">
+        <h2 class="group-title">🧩 단어 퍼즐</h2>
+        <div class="tile-grid">
+          ${homeTile({ id: "houseBtn", emoji: "🏠", title: "집 · 동네 물건", meta: "그림 보고 · 듣고 맞히기" })}
+          ${homeTile({ id: "pairsBtn", emoji: "🔗", title: "짝꿍 단어 잇기", meta: "반대말 · 비슷한 말" })}
+          ${homeTile({ id: "speedBtn", emoji: "⏱️", title: "60초 퀴즈", meta: "1분 동안 많이 맞히기" })}
+          ${homeTile({ id: "chainBtn", emoji: "🐍", title: "끝말잇기", meta: "컴퓨터와 단어 잇기" })}
           ${homeTile({ id: "wordSearchBtn", emoji: "🔍", title: "단어 찾기", meta: "숨은 단어 긋기" })}
           ${homeTile({ id: "wordGuessBtn", emoji: "🕵️", title: "단어 추리", meta: "글자 골라 맞히기" })}
           ${homeTile({ id: "riddleBtn", emoji: "❓", title: "영어 수수께끼", meta: "나는 무엇일까요?" })}
           ${homeTile({ id: "spellingBtn", emoji: "🎯", title: "스펠링 게임", meta: "글자 맞혀 단어 완성" })}
+          ${homeTile({ id: "crosswordBtn", emoji: "🧩", title: "가로세로 낱말", meta: "매번 새 퍼즐" })}
+        </div>
+      </section>
+
+      <section class="group">
+        <h2 class="group-title">✏️ 문제 풀기</h2>
+        <div class="tile-grid">
           ${homeTile({ id: "weeklyBtn", emoji: "📅", title: "주간 단어 시험", meta: weeklyBest ? `이번 주 ${ratioLabel(weeklyBest)}` : `이번 주 본 단어 ${weeklySeenCount(profileName)}개` })}
           ${homeTile({ id: "wordsBtn", emoji: "✏️", title: "단어 시험", meta: wrongWords > 0 ? `오답 ${wrongWords}개` : wordBest !== null ? `최고 ${wordBest}점` : "고르기 · 철자 · 받아쓰기", warn: wrongWords > 0 })}
           ${homeTile({ id: "chunksBtn", emoji: "✂️", title: "끊어 읽기", meta: `${chunkDone} / ${CHUNK_SETS.length} 완료` })}
-          ${homeTile({ id: "crosswordBtn", emoji: "🧩", title: "가로세로 낱말", meta: "매번 새 퍼즐" })}
           ${homeTile({ id: "examBtn", emoji: "📋", title: "단원 모의고사", meta: "20문제 · 100점" })}
           ${homeTile({ id: "printBtn", emoji: "🖨️", title: "시험지 인쇄", meta: "종이로 풀기" })}
         </div>
@@ -24899,6 +25060,11 @@ function renderHomeScreen(root, ctx) {
   bind("dailyWriteBtn", actions.openDailyWrite);
   bind("fishingBtn", actions.openFishing);
   bind("boardBtn", actions.openBoard);
+  bind("treasureBtn", actions.openTreasure);
+  bind("posBtn", actions.openPosition);
+  bind("blendBtn", actions.openBlend);
+  bind("animalBtn", actions.openAnimal);
+  bind("sceneBtn", actions.openScenes);
   bind("clockBtn", actions.openClock);
   bind("blocksBtn", actions.openBlocks);
   bind("storeGameBtn", actions.openStoreGame);
@@ -32451,6 +32617,11 @@ const HOME_TILE_ALIASES = {
   konglishBtn: "konglish 콩글리시 틀린 영어 핸드폰",
   linkingBtn: "linking pronunciation 연음 발음 gonna wanna",
   dailyWriteBtn: "daily writing 영작 하루 한 문장 쓰기",
+  treasureBtn: "treasure direction 보물 방향 지도 위 아래 왼쪽 오른쪽",
+  posBtn: "position preposition 위치 전치사 위 아래 옆 안",
+  blendBtn: "blend phonics 소리 합치기 파닉스",
+  animalBtn: "animal 동물 스무고개 질문",
+  sceneBtn: "scene dialogue 상황 대화 병원 학교 은행",
   boardBtn: "board game dice 주사위 말판 보드게임 가족",
   clockBtn: "clock time 시계 시간 몇 시",
   blocksBtn: "sentence blocks 문장 블록 순서 쌓기",
@@ -34571,6 +34742,560 @@ function renderNewsListScreen(root, { profileName, open, back }) {
 
 ;
 
+/* ── js/screens/funMore.js ── */
+// 🧭 방향 보물찾기 · 📦 어디에 있을까? · 🔤 소리 합치기 · 🐾 동물 스무고개 · 🎬 상황별 영어 대화
+
+// ── 🧭 방향 보물찾기: "Go right two steps." 를 듣고 화살표로 움직여 보물 자리를 찾아요 ──
+const MAP_SIZE = 5;
+const MAP_ROUNDS = 8;
+const MAP_DIRS = { up: [0, -1, "⬆️", "위"], down: [0, 1, "⬇️", "아래"], left: [-1, 0, "⬅️", "왼쪽"], right: [1, 0, "➡️", "오른쪽"] };
+const MAP_DECOR = ["🌳", "🪨", "🌵", "🌼", "🍄", "🌲"];
+const mapStepWord = (n) => `${EN_NUMS[n]} step${n === 1 ? "" : "s"}`;
+const mapCmdText = (c) => `Go ${c.dir} ${mapStepWord(c.n)}.`;
+
+function newMapGame() {
+  const rounds = Array.from({ length: MAP_ROUNDS }, (_, i) => {
+    const count = i < 3 ? 1 : i < 6 ? 2 : 3;
+    for (;;) {
+      const start = [Math.floor(Math.random() * MAP_SIZE), Math.floor(Math.random() * MAP_SIZE)];
+      let [x, y] = start;
+      const cmds = [];
+      let last = null;
+      for (let k = 0; k < count; k++) {
+        const opts = [];
+        for (const [dir, [dx, dy]] of Object.entries(MAP_DIRS)) {
+          if (last && (dir === last || MAP_DIRS[last][0] === -dx && MAP_DIRS[last][1] === -dy)) continue;
+          for (let n = 1; n <= 3; n++) if (x + dx * n >= 0 && x + dx * n < MAP_SIZE && y + dy * n >= 0 && y + dy * n < MAP_SIZE) opts.push({ dir, n });
+        }
+        if (!opts.length) break;
+        const c = opts[Math.floor(Math.random() * opts.length)];
+        cmds.push(c);
+        x += MAP_DIRS[c.dir][0] * c.n;
+        y += MAP_DIRS[c.dir][1] * c.n;
+        last = c.dir;
+      }
+      if (cmds.length === count) {
+        const decor = {};
+        for (let d = 0; d < 6; d++) decor[Math.floor(Math.random() * MAP_SIZE * MAP_SIZE)] = MAP_DECOR[d];
+        return { start, cmds, goal: [x, y], decor, missed: false };
+      }
+    }
+  });
+  return { rounds, i: 0, pos: [...rounds[0].start], found: false, done: false, isNewBest: false, msg: "" };
+}
+
+function renderMapScreen(root, { game, actions }) {
+  if (game.done) {
+    const score = game.rounds.filter((r) => !r.missed).length;
+    root.innerHTML = kidDoneHtml({
+      title: "🧭 보물찾기 결과",
+      score,
+      total: game.rounds.length,
+      isNewBest: game.isNewBest,
+      rows: game.rounds.map((r) => `<li>${r.missed ? "🔁" : "✅"} ${r.cmds.map(mapCmdText).join(" ")}</li>`).join(""),
+    });
+    root.querySelector("#againBtn").addEventListener("click", actions.again);
+    root.querySelector("#homeBtn").addEventListener("click", actions.home);
+    return;
+  }
+  const r = game.rounds[game.i];
+  const text = r.cmds.map(mapCmdText).join(" ");
+  const say = () => speak(text, { rate: 0.8 });
+  const cells = [];
+  for (let y = 0; y < MAP_SIZE; y++)
+    for (let x = 0; x < MAP_SIZE; x++) {
+      const k = y * MAP_SIZE + x;
+      const me = game.pos[0] === x && game.pos[1] === y;
+      const start = r.start[0] === x && r.start[1] === y;
+      const gem = game.found && r.goal[0] === x && r.goal[1] === y;
+      cells.push(`<div class="map-cell${start ? " map-start" : ""}">${me ? `<span class="map-me">${gem ? "💎" : "🐶"}</span>` : gem ? "💎" : r.decor[k] || ""}</div>`);
+    }
+  root.innerHTML = `
+    <div class="screen screen-kidgame no-anim">
+      <div class="cw-top">
+        <button class="back-btn" id="quitBtn">× 그만하기</button>
+        <span class="cw-progress">${game.i + 1} / ${game.rounds.length}</span>
+      </div>
+      <div class="color-order"><b>${text}</b><button class="speak-btn" id="sayBtn" aria-label="듣기" ${speechSupported ? "" : "disabled"}>🔊</button></div>
+      <details class="color-help"><summary>뜻 보기</summary>${r.cmds.map((c) => `${MAP_DIRS[c.dir][3]}으로 ${c.n}칸`).join(" → ")}</details>
+      <div class="map-grid">${cells.join("")}</div>
+      <div class="map-pad">
+        <span></span><button class="chip-btn" data-go="up" aria-label="up">⬆️</button><span></span>
+        <button class="chip-btn" data-go="left" aria-label="left">⬅️</button><button class="chip-btn map-dig" id="digBtn" ${game.found ? "disabled" : ""}>⛏️</button><button class="chip-btn" data-go="right" aria-label="right">➡️</button>
+        <span></span><button class="chip-btn" data-go="down" aria-label="down">⬇️</button><span></span>
+      </div>
+      <p class="fish-status">${game.msg || "🐶를 움직이고 ⛏️로 땅을 파요 · 초록 칸이 출발"}</p>
+      <button class="secondary-btn" id="resetBtn" ${game.found ? "disabled" : ""}>↩️ 출발점으로</button>
+    </div>`;
+  root.querySelector("#quitBtn").addEventListener("click", actions.quit);
+  root.querySelector("#sayBtn").addEventListener("click", say);
+  if (!r.spoken) {
+    r.spoken = true;
+    setTimeout(say, 300);
+  }
+  root.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => actions.move(b.dataset.go)));
+  root.querySelector("#digBtn").addEventListener("click", actions.dig);
+  root.querySelector("#resetBtn").addEventListener("click", actions.reset);
+}
+
+const mapActions = {
+  move: (dir) => {
+    const { map: game } = store.getState();
+    if (game.found) return;
+    const [dx, dy] = MAP_DIRS[dir];
+    const x = game.pos[0] + dx;
+    const y = game.pos[1] + dy;
+    if (x < 0 || y < 0 || x >= MAP_SIZE || y >= MAP_SIZE) return;
+    game.pos = [x, y];
+    game.msg = dir;
+    speak(dir, { rate: 0.9 });
+    set({});
+  },
+  reset: () => {
+    const { map: game } = store.getState();
+    game.pos = [...game.rounds[game.i].start];
+    game.msg = "";
+    set({});
+  },
+  dig: () => {
+    const { map: game } = store.getState();
+    const r = game.rounds[game.i];
+    if (game.pos[0] !== r.goal[0] || game.pos[1] !== r.goal[1]) {
+      r.missed = true;
+      playSound("wrong");
+      game.msg = "🕳️ 여기는 보물이 없어요! 🔊 다시 듣고 출발점부터 해 봐요";
+      game.pos = [...r.start];
+      set({});
+      return;
+    }
+    playSound("correct");
+    recordActivity(currentProfile());
+    game.found = true;
+    game.msg = "💎 보물을 찾았어요!";
+    set({});
+    setTimeout(() => {
+      const s = store.getState();
+      if (s.screen !== "map" || s.map !== game) return;
+      game.i += 1;
+      game.found = false;
+      game.msg = "";
+      if (game.i >= game.rounds.length) {
+        game.done = true;
+        game.isNewBest = kidFinish("treasure", "all", game.rounds.filter((x) => !x.missed).length, game.rounds.length);
+      } else game.pos = [...game.rounds[game.i].start];
+      set({});
+    }, 1200);
+  },
+  again: () => set({ map: newMapGame() }),
+  home: () => goHome(),
+  quit: () => goHome(),
+};
+
+// ── 📦 어디에 있을까?: on · under · next to · in · in front of ──
+const POS_ROUNDS = 8;
+// 자리: [전치사, 기준 물건, 우리말, 그림 위치(%) x, y, 겹침 순서]
+const POS_SPOTS = [
+  { id: "on", prep: "on", ref: "table", ko: "탁자 위", x: 40, y: 29, z: 3 },
+  { id: "under", prep: "under", ref: "table", ko: "탁자 아래", x: 40, y: 76, z: 3 },
+  { id: "nextto", prep: "next to", ref: "table", ko: "탁자 옆", x: 9, y: 80, z: 3 },
+  { id: "in", prep: "in", ref: "box", ko: "상자 안", x: 82, y: 57, z: 1 },
+  { id: "front", prep: "in front of", ref: "box", ko: "상자 앞", x: 80, y: 84, z: 4 },
+];
+const posSentence = (item, spot, put) => (put ? `Put the ${item[0]} ${spot.prep} the ${spot.ref}.` : `The ${item[0]} is ${spot.prep} the ${spot.ref}.`);
+
+function newPosGame() {
+  const spots = [...shuffle(POS_SPOTS), ...shuffle(POS_SPOTS)].slice(0, POS_ROUNDS);
+  const rounds = spots.map((spot, i) => {
+    const item = POS_ITEMS[Math.floor(Math.random() * POS_ITEMS.length)];
+    const r = { item, spot, mode: i % 2 ? "read" : "put", missed: false };
+    if (r.mode === "read") r.choices = shuffle([spot, ...shuffle(POS_SPOTS.filter((s) => s !== spot)).slice(0, 3)]).map((s) => posSentence(item, s, false));
+    return r;
+  });
+  return { rounds, i: 0, placed: null, done: false, isNewBest: false, msg: "" };
+}
+
+const POS_SCENE_SVG = `<svg class="pos-svg" viewBox="0 0 320 250" aria-hidden="true">
+  <rect x="0" y="228" width="320" height="22" class="pos-floor"/>
+  <rect x="60" y="100" width="140" height="14" rx="4" class="pos-wood"/>
+  <rect x="70" y="114" width="12" height="114" class="pos-wood"/><rect x="178" y="114" width="12" height="114" class="pos-wood"/>
+</svg>`;
+const POS_BOX_SVG = `<svg class="pos-svg pos-box" viewBox="0 0 320 250" aria-hidden="true"><rect x="225" y="160" width="76" height="68" class="pos-cardboard"/><path d="M225 160 l-12 -14 h76 l12 14 z" class="pos-flap"/></svg>`;
+
+function renderPosScreen(root, { game, actions }) {
+  if (game.done) {
+    const score = game.rounds.filter((r) => !r.missed).length;
+    root.innerHTML = kidDoneHtml({
+      title: "📦 어디에 있을까? 결과",
+      score,
+      total: game.rounds.length,
+      isNewBest: game.isNewBest,
+      rows: game.rounds.map((r) => `<li>${r.missed ? "🔁" : "✅"} ${r.item[1]} ${posSentence(r.item, r.spot, false)} <small>${r.spot.ko}</small></li>`).join(""),
+    });
+    root.querySelector("#againBtn").addEventListener("click", actions.again);
+    root.querySelector("#homeBtn").addEventListener("click", actions.home);
+    return;
+  }
+  const r = game.rounds[game.i];
+  const at = r.mode === "read" ? r.spot : game.placed;
+  const sentence = posSentence(r.item, r.spot, r.mode === "put");
+  const say = () => speak(sentence, { rate: 0.8 });
+  root.innerHTML = `
+    <div class="screen screen-kidgame no-anim">
+      <div class="cw-top">
+        <button class="back-btn" id="quitBtn">× 그만하기</button>
+        <span class="cw-progress">${game.i + 1} / ${game.rounds.length}</span>
+      </div>
+      ${
+        r.mode === "put"
+          ? `<div class="color-order"><b>${sentence}</b><button class="speak-btn" id="sayBtn" aria-label="듣기" ${speechSupported ? "" : "disabled"}>🔊</button></div><p class="color-help">${r.item[1]}을(를) 놓을 자리를 톡!</p>`
+          : `<p class="color-order"><b>${r.item[1]} 어디에 있나요? 알맞은 문장을 골라요</b></p>`
+      }
+      <div class="pos-scene">
+        ${POS_SCENE_SVG}${POS_BOX_SVG}
+        ${r.mode === "put" ? POS_SPOTS.map((s) => `<button class="pos-spot${at === s ? " filled" : ""}" data-spot="${s.id}" style="left:${s.x}%;top:${s.y}%;z-index:${s.z + 1}" aria-label="자리"></button>`).join("") : ""}
+        ${at ? `<span class="pos-item" style="left:${at.x}%;top:${at.y}%;z-index:${at.z}">${r.item[1]}</span>` : ""}
+      </div>
+      ${r.mode === "read" ? `<div class="choice-grid choice-grid--list">${r.choices.map((c, k) => `<button class="choice-btn choice-btn--long" data-k="${k}">${c}</button>`).join("")}</div>` : ""}
+      <p class="fish-status">${game.msg}</p>
+    </div>`;
+  root.querySelector("#quitBtn").addEventListener("click", actions.quit);
+  root.querySelector("#sayBtn")?.addEventListener("click", say);
+  if (r.mode === "put" && !r.spoken) {
+    r.spoken = true;
+    setTimeout(say, 300);
+  }
+  root.querySelectorAll("[data-spot]").forEach((b) => b.addEventListener("click", () => actions.put(b.dataset.spot)));
+  root.querySelectorAll("[data-k]").forEach((b) => b.addEventListener("click", () => actions.pick(r.choices[Number(b.dataset.k)])));
+}
+
+const posActions = {
+  put: (id) => {
+    const { pos: game } = store.getState();
+    const r = game.rounds[game.i];
+    if (game.placed === r.spot) return;
+    const spot = POS_SPOTS.find((s) => s.id === id);
+    game.placed = spot;
+    if (spot !== r.spot) {
+      r.missed = true;
+      playSound("wrong");
+      game.msg = `🤔 거기는 <b>${spot.prep} the ${spot.ref}</b>(${spot.ko})! 다시 들어 봐요`;
+      set({});
+      return;
+    }
+    posActions.solved();
+  },
+  pick: (choice) => {
+    const { pos: game } = store.getState();
+    const r = game.rounds[game.i];
+    if (choice === posSentence(r.item, r.spot, false)) return posActions.solved();
+    r.missed = true;
+    playSound("wrong");
+    game.msg = "🤔 그림을 다시 봐요!";
+    set({});
+  },
+  solved: () => {
+    const { pos: game } = store.getState();
+    const r = game.rounds[game.i];
+    playSound("correct");
+    recordActivity(currentProfile());
+    speak(posSentence(r.item, r.spot, false), { rate: 0.85 });
+    game.msg = `🎉 ${posSentence(r.item, r.spot, false)} <small>(${r.spot.ko})</small>`;
+    game.placed = r.spot;
+    set({});
+    setTimeout(() => {
+      const s = store.getState();
+      if (s.screen !== "pos" || s.pos !== game) return;
+      game.i += 1;
+      game.placed = null;
+      game.msg = "";
+      if (game.i >= game.rounds.length) {
+        game.done = true;
+        game.isNewBest = kidFinish("position", "all", game.rounds.filter((x) => !x.missed).length, game.rounds.length);
+      }
+      set({});
+    }, 1400);
+  },
+  again: () => set({ pos: newPosGame() }),
+  home: () => goHome(),
+  quit: () => goHome(),
+};
+
+// ── 🔤 소리 합치기: 글자 소리를 하나씩 눌러 보고, 합친 단어의 그림을 골라요 ──
+const BLEND_ROUNDS = 8;
+const LETTER_SOUNDS = { a: "애", e: "에", i: "이", o: "아", u: "어", b: "브", c: "크", d: "드", f: "프", g: "그", h: "흐", j: "즈", k: "크", l: "르", m: "므", n: "느", p: "프", r: "뤄", s: "스", t: "트", v: "브", w: "워", x: "크스", z: "즈" };
+function blendPool() {
+  const all = [...pictureWordPool("elementary-low"), ...pictureWordPool("elementary-mid")];
+  const seen = new Set();
+  return all.filter((w) => {
+    if (!/^[bcdfghjklmnprstvwz][aeiou][bcdfgklmnprstxz]$/.test(w.word) || seen.has(w.word) || seen.has(w.emoji)) return false;
+    seen.add(w.word);
+    seen.add(w.emoji);
+    return true;
+  });
+}
+
+function newBlendGame() {
+  const pool = blendPool();
+  const rounds = shuffle(pool)
+    .slice(0, BLEND_ROUNDS)
+    .map((w) => {
+      // 헷갈리는 보기: 글자가 하나만 다른 단어를 먼저
+      const near = pool.filter((x) => x !== w && [...x.word].filter((ch, k) => ch === w.word[k]).length === 2);
+      const others = [...shuffle(near), ...shuffle(pool.filter((x) => x !== w && !near.includes(x)))].slice(0, 3);
+      return { w, choices: shuffle([w, ...others]), tapped: [], missed: false };
+    });
+  return { rounds, i: 0, done: false, isNewBest: false, msg: "" };
+}
+
+function renderBlendScreen(root, { game, actions }) {
+  if (game.done) {
+    const score = game.rounds.filter((r) => !r.missed).length;
+    root.innerHTML = kidDoneHtml({
+      title: "🔤 소리 합치기 결과",
+      score,
+      total: game.rounds.length,
+      isNewBest: game.isNewBest,
+      rows: game.rounds.map((r) => `<li>${r.missed ? "🔁" : "✅"} ${r.w.emoji} <b>${[...r.w.word].join("-")}</b> → ${r.w.word} <small>${r.w.meaningKo}</small></li>`).join(""),
+    });
+    root.querySelector("#againBtn").addEventListener("click", actions.again);
+    root.querySelector("#homeBtn").addEventListener("click", actions.home);
+    return;
+  }
+  const r = game.rounds[game.i];
+  const allTapped = r.tapped.length >= r.w.word.length;
+  root.innerHTML = `
+    <div class="screen screen-kidgame no-anim">
+      <div class="cw-top">
+        <button class="back-btn" id="quitBtn">× 그만하기</button>
+        <span class="cw-progress">${game.i + 1} / ${game.rounds.length}</span>
+      </div>
+      <p class="color-order"><b>글자를 차례로 눌러 소리를 내 보고, 합친 단어의 그림을 골라요</b></p>
+      <div class="blend-tiles">${[...r.w.word].map((ch, k) => `<button class="blend-tile${r.tapped.includes(k) ? " on" : ""}" data-t="${k}"><b>${ch}</b><small>${r.tapped.includes(k) ? LETTER_SOUNDS[ch] : "?"}</small></button>`).join("")}</div>
+      <p class="blend-sum">${allTapped ? `${[...r.w.word].map((ch) => LETTER_SOUNDS[ch]).join(" + ")} → ?` : "&nbsp;"}</p>
+      <div class="choice-grid choice-grid--emoji">${r.choices.map((c, k) => `<button class="choice-btn" data-k="${k}" ${allTapped ? "" : "disabled"}>${c.emoji}</button>`).join("")}</div>
+      <p class="fish-status">${game.msg || (allTapped ? "어떤 그림일까요?" : "👆 왼쪽 글자부터 눌러요")}</p>
+    </div>`;
+  root.querySelector("#quitBtn").addEventListener("click", actions.quit);
+  root.querySelectorAll("[data-t]").forEach((b) => b.addEventListener("click", () => actions.tap(Number(b.dataset.t))));
+  root.querySelectorAll("[data-k]").forEach((b) => b.addEventListener("click", () => actions.pick(r.choices[Number(b.dataset.k)])));
+}
+
+const blendActions = {
+  tap: (k) => {
+    const { blend: game } = store.getState();
+    const r = game.rounds[game.i];
+    if (!r.tapped.includes(k)) r.tapped.push(k);
+    game.msg = `${r.w.word[k]} → '${LETTER_SOUNDS[r.w.word[k]]}'`;
+    set({});
+  },
+  pick: (c) => {
+    const { blend: game } = store.getState();
+    const r = game.rounds[game.i];
+    if (c !== r.w) {
+      r.missed = true;
+      playSound("wrong");
+      game.msg = `🤔 그건 ${c.word}(${c.meaningKo})! 소리를 다시 이어 봐요`;
+      set({});
+      return;
+    }
+    playSound("correct");
+    recordActivity(currentProfile());
+    speak(r.w.word, { rate: 0.7 });
+    game.msg = `🎉 ${[...r.w.word].join("-")} → <b>${r.w.word}</b> ${r.w.emoji} ${r.w.meaningKo}`;
+    set({});
+    setTimeout(() => {
+      const s = store.getState();
+      if (s.screen !== "blend" || s.blend !== game) return;
+      game.i += 1;
+      game.msg = "";
+      if (game.i >= game.rounds.length) {
+        game.done = true;
+        game.isNewBest = kidFinish("blend", "all", game.rounds.filter((x) => !x.missed).length, game.rounds.length);
+      }
+      set({});
+    }, 1400);
+  },
+  again: () => set({ blend: newBlendGame() }),
+  home: () => goHome(),
+  quit: () => goHome(),
+};
+
+// ── 🐾 동물 스무고개: 영어 질문을 골라 물어보고 숨은 동물을 맞혀요 ──
+const animalAnswer = (q, yes) => (q.aux === "is" ? (yes ? "Yes, it is." : "No, it isn't.") : yes ? "Yes, it does." : "No, it doesn't.");
+
+function newAnimalGame() {
+  return { secret: ANIMAL_CARDS[Math.floor(Math.random() * ANIMAL_CARDS.length)].word, asked: [], out: [], log: [], done: false, isNewBest: false };
+}
+
+function renderAnimalScreen(root, { game, actions }) {
+  const secret = ANIMAL_CARDS.find((a) => a.word === game.secret);
+  const left = ANIMAL_CARDS.filter((a) => !game.out.includes(a.word));
+  root.innerHTML = `
+    <div class="screen screen-kidgame no-anim">
+      <div class="cw-top">
+        <button class="back-btn" id="quitBtn">${game.done ? "← 홈" : "× 그만하기"}</button>
+        <span class="cw-progress">질문 ${game.asked.length}번 · 남은 동물 ${left.length}</span>
+      </div>
+      ${
+        game.done
+          ? `<div class="result-banner correct" role="status">🎉 정답! <b>${secret.emoji} ${secret.word}</b> (${secret.ko}) · 질문 ${game.asked.length}번 만에${game.isNewBest ? " · 🏆 최고 기록!" : ""}</div>`
+          : `<p class="color-order"><b>🤫 숨은 동물이 있어요. 영어로 물어보세요!</b></p>`
+      }
+      <div class="animal-grid">${ANIMAL_CARDS.map((a) => `<button class="animal-card${game.out.includes(a.word) ? " out" : ""}${game.done && a === secret ? " found" : ""}" data-guess="${a.word}" ${game.done || game.out.includes(a.word) ? "disabled" : ""}><span>${a.emoji}</span><small>${a.word}</small></button>`).join("")}</div>
+      ${game.log.length ? `<ul class="animal-log">${game.log.slice(-3).map((l) => `<li><b>${l.q}</b> → ${l.a}</li>`).join("")}</ul>` : ""}
+      ${
+        game.done
+          ? `<div class="result-actions"><button class="primary-btn" id="againBtn">🔁 한 번 더</button><button class="secondary-btn" id="homeBtn">🏠 홈으로</button></div>`
+          : `<h2 class="section-title">❓ 질문 고르기</h2>
+      <div class="animal-qs">${ANIMAL_QUESTIONS.map((q) => `<button class="chip-btn" data-q="${q.id}" ${game.asked.includes(q.id) ? "disabled" : ""}>${q.q}<small> ${q.ko}</small></button>`).join("")}</div>
+      <p class="color-help">알 것 같으면 위의 동물을 눌러 "Is it a …?" 하고 맞혀 보세요</p>`
+      }
+    </div>`;
+  root.querySelector("#quitBtn").addEventListener("click", game.done ? actions.home : actions.quit);
+  root.querySelectorAll("[data-q]").forEach((b) => b.addEventListener("click", () => actions.ask(b.dataset.q)));
+  root.querySelectorAll("[data-guess]").forEach((b) => b.addEventListener("click", () => actions.guess(b.dataset.guess)));
+  root.querySelector("#againBtn")?.addEventListener("click", actions.again);
+  root.querySelector("#homeBtn")?.addEventListener("click", actions.home);
+}
+
+const animalActions = {
+  ask: (id) => {
+    const { animal: game } = store.getState();
+    const q = ANIMAL_QUESTIONS.find((x) => x.id === id);
+    const secret = ANIMAL_CARDS.find((a) => a.word === game.secret);
+    const yes = secret.yes.includes(id);
+    const a = animalAnswer(q, yes);
+    game.asked.push(id);
+    game.log.push({ q: q.q, a });
+    ANIMAL_CARDS.forEach((c) => c.yes.includes(id) !== yes && !game.out.includes(c.word) && game.out.push(c.word));
+    speakAsync(q.q, { rate: 0.9 }).then(() => speak(a, { rate: 0.9 }));
+    set({});
+  },
+  guess: (word) => {
+    const { animal: game } = store.getState();
+    const c = ANIMAL_CARDS.find((a) => a.word === word);
+    game.asked.push(`guess-${word}`);
+    if (word === game.secret) {
+      game.log.push({ q: `Is it a ${word}?`, a: "Yes, it is! 🎉" });
+      speak(`Is it a ${word}? Yes, it is!`, { rate: 0.9 });
+      playSound("correct");
+      recordActivity(currentProfile());
+      game.done = true;
+      const n = game.asked.length;
+      game.isNewBest = recordSectionResult(currentProfile(), "animal20", "all", Math.max(1, 11 - n), 10);
+      burstConfetti(n <= 4 ? 60 : 30);
+      announceBadges(checkNewBadges(currentProfile()));
+    } else {
+      game.log.push({ q: `Is it a ${word}?`, a: "No, it isn't." });
+      speak(`Is it a ${word}? No, it isn't.`, { rate: 0.9 });
+      playSound("wrong");
+      game.out.push(c.word);
+    }
+    set({});
+  },
+  again: () => set({ animal: newAnimalGame() }),
+  home: () => goHome(),
+  quit: () => goHome(),
+};
+
+// ── 🎬 상황별 영어 대화 (부모님) ──
+const sceneDialog = (id) => SCENE_DIALOGS.find((d) => d.id === id);
+
+function renderSceneListScreen(root, { profileName, open, back }) {
+  root.innerHTML = `
+    <div class="screen screen-biz">
+      <button class="back-btn" id="backBtn">← 홈</button>
+      <h1 class="title">🎬 상황별 영어 대화</h1>
+      <p class="subtitle">병원 · 학교 상담 · 은행 · 이웃처럼 실제로 마주치는 짧은 대화. 듣고, 내 대사를 가리고 말해 보고, 퀴즈로 확인해요</p>
+      <div class="level-grid">
+        ${SCENE_DIALOGS.map((d) => {
+          const best = getSectionBest(profileName, "scene", d.id);
+          return `<button class="level-card" data-id="${d.id}"><span class="level-icon">${d.emoji}</span><span class="topic-text"><span class="level-label">${d.title}</span><span class="topic-summary">${d.setting}</span></span><span class="level-best${best ? "" : " level-best-empty"}">${ratioLabel(best)}</span></button>`;
+        }).join("")}
+      </div>
+    </div>`;
+  root.querySelector("#backBtn").addEventListener("click", back);
+  root.querySelectorAll("[data-id]").forEach((b) => b.addEventListener("click", () => open(b.dataset.id)));
+}
+
+function renderSceneScreen(root, { sceneId, actions }) {
+  const d = sceneDialog(sceneId);
+  const me = d.lines[1][0];
+  let hide = false;
+  const draw = () => {
+    root.innerHTML = `
+      <div class="screen screen-biz">
+        <button class="back-btn" id="backBtn">← 대화 목록</button>
+        <div class="lesson-head"><span class="lesson-emoji">${d.emoji}</span><h1 class="title">${d.title}</h1><p class="subtitle">${d.setting}</p></div>
+        <div class="listen-row">
+          <button class="listen-btn" id="playBtn" ${speechSupported ? "" : "disabled"}>▶ 대화 듣기</button>
+          <button class="listen-btn" id="slowBtn" ${speechSupported ? "" : "disabled"}>🐢 천천히</button>
+          <button class="listen-btn" id="hideBtn">${hide ? "👀 내 대사 보이기" : "🙈 내 대사 가리기"}</button>
+        </div>
+        <div class="scene-lines">
+          ${d.lines
+            .map(([who, en, ko], k) => {
+              const mine = who === me;
+              return `<div class="scene-line${mine ? " mine" : ""}">
+                <span class="scene-who">${mine ? "🙋 나" : "🧑 상대"}</span>
+                <div class="culture-line"><button class="speak-btn" data-say="${k}" aria-label="듣기" ${speechSupported ? "" : "disabled"}>🔊</button><p>${mine && hide ? `<b class="scene-hidden" data-show="${k}">눌러서 보기</b>` : `<b>${en}</b>`}<small>${ko}</small></p></div>
+                ${mine ? recorderHtml("s:" + en) : ""}
+              </div>`;
+            })
+            .join("")}
+        </div>
+        <button class="primary-btn" id="quizBtn">✅ 내 대사 퀴즈</button>
+      </div>`;
+    root.querySelector("#backBtn").addEventListener("click", () => {
+      stopSpeaking();
+      actions.back();
+    });
+    root.querySelector("#playBtn").addEventListener("click", () => playDialog(d.lines));
+    root.querySelector("#slowBtn").addEventListener("click", () => playDialog(d.lines, { rate: 0.65 }));
+    root.querySelector("#hideBtn").addEventListener("click", () => {
+      hide = !hide;
+      draw();
+    });
+    root.querySelectorAll("[data-say]").forEach((b) => b.addEventListener("click", () => speak(d.lines[Number(b.dataset.say)][1], { rate: 0.9 })));
+    root.querySelectorAll("[data-show]").forEach((b) => b.addEventListener("click", () => (b.outerHTML = `<b>${d.lines[Number(b.dataset.show)][1]}</b>`)));
+    root.querySelector("#quizBtn").addEventListener("click", () => {
+      stopSpeaking();
+      actions.quiz(sceneId);
+    });
+    bindRecorders(root);
+  };
+  draw();
+}
+
+// 퀴즈: 상대 말을 보고 내 다음 말 고르기 (오답은 다른 대화의 내 대사)
+function buildSceneQuestions(sceneId) {
+  const d = sceneDialog(sceneId);
+  const me = d.lines[1][0];
+  const myLinesOf = (x) => x.lines.filter(([who], k) => k > 0 && who === x.lines[1][0]).map(([, en]) => en);
+  const others = SCENE_DIALOGS.filter((x) => x !== d).flatMap(myLinesOf);
+  return d.lines
+    .map((line, k) => ({ line, k }))
+    .filter(({ line, k }) => k > 0 && line[0] === me)
+    .map(({ line, k }) => {
+      const prev = d.lines[k - 1];
+      return {
+        id: `${sceneId}-${k}`,
+        kind: "scene",
+        label: "🎬 상대가 이렇게 말했어요. 나의 대답은?",
+        q: prev[1],
+        ko: prev[2],
+        choices: shuffle([line[1], ...shuffle(others).slice(0, 3)]),
+        correctAnswer: line[1],
+        explain: `<b>${line[1]}</b><br>${line[2]}`,
+        summary: `${line[1]} <small>${line[2]}</small>`,
+        listenText: line[1],
+        selectedAnswer: null,
+      };
+    });
+}
+
+;
+
 /* ── js/screens/memberEdit.js ── */
 const MEMBER_EMOJIS = ["👨", "👩", "🧒", "👦", "👧", "👶", "👴", "👵", "🧑", "🐶", "🐱", "🐰", "🦊", "🐻", "🐼", "🦁", "🐸"];
 const MEMBER_COLORS = ["#4d96ff", "#ff6b81", "#ffb703", "#38b26b", "#8338ec", "#16a3a3", "#ff8b3d", "#3a5a78"];
@@ -36504,6 +37229,10 @@ function mcSourceInfo(source) {
     const ss = SOUND_PAIR_SETS.find((x) => x.id === source.id);
     return { label: ss ? `${ss.emoji} ${ss.title}` : "🎲 소리 구별 모두 섞기", level: null, quitTo: "soundsList", listScreen: "soundsList" };
   }
+  if (source.type === "scene") {
+    const d = sceneDialog(source.id);
+    return { label: `${d.emoji} ${d.title}`, level: levelById("adult"), quitTo: "scene", listScreen: "sceneList" };
+  }
   if (source.type === "pbook") {
     const [bookId, setId] = source.id.split(":");
     const book = pbook(bookId);
@@ -36584,7 +37313,7 @@ function nextMcQuestion() {
     const [bookId, setId] = mc.source.id.split(":");
     isNewBest = recordSectionResult(currentProfile(), bookId, setId, correct, total);
   }
-  if (["topic", "numbers", "sounds", "story", "riddle", "school", "biz"].includes(mc.source.type)) isNewBest = recordSectionResult(currentProfile(), mc.source.type, mc.source.id, correct, total);
+  if (["topic", "numbers", "sounds", "story", "riddle", "school", "biz", "scene"].includes(mc.source.type)) isNewBest = recordSectionResult(currentProfile(), mc.source.type, mc.source.id, correct, total);
   if (mc.source.type === "weekly") isNewBest = recordSectionResult(currentProfile(), "weekly", mc.source.id, correct, total);
   set({ mc: { ...mc, isNewBest }, screen: "mcResult" });
   announceBadges(checkNewBadges(currentProfile()));
@@ -36714,6 +37443,18 @@ function mcResultActions(source, hasWrong) {
         { label: "📋 단어 다시 보기", onClick: () => set({ topicId: source.id, screen: "topicView" }) },
         ...(next ? [{ label: `다음 주제: ${next.emoji} ${next.title}`, onClick: () => set({ topicId: next.id, screen: "topicView" }) }] : []),
         { label: "주제 목록", onClick: () => set({ screen: "topicList" }) },
+      ],
+    };
+  }
+  if (source.type === "scene") {
+    const d = sceneDialog(source.id);
+    const next = SCENE_DIALOGS[SCENE_DIALOGS.indexOf(d) + 1];
+    return {
+      actions: [
+        { ...retry, onClick: () => startMc({ type: "scene", id: source.id }, buildSceneQuestions(source.id)) },
+        { label: "🎬 대화 다시 보기", onClick: () => set({ sceneDlgId: source.id, screen: "scene" }) },
+        ...(next ? [{ label: `다음: ${next.emoji} ${next.title}`, onClick: () => set({ sceneDlgId: next.id, screen: "scene" }) }] : []),
+        { label: "대화 목록", onClick: () => set({ screen: "sceneList" }) },
       ],
     };
   }
@@ -37688,6 +38429,10 @@ const QUIZ_QUIT_TARGET = {
   clock: (s) => (s.clock.done ? null : "home"),
   blocks: (s) => (s.blocks.done ? null : "home"),
   storeGame: (s) => (s.storeGame.done ? null : "home"),
+  map: (s) => (s.map.done ? null : "home"),
+  pos: (s) => (s.pos.done ? null : "home"),
+  blend: (s) => (s.blend.done ? null : "home"),
+  animal: (s) => (s.animal.done || !s.animal.asked.length ? null : "home"),
 };
 
 function parentScreen(state) {
@@ -37707,7 +38452,9 @@ function parentScreen(state) {
     case "advent": case "pairsList": case "drawSetup": case "chantList": case "cultureList":
     case "schoolList": case "vacation": case "houseList": case "bizList":
     case "pbookList": case "dailyWrite": case "fishingList": case "coloringList": case "basket": case "balloon":
-    case "boardSetup": case "clock": case "blocks": case "storeGame": case "tableTalk": case "newsList": return "home";
+    case "boardSetup": case "clock": case "blocks": case "storeGame": case "tableTalk": case "newsList":
+    case "map": case "pos": case "blend": case "animal": case "sceneList": return "home";
+    case "scene": return "sceneList";
     case "board": return "boardSetup";
     case "pbookSet": return "pbookList";
     case "fishing": return "fishingList";
@@ -37785,7 +38532,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation", "houseList", "bizList", "dailyWrite", "fishingList", "coloringList", "boardSetup", "tableTalk", "newsList",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation", "houseList", "bizList", "dailyWrite", "fishingList", "coloringList", "boardSetup", "tableTalk", "newsList", "sceneList",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -37845,7 +38592,7 @@ function render() {
   }
 
   // 지문 듣기 중에 다른 화면으로 가면 소리를 멈춘다.
-  if (["passage", "basicLesson", "storyRead", "chant", "schoolTalk", "culture", "bizSet", "pbookSet"].includes(lastScreen) && state.screen !== lastScreen) stopSpeaking();
+  if (["passage", "basicLesson", "storyRead", "chant", "schoolTalk", "culture", "bizSet", "pbookSet", "scene"].includes(lastScreen) && state.screen !== lastScreen) stopSpeaking();
   if (lastScreen !== state.screen) stopRecording(); // 녹음 중에 화면을 옮기면 녹음을 멈춘다
   lastScreen = state.screen;
 
@@ -37982,6 +38729,11 @@ function render() {
           openColoring: () => set({ screen: "coloringList" }),
           openBasket: () => set({ basket: newBasketGame(), screen: "basket" }),
           openBoard: () => set({ screen: "boardSetup" }),
+          openTreasure: () => set({ map: newMapGame(), screen: "map" }),
+          openPosition: () => set({ pos: newPosGame(), screen: "pos" }),
+          openBlend: () => set({ blend: newBlendGame(), screen: "blend" }),
+          openAnimal: () => set({ animal: newAnimalGame(), screen: "animal" }),
+          openScenes: () => set({ screen: "sceneList" }),
           openClock: () => set({ clock: newClockGame(), screen: "clock" }),
           openBlocks: () => set({ blocks: newBlocksGame(kidLevelOf(state.profileName)), screen: "blocks" }),
           openStoreGame: () => set({ storeGame: newStoreGame(), screen: "storeGame" }),
@@ -38232,6 +38984,12 @@ function render() {
         write: (tplId) => set({ diaryDraft: { tplId, picks: findDiaryTemplate(tplId).lines.map(() => null) }, screen: "diaryWrite" }),
         back: goHome,
       }),
+    map: () => renderMapScreen(root, { game: state.map, actions: mapActions }),
+    pos: () => renderPosScreen(root, { game: state.pos, actions: posActions }),
+    blend: () => renderBlendScreen(root, { game: state.blend, actions: blendActions }),
+    animal: () => renderAnimalScreen(root, { game: state.animal, actions: animalActions }),
+    sceneList: () => renderSceneListScreen(root, { profileName: state.profileName, open: (sceneDlgId) => set({ sceneDlgId, screen: "scene" }), back: goHome }),
+    scene: () => renderSceneScreen(root, { sceneId: state.sceneDlgId, actions: { back: () => set({ screen: "sceneList" }), quiz: (id) => startMc({ type: "scene", id }, buildSceneQuestions(id)) } }),
     boardSetup: () => renderBoardSetupScreen(root, { profileName: state.profileName, start: (names) => set({ board: newBoardGame(names), screen: "board" }), back: goHome }),
     board: () => renderBoardScreen(root, { game: state.board, actions: boardActions }),
     clock: () => renderClockScreen(root, { game: state.clock, actions: clockActions }),
