@@ -2566,16 +2566,16 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .block-punct { font-size: 22px; font-weight: 800; }
 
 /* 🛒 영어 가게 */
-.shop-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.shop-item span { font-size: 64px; line-height: 1.1; }
-.shop-item b { font-size: 22px; }
-.shop-item small { color: var(--muted); }
-.shop-money { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.store-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.store-item span { font-size: 64px; line-height: 1.1; }
+.store-item b { font-size: 22px; }
+.store-item small { color: var(--muted); }
+.store-money { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .money-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; border: none; border-radius: 14px; background: #d3f9d8; color: #1b4332; font: inherit; font-weight: 800; box-shadow: var(--shadow); cursor: pointer; }
 .money-btn.coin { background: #fff3bf; color: #5c4400; }
 .money-btn span { font-size: 28px; }
 .money-btn:active { transform: scale(0.94); }
-.shop-tray { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; min-height: 44px; padding: 8px; border-radius: 14px; background: color-mix(in srgb, var(--primary) 8%, var(--card-bg)); }
+.store-tray { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; min-height: 44px; padding: 8px; border-radius: 14px; background: color-mix(in srgb, var(--primary) 8%, var(--card-bg)); }
 .tray-money { border: none; border-radius: 10px; padding: 8px 12px; font-size: 16px; background: var(--card-bg); color: var(--text); font: inherit; font-weight: 800; box-shadow: var(--shadow); cursor: pointer; animation: pop 0.2s ease; }
 
 /* 🍽️ 저녁 식탁 질문 카드 */
@@ -2657,3 +2657,34 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 @keyframes auraSpin { to { transform: rotate(360deg); } }
 .pet-tiers span { display: inline-flex; flex-direction: column; align-items: center; }
 .pet-tiers b { font-size: 12px; }
+
+/* 👗 착용 아이템: 캐릭터 그림 크기(em)에 맞춰 자리를 잡는다 */
+.pet-avatar .pet-body { position: relative; display: inline-block; font-size: 48px; line-height: 1; }
+.pet-avatar.big .pet-body { font-size: 90px; }
+.pet-avatar .pet-body .pet-emoji { font-size: 1em; }
+.pet-avatar .pet-body .pet-hat { position: absolute; top: -0.42em; left: 50%; transform: translateX(-50%); font-size: 0.55em; line-height: 1; z-index: 2; }
+.pet-avatar .pet-face { position: absolute; top: 0.24em; left: 50%; transform: translateX(-50%); font-size: 0.4em; line-height: 1; z-index: 2; }
+.pet-avatar .pet-neck { position: absolute; bottom: 0.04em; left: 50%; transform: translateX(-50%); font-size: 0.34em; line-height: 1; z-index: 2; }
+.pet-avatar .pet-hand { position: absolute; bottom: 0.08em; right: -0.2em; font-size: 0.4em; line-height: 1; z-index: 3; transform: rotate(-12deg); }
+.pet-avatar .pet-fx { position: absolute; top: 0; left: -6px; font-size: 22px; line-height: 1; z-index: 3; animation: fxFloat 2.2s ease-in-out infinite; pointer-events: none; }
+.pet-avatar.big .pet-fx { font-size: 40px; left: -14px; }
+@keyframes fxFloat { 0%, 100% { transform: translateY(0) rotate(-8deg); opacity: 0.85; } 50% { transform: translateY(-8px) rotate(8deg); opacity: 1; } }
+
+/* 🏠 친구 방 */
+.screen-petroom .pet-big .pet-bubble { display: inline-block; margin-top: 8px; }
+.bond-card { background: var(--card-bg); border-radius: 18px; box-shadow: var(--shadow); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.bond-head { display: flex; justify-content: space-between; align-items: center; font-size: 16px; }
+.bond-card .progress-fill { background: #f06595; }
+.bond-card small { color: var(--muted); font-size: 13px; }
+.room-acts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.room-act { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 2px; border: none; border-radius: 14px; background: var(--card-bg); box-shadow: var(--shadow); color: var(--text); font: inherit; cursor: pointer; }
+.room-act span { font-size: 28px; line-height: 1.1; }
+.room-act small { font-size: 12px; font-weight: 700; }
+.room-act.done { opacity: 0.45; }
+.room-act i { position: absolute; top: 4px; right: 6px; font-style: normal; color: var(--correct); font-weight: 800; }
+.room-bag { display: flex; flex-wrap: wrap; gap: 8px; }
+.room-bag-item { display: flex; flex-direction: column; align-items: center; padding: 8px 10px; border: none; border-radius: 14px; background: var(--card-bg); box-shadow: var(--shadow); color: var(--text); font: inherit; cursor: pointer; min-width: 64px; }
+.room-bag-item span { font-size: 28px; line-height: 1.1; }
+.room-bag-item small { font-size: 12px; }
+.room-bag-item b { font-size: 13px; color: var(--primary); }
+.room-bag-item:disabled { opacity: 0.45; }
