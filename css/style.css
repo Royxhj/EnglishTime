@@ -2526,3 +2526,63 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
   .fish { animation: none !important; left: 12px; }
   .balloon { animation: none !important; bottom: auto; top: 35%; }
 }
+
+/* 🎲 주사위 말판 */
+.board-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.board-cell { position: relative; aspect-ratio: 1; border-radius: 10px; background: var(--card-bg); box-shadow: var(--shadow); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; align-content: center; gap: 0; font-size: 18px; line-height: 1; min-width: 0; }
+.board-cell small { position: absolute; top: 2px; left: 4px; font-size: 10px; color: var(--muted); font-weight: 700; }
+.board-up { background: color-mix(in srgb, #40c057 18%, var(--card-bg)); }
+.board-down { background: color-mix(in srgb, #fa5252 16%, var(--card-bg)); }
+.board-goal { background: color-mix(in srgb, #fcc419 35%, var(--card-bg)); }
+.board-goal small { font-size: 16px; position: static; }
+.board-token { font-size: 20px; }
+.board-dice { font-size: 22px; vertical-align: -2px; }
+.board-dice-btn { font-size: 22px; }
+.board-q { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 26px; }
+.board-q b { font-size: 28px; }
+
+/* 🕰️ 시계 맞추기 */
+.clock-board { max-width: 260px; margin: 0 auto; width: 100%; }
+.clock-svg { display: block; width: 100%; height: auto; }
+.clock-face { fill: #fff; stroke: #343a40; stroke-width: 4; }
+.clock-ticks line { stroke: #495057; stroke-width: 2; }
+.clock-nums text { font-size: 17px; font-weight: 800; fill: #212529; font-family: inherit; }
+.clock-hour { stroke: #e03131; stroke-width: 8; stroke-linecap: round; }
+.clock-min { stroke: #1971c2; stroke-width: 5; stroke-linecap: round; }
+.clock-pin { fill: #343a40; }
+.clock-ctrl { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; }
+.clock-ctrl div { display: flex; align-items: center; gap: 6px; }
+.clock-ctrl small { font-weight: 700; color: var(--muted); }
+.clock-ctrl .chip-btn { width: 48px; height: 44px; text-align: center; font-size: 18px; }
+
+/* 🧱 문장 블록 */
+.block-line { min-height: 56px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; padding: 10px; border-radius: 16px; border: 2px dashed color-mix(in srgb, var(--primary) 40%, transparent); }
+.block-line.wrong { border-color: var(--wrong); background: var(--wrong-bg); }
+.block-line.ok { border-style: solid; border-color: var(--correct); background: var(--correct-bg); }
+.block-pool { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.word-block { border: none; border-radius: 12px; padding: 10px 14px; font: inherit; font-size: 19px; font-weight: 800; background: #ffd8a8; color: #3b2a14; box-shadow: 0 3px 0 #e8a85a; cursor: pointer; }
+.word-block.placed { background: #a5d8ff; box-shadow: 0 3px 0 #4dabf7; color: #0b3558; }
+.word-block.ghost { opacity: 0.25; box-shadow: none; }
+.block-punct { font-size: 22px; font-weight: 800; }
+
+/* 🛒 영어 가게 */
+.shop-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.shop-item span { font-size: 64px; line-height: 1.1; }
+.shop-item b { font-size: 22px; }
+.shop-item small { color: var(--muted); }
+.shop-money { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.money-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; border: none; border-radius: 14px; background: #d3f9d8; color: #1b4332; font: inherit; font-weight: 800; box-shadow: var(--shadow); cursor: pointer; }
+.money-btn.coin { background: #fff3bf; color: #5c4400; }
+.money-btn span { font-size: 28px; }
+.money-btn:active { transform: scale(0.94); }
+.shop-tray { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; min-height: 44px; padding: 8px; border-radius: 14px; background: color-mix(in srgb, var(--primary) 8%, var(--card-bg)); }
+.tray-money { border: none; border-radius: 10px; padding: 8px 12px; font-size: 16px; background: var(--card-bg); color: var(--text); font: inherit; font-weight: 800; box-shadow: var(--shadow); cursor: pointer; animation: pop 0.2s ease; }
+
+/* 🍽️ 저녁 식탁 질문 카드 */
+.tt-cats { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.tt-card { background: var(--card-bg); border-radius: 22px; box-shadow: var(--shadow); padding: 20px 16px; text-align: center; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.tt-card > small { color: var(--muted); font-weight: 700; }
+.tt-q { font-size: 23px; font-weight: 800; margin: 0; line-height: 1.35; }
+.tt-answer { background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); padding: 10px 12px; }
+.tt-answer summary { cursor: pointer; font-weight: 700; }
+.tt-answer .culture-line { margin-top: 8px; }

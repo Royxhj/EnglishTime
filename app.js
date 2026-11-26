@@ -22244,6 +22244,185 @@ ROLEPLAYS.push(
 
 ;
 
+/* ── data/familyData.js ── */
+// 🍽️ 저녁 식탁 질문 카드 · 🛒 영어 가게 물건 · 📰 영어 뉴스 더하기
+// 질문 카드: cat(묶음), q(질문), ko(뜻), say(대답 예시), sayKo(대답 뜻)
+const TABLE_TALK_CATS = [
+  { id: "day", emoji: "🌤️", title: "오늘 하루" },
+  { id: "like", emoji: "💖", title: "좋아하는 것" },
+  { id: "imagine", emoji: "🦄", title: "상상해 봐" },
+  { id: "family", emoji: "🏡", title: "우리 가족" },
+];
+const TABLE_TALK = [
+  ["day", "What was the best part of your day?", "오늘 가장 좋았던 일은 뭐야?", "The best part was lunch time.", "가장 좋았던 건 점심시간이었어."],
+  ["day", "What did you learn today?", "오늘 뭘 배웠어?", "I learned about plants.", "식물에 대해 배웠어."],
+  ["day", "Who did you play with today?", "오늘 누구랑 놀았어?", "I played with Minji.", "민지랑 놀았어."],
+  ["day", "What made you laugh today?", "오늘 뭐가 웃겼어?", "My friend told a funny joke.", "친구가 웃긴 농담을 했어."],
+  ["day", "Was anything hard today?", "오늘 힘든 일 있었어?", "Math was a little hard.", "수학이 조금 어려웠어."],
+  ["day", "What did you eat for lunch?", "점심으로 뭐 먹었어?", "I ate rice and soup.", "밥이랑 국 먹었어."],
+  ["day", "How do you feel right now?", "지금 기분이 어때?", "I feel happy and a little tired.", "기쁘고 조금 피곤해."],
+  ["day", "What do you want to do tomorrow?", "내일 뭐 하고 싶어?", "I want to ride my bike.", "자전거 타고 싶어."],
+  ["day", "Did you help anyone today?", "오늘 누구 도와줬어?", "I helped my teacher carry books.", "선생님 책 옮기는 걸 도와드렸어."],
+  ["like", "What is your favorite food?", "제일 좋아하는 음식은 뭐야?", "My favorite food is pizza.", "제일 좋아하는 음식은 피자야."],
+  ["like", "What is your favorite animal? Why?", "제일 좋아하는 동물은? 왜?", "I like dolphins because they are smart.", "돌고래가 좋아. 똑똑하니까."],
+  ["like", "What is your favorite season?", "제일 좋아하는 계절은?", "I like winter because I can make a snowman.", "겨울이 좋아. 눈사람을 만들 수 있으니까."],
+  ["like", "What game do you like to play?", "어떤 게임 하는 거 좋아해?", "I like to play tag.", "술래잡기 하는 거 좋아해."],
+  ["like", "What is your favorite color?", "제일 좋아하는 색은?", "My favorite color is blue.", "제일 좋아하는 색은 파란색이야."],
+  ["like", "What song do you like these days?", "요즘 좋아하는 노래는?", "I like a song from a movie.", "영화에 나온 노래가 좋아."],
+  ["like", "What is your favorite subject at school?", "학교에서 제일 좋아하는 과목은?", "I like P.E. the most.", "체육이 제일 좋아."],
+  ["like", "Which book or movie do you like?", "어떤 책이나 영화를 좋아해?", "I like adventure stories.", "모험 이야기가 좋아."],
+  ["imagine", "If you could fly, where would you go?", "날 수 있다면 어디에 갈래?", "I would fly to the moon.", "달에 날아갈 거야."],
+  ["imagine", "If you had a robot, what would it do?", "로봇이 있다면 뭘 시킬래?", "It would clean my room.", "내 방을 청소하게 할 거야."],
+  ["imagine", "If you could be an animal, what would you be?", "동물이 될 수 있다면 뭐가 될래?", "I would be a cheetah. I could run fast.", "치타가 될래. 빨리 달릴 수 있으니까."],
+  ["imagine", "What superpower do you want?", "어떤 초능력을 갖고 싶어?", "I want to be invisible.", "투명 인간이 되고 싶어."],
+  ["imagine", "If you had one wish, what would it be?", "소원을 하나 빌 수 있다면?", "I wish I had a puppy.", "강아지가 있으면 좋겠어."],
+  ["imagine", "What do you want to be when you grow up?", "크면 뭐가 되고 싶어?", "I want to be a scientist.", "과학자가 되고 싶어."],
+  ["imagine", "If you could visit any country, where would you go?", "어느 나라든 갈 수 있다면 어디에 갈래?", "I would go to Canada to see the snow.", "눈 보러 캐나다에 갈 거야."],
+  ["imagine", "What would you do with a million won?", "백만 원이 생기면 뭐 할래?", "I would buy books and save the rest.", "책을 사고 나머지는 저금할래."],
+  ["family", "What do you like about our family?", "우리 가족의 어떤 점이 좋아?", "I like that we eat dinner together.", "같이 저녁 먹는 게 좋아."],
+  ["family", "Where should we go this weekend?", "이번 주말에 어디 갈까?", "Let's go to the park.", "공원에 가자."],
+  ["family", "What should we cook together?", "같이 뭘 만들어 먹을까?", "Let's make pancakes.", "팬케이크 만들자."],
+  ["family", "What was our best trip?", "우리 여행 중 최고는 어디였어?", "Our trip to Jeju was the best.", "제주도 여행이 최고였어."],
+  ["family", "What is one thing you are thankful for?", "고마운 거 하나만 말해 볼래?", "I'm thankful for my mom's cooking.", "엄마 요리가 고마워."],
+  ["family", "What can you do to help at home?", "집에서 뭘 도울 수 있을까?", "I can set the table.", "식탁을 차릴 수 있어."],
+  ["family", "What game should we play as a family?", "가족끼리 무슨 게임 할까?", "Let's play a board game.", "보드게임 하자."],
+  ["family", "Who in our family is the funniest?", "우리 가족 중 누가 제일 웃겨?", "Dad is the funniest.", "아빠가 제일 웃겨."],
+].map(([cat, q, ko, say, sayKo], i) => ({ id: `tt-${i + 1}`, cat, q, ko, say, sayKo }));
+
+// 🛒 영어 가게: [영어, 그림, 우리말]
+const STORE_ITEMS = [
+  ["teddy bear", "🧸", "곰 인형"],
+  ["ball", "⚽", "공"],
+  ["book", "📕", "책"],
+  ["pencil", "✏️", "연필"],
+  ["cap", "🧢", "모자"],
+  ["robot", "🤖", "로봇"],
+  ["kite", "🪁", "연"],
+  ["juice", "🧃", "주스"],
+  ["ice cream", "🍦", "아이스크림"],
+  ["sandwich", "🥪", "샌드위치"],
+  ["cookie", "🍪", "쿠키"],
+  ["toy car", "🚗", "장난감 자동차"],
+  ["umbrella", "☂️", "우산"],
+  ["pair of socks", "🧦", "양말 한 켤레"],
+  ["backpack", "🎒", "책가방"],
+  ["balloon", "🎈", "풍선"],
+];
+
+// 📰 영어 뉴스 더하기 (읽기에도 함께 나온다)
+READING_PASSAGES.push(
+  {
+    id: "news-sleep", levelId: "adult", emoji: "😴", title: "[뉴스] 잠 못 드는 십 대",
+    sentences: [
+      { en: "A new survey found that more than half of teenagers sleep less than seven hours on school nights.", ko: "새 조사에 따르면 십 대의 절반 이상이 학교 가는 날 밤에 7시간도 못 잔다." },
+      { en: "Researchers say the main reason is the use of smartphones in bed.", ko: "연구자들은 주된 이유가 잠자리에서 스마트폰을 쓰는 것이라고 말한다." },
+      { en: "The blue light from screens can delay the release of a hormone that makes us sleepy.", ko: "화면의 푸른빛은 졸음을 부르는 호르몬이 나오는 것을 늦출 수 있다." },
+      { en: "Lack of sleep is linked to poor concentration and changes in mood.", ko: "잠이 부족하면 집중력이 떨어지고 기분이 오락가락하는 것과 관련이 있다." },
+      { en: "Experts recommend keeping phones out of the bedroom at least an hour before bedtime.", ko: "전문가들은 잠자리에 들기 적어도 한 시간 전에는 휴대폰을 침실 밖에 두라고 권한다." },
+    ],
+    glossary: [
+      { w: "survey", ko: "설문 조사" }, { w: "teenagers", ko: "십 대" }, { w: "delay", ko: "늦추다" }, { w: "release", ko: "분비, 방출" }, { w: "Lack of", ko: "~의 부족" }, { w: "concentration", ko: "집중력" }, { w: "recommend", ko: "권하다" },
+    ],
+    questions: [
+      { q: "십 대의 절반 이상이 겪는 문제는?", choices: ["학교 가는 날 7시간도 못 잔다", "아침을 거른다", "운동을 안 한다", "책을 안 읽는다"], answer: 0, explain: "more than half of teenagers sleep less than seven hours on school nights." },
+      { q: "잠이 부족한 주된 이유로 꼽힌 것은?", choices: ["잠자리에서 스마트폰 사용", "숙제가 많아서", "학원 때문에", "카페인 음료"], answer: 0, explain: "the main reason is the use of smartphones in bed." },
+      { q: "전문가의 권고는?", choices: ["잠들기 한 시간 전 휴대폰을 침실 밖에 두기", "낮잠을 자기", "화면을 더 밝게 하기", "주말에 몰아서 자기"], answer: 0, explain: "keeping phones out of the bedroom at least an hour before bedtime." },
+    ],
+  },
+  {
+    id: "news-plastic", levelId: "adult", emoji: "♻️", title: "[뉴스] 플라스틱 재활용의 진실",
+    sentences: [
+      { en: "Many people believe that most plastic they throw away is recycled, but the reality is different.", ko: "많은 사람이 버린 플라스틱 대부분이 재활용된다고 믿지만 실제는 다르다." },
+      { en: "Globally, less than ten percent of plastic waste is actually recycled.", ko: "세계적으로 플라스틱 쓰레기 중 실제로 재활용되는 것은 10%도 안 된다." },
+      { en: "Food left in containers and mixed materials make recycling difficult and expensive.", ko: "용기에 남은 음식과 섞인 재질 때문에 재활용이 어렵고 비싸진다." },
+      { en: "Some cities now require residents to rinse containers and separate labels before throwing them out.", ko: "어떤 도시는 이제 주민들에게 버리기 전에 용기를 헹구고 라벨을 떼라고 요구한다." },
+      { en: "Still, experts agree that the best solution is to use less plastic in the first place.", ko: "그래도 전문가들은 가장 좋은 해결책은 애초에 플라스틱을 덜 쓰는 것이라는 데 동의한다." },
+    ],
+    glossary: [
+      { w: "recycled", ko: "재활용된" }, { w: "reality", ko: "현실" }, { w: "Globally", ko: "세계적으로" }, { w: "containers", ko: "용기" }, { w: "residents", ko: "주민" }, { w: "rinse", ko: "헹구다" }, { w: "in the first place", ko: "애초에" },
+    ],
+    questions: [
+      { q: "세계적으로 실제 재활용되는 플라스틱의 비율은?", choices: ["10% 미만", "약 50%", "대부분", "약 30%"], answer: 0, explain: "less than ten percent of plastic waste is actually recycled." },
+      { q: "재활용을 어렵게 만드는 것은?", choices: ["남은 음식과 섞인 재질", "플라스틱의 색깔", "용기의 크기", "분리수거함 부족"], answer: 0, explain: "Food left in containers and mixed materials make recycling difficult." },
+      { q: "전문가들이 말하는 가장 좋은 해결책은?", choices: ["애초에 플라스틱을 덜 쓰기", "더 많이 태우기", "바다에 묻기", "새 공장 짓기"], answer: 0, explain: "the best solution is to use less plastic in the first place." },
+    ],
+  },
+  {
+    id: "news-steps", levelId: "adult", emoji: "🚶", title: "[뉴스] 하루 몇 걸음이면 될까",
+    sentences: [
+      { en: "For years, people have aimed for 10,000 steps a day, but that number was originally used in an advertisement.", ko: "오랫동안 사람들은 하루 1만 걸음을 목표로 해 왔지만, 그 숫자는 원래 광고에서 쓰인 것이었다." },
+      { en: "A recent study suggests that health benefits begin at around 4,000 steps.", ko: "최근 연구는 건강상의 이점이 대략 4천 걸음부터 시작된다고 말한다." },
+      { en: "The risk of heart disease continued to drop as people walked more, up to about 8,000 steps.", ko: "사람들이 더 걸을수록 심장병 위험은 약 8천 걸음까지 계속 줄었다." },
+      { en: "Walking speed also mattered: brisk walkers gained more benefits than slow walkers.", ko: "걷는 속도도 중요했다. 빠르게 걷는 사람이 천천히 걷는 사람보다 더 많은 이점을 얻었다." },
+      { en: "The researchers concluded that any amount of walking is better than none.", ko: "연구진은 얼마를 걷든 안 걷는 것보다 낫다고 결론 내렸다." },
+    ],
+    glossary: [
+      { w: "aimed for", ko: "~을 목표로 했다" }, { w: "originally", ko: "원래" }, { w: "advertisement", ko: "광고" }, { w: "benefits", ko: "이점, 혜택" }, { w: "risk", ko: "위험" }, { w: "brisk", ko: "활발한, 빠른" }, { w: "concluded", ko: "결론 내렸다" },
+    ],
+    questions: [
+      { q: "'하루 1만 걸음'이라는 숫자는 원래 어디서 나왔나요?", choices: ["광고", "정부 지침", "병원 연구", "올림픽 기록"], answer: 0, explain: "that number was originally used in an advertisement." },
+      { q: "건강상의 이점은 대략 몇 걸음부터 시작되나요?", choices: ["4천 걸음", "1만 걸음", "2만 걸음", "천 걸음"], answer: 0, explain: "health benefits begin at around 4,000 steps." },
+      { q: "연구진의 결론은?", choices: ["조금이라도 걷는 게 안 걷는 것보다 낫다", "1만 걸음을 꼭 채워야 한다", "천천히 걷는 게 가장 좋다", "걷기는 효과가 없다"], answer: 0, explain: "any amount of walking is better than none." },
+    ],
+  },
+  {
+    id: "news-library", levelId: "adult", emoji: "📚", title: "[뉴스] 동네 도서관의 변신",
+    sentences: [
+      { en: "Public libraries are changing to attract visitors in the digital age.", ko: "공공 도서관들이 디지털 시대에 방문객을 끌기 위해 바뀌고 있다." },
+      { en: "Besides lending books, many now offer 3D printers, recording studios, and coding classes.", ko: "책을 빌려주는 것 말고도 많은 도서관이 3D 프린터, 녹음실, 코딩 수업을 제공한다." },
+      { en: "Some libraries even lend out items like tools, musical instruments, and board games.", ko: "어떤 도서관은 공구, 악기, 보드게임 같은 물건까지 빌려준다." },
+      { en: "Librarians say these services help people who cannot afford expensive equipment.", ko: "사서들은 이런 서비스가 비싼 장비를 살 형편이 안 되는 사람들에게 도움이 된다고 말한다." },
+      { en: "As a result, visits to some libraries have increased for the first time in a decade.", ko: "그 결과 일부 도서관은 10년 만에 처음으로 방문객이 늘었다." },
+    ],
+    glossary: [
+      { w: "attract", ko: "끌어들이다" }, { w: "Besides", ko: "~ 말고도" }, { w: "lending", ko: "빌려주는 것" }, { w: "musical instruments", ko: "악기" }, { w: "afford", ko: "(살) 형편이 되다" }, { w: "equipment", ko: "장비" }, { w: "decade", ko: "10년" },
+    ],
+    questions: [
+      { q: "도서관이 새로 제공하는 것이 아닌 것은?", choices: ["무료 식사", "3D 프린터", "녹음실", "코딩 수업"], answer: 0, explain: "3D printers, recording studios, and coding classes → 무료 식사는 없어요." },
+      { q: "사서들이 말하는 서비스의 장점은?", choices: ["비싼 장비를 못 사는 사람을 돕는다", "책 판매가 는다", "직원이 줄어든다", "건물이 넓어진다"], answer: 0, explain: "help people who cannot afford expensive equipment." },
+      { q: "그 결과 일어난 일은?", choices: ["10년 만에 처음으로 방문객이 늘었다", "도서관이 문을 닫았다", "책 대출이 금지되었다", "입장료가 생겼다"], answer: 0, explain: "visits ... have increased for the first time in a decade." },
+    ],
+  },
+  {
+    id: "news-heat", levelId: "adult", emoji: "🌡️", title: "[뉴스] 더 길어지는 여름",
+    sentences: [
+      { en: "Scientists report that summers in many parts of the world are getting longer and hotter.", ko: "과학자들은 세계 여러 곳의 여름이 더 길고 더워지고 있다고 보고한다." },
+      { en: "In some regions, summer now lasts nearly a month longer than it did fifty years ago.", ko: "어떤 지역에서는 여름이 50년 전보다 거의 한 달이나 길어졌다." },
+      { en: "Heat waves put older people and outdoor workers at particular risk.", ko: "폭염은 노인과 야외 노동자를 특히 위험하게 만든다." },
+      { en: "Cities are responding by opening cooling centers and planting more trees for shade.", ko: "도시들은 무더위 쉼터를 열고 그늘을 위해 나무를 더 심는 것으로 대응하고 있다." },
+      { en: "Health officials advise people to drink water often and avoid going out in the afternoon.", ko: "보건 당국은 물을 자주 마시고 오후에는 외출을 피하라고 권고한다." },
+    ],
+    glossary: [
+      { w: "regions", ko: "지역" }, { w: "lasts", ko: "지속되다" }, { w: "Heat waves", ko: "폭염" }, { w: "particular", ko: "특별한" }, { w: "responding", ko: "대응하는" }, { w: "shade", ko: "그늘" }, { w: "advise", ko: "권고하다" },
+    ],
+    questions: [
+      { q: "일부 지역의 여름은 50년 전보다 얼마나 길어졌나요?", choices: ["거의 한 달", "일주일", "두 달", "하루"], answer: 0, explain: "summer now lasts nearly a month longer." },
+      { q: "폭염에 특히 위험한 사람들은?", choices: ["노인과 야외 노동자", "학생과 교사", "운동선수", "여행객"], answer: 0, explain: "older people and outdoor workers at particular risk." },
+      { q: "보건 당국의 권고가 아닌 것은?", choices: ["오후에 운동하기", "물 자주 마시기", "오후 외출 피하기", "무더위 쉼터 이용"], answer: 0, explain: "drink water often and avoid going out in the afternoon → 오후 운동은 권하지 않아요." },
+    ],
+  },
+  {
+    id: "news-space", levelId: "adult", emoji: "🚀", title: "[뉴스] 우주여행, 어디까지 왔나",
+    sentences: [
+      { en: "Private companies have already sent a small number of paying customers to the edge of space.", ko: "민간 기업들은 이미 돈을 낸 소수의 고객을 우주 경계까지 보냈다." },
+      { en: "A short flight that lasts about ten minutes currently costs hundreds of thousands of dollars.", ko: "10분 정도 걸리는 짧은 비행이 현재 수십만 달러다." },
+      { en: "Supporters believe prices will fall as the technology improves, just as they did with air travel.", ko: "지지하는 사람들은 항공 여행이 그랬듯 기술이 발전하면 값이 내려갈 것이라고 믿는다." },
+      { en: "Critics, however, point out that rocket launches release pollution high in the atmosphere.", ko: "그러나 비판하는 사람들은 로켓 발사가 대기 높은 곳에 오염 물질을 내뿜는다고 지적한다." },
+      { en: "For now, space tourism remains an experience for the very rich.", ko: "현재로서 우주 관광은 아주 부유한 사람들만의 경험으로 남아 있다." },
+    ],
+    glossary: [
+      { w: "Private", ko: "민간의" }, { w: "edge", ko: "가장자리, 경계" }, { w: "currently", ko: "현재" }, { w: "Supporters", ko: "지지하는 사람들" }, { w: "point out", ko: "지적하다" }, { w: "atmosphere", ko: "대기" }, { w: "tourism", ko: "관광" },
+    ],
+    questions: [
+      { q: "현재 짧은 우주 비행의 가격은?", choices: ["수십만 달러", "수백 달러", "무료", "수천 달러"], answer: 0, explain: "currently costs hundreds of thousands of dollars." },
+      { q: "지지자들이 가격이 내려갈 거라고 보는 근거는?", choices: ["항공 여행처럼 기술이 발전하면", "정부가 돈을 대서", "손님이 줄어서", "로켓이 작아져서"], answer: 0, explain: "prices will fall as the technology improves, just as they did with air travel." },
+      { q: "비판하는 사람들이 걱정하는 것은?", choices: ["대기 오염", "소음", "교통 체증", "일자리 감소"], answer: 0, explain: "rocket launches release pollution high in the atmosphere." },
+    ],
+  }
+);
+
+;
+
 /* ── js/state.js ── */
 function createStore(initialState) {
   let state = initialState;
@@ -22419,7 +22598,7 @@ function normalizeProfile(profile) {
   p.care = { day: typeof p.care.day === "string" ? p.care.day : "", pets: Number(p.care.pets) || 0, snacks: Number(p.care.snacks) || 0, bond: Math.max(0, Math.floor(Number(p.care.bond) || 0)) };
   if (p.petKind !== undefined && !(typeof p.petKind === "string" && /^[a-z]{2,10}$/.test(p.petKind))) delete p.petKind;
   if (p.diag && !(typeof p.diag === "object" && levelById(p.diag.levelId) && /^\d{4}-\d{2}-\d{2}$/.test(p.diag.date))) delete p.diag;
-  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster", "wordrain", "xmas", "pairs", "chant", "culture", "drawgame", "school", "house", "biz", "fishing", "coloring", "basket", "balloon", "parentTalk", "konglish", "linking", "dailyWrite"]) {
+  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster", "wordrain", "xmas", "pairs", "chant", "culture", "drawgame", "school", "house", "biz", "fishing", "coloring", "basket", "balloon", "parentTalk", "konglish", "linking", "dailyWrite", "board", "clock", "blocks", "storeGame", "tableTalk"]) {
     p[section] ||= { best: {}, wrong: {} };
     p[section].best ||= {};
     p[section].wrong ||= {};
@@ -23167,6 +23346,11 @@ const BADGES = [
   { id: "wordSearch", emoji: "🔍", title: "숨은 단어 탐험가", desc: "단어 찾기 퍼즐 완성하기", test: (p) => Object.keys(p.wordsearch.best).length >= 1 },
   { id: "wordGuess", emoji: "🕵️", title: "명탐정", desc: "단어 추리 5개 모두 맞히기", test: (p) => perfectCount(p.wordguess.best) >= 1 },
   { id: "riddle", emoji: "❓", title: "수수께끼 박사", desc: "영어 수수께끼 만점", test: (p) => perfectCount(p.riddle.best) >= 1 },
+  { id: "boardWin", emoji: "🎲", title: "말판 챔피언", desc: "주사위 말판 놀이에서 1등 하기", test: (p) => !!p.board.best.win },
+  { id: "clock", emoji: "🕰️", title: "시계 박사", desc: "시계 맞추기 8문제 모두 한 번에", test: (p) => perfectCount(p.clock.best) >= 1 },
+  { id: "blocks", emoji: "🧱", title: "문장 건축가", desc: "문장 블록 8문장 모두 한 번에 쌓기", test: (p) => perfectCount(p.blocks.best) >= 1 },
+  { id: "storeGame", emoji: "🛒", title: "꼬마 손님", desc: "영어 가게 8번 모두 딱 맞게 내기", test: (p) => perfectCount(p.storeGame.best) >= 1 },
+  { id: "tableTalk", emoji: "🍽️", title: "수다쟁이 식탁", desc: "저녁 식탁 질문 카드 20장 보기", test: (p) => Object.keys(p.tableTalk.best).length >= 20 },
   { id: "fishing", emoji: "🎣", title: "낚시왕", desc: "단어 낚시 10마리 한 번에 다 낚기", test: (p) => perfectCount(p.fishing.best) >= 1 },
   { id: "coloring", emoji: "🖍️", title: "꼬마 색칠가", desc: "영어 색칠 놀이 그림 3장 모두 완성", test: (p) => Object.keys(p.coloring.best).length >= 3 },
   { id: "basket", emoji: "🧺", title: "과일 가게 사장님", desc: "과일 바구니 8문제 모두 한 번에 맞히기", test: (p) => perfectCount(p.basket.best) >= 1 },
@@ -24573,6 +24757,7 @@ function renderHomeScreen(root, ctx) {
           ${homeTile({ id: "notesBtn", emoji: "📘", title: "문법", meta: level ? `내 단계 ${lessonDoneCount(profileName, myBasics)} / ${myBasics.length}` : `${lessonDoneCount(profileName, BASIC_TOPICS)} / ${BASIC_TOPICS.length}` })}
           ${homeTile({ id: "talkBtn", emoji: "💬", title: "대화 표현", meta: level && myTalks.length ? `내 단계 ${lessonDoneCount(profileName, myTalks)} / ${myTalks.length}` : `${lessonDoneCount(profileName, TALK_TOPICS)} / ${TALK_TOPICS.length}` })}
           ${homeTile({ id: "readBtn", emoji: "📖", title: "읽기", meta: level ? `내 단계 ${passagesDone(myPassages)} / ${myPassages.length}` : `${passagesDone(READING_PASSAGES)} / ${READING_PASSAGES.length}` })}
+          ${show.practice ? homeTile({ id: "newsBtn", emoji: "📰", title: "짧은 영어 뉴스", meta: `기사 ${newsPassages().length}개` }) : ""}
           ${homeTile({ id: "storyBtn", emoji: "📚", title: "이야기책", meta: `${storyDone} / ${storyTotal}장` })}
           ${homeTile({ id: "topicBtn", emoji: "🗂️", title: "주제별 단어", meta: `${sectionCount(profileName, "topic", TOPIC_WORD_GROUPS)} / ${TOPIC_WORD_GROUPS.length} 주제` })}
           ${homeTile({ id: "numbersBtn", emoji: "🔢", title: "숫자 · 시간", meta: `${sectionCount(profileName, "numbers", NUMBER_SETS)} / ${NUMBER_SETS.length} 묶음` })}
@@ -24590,6 +24775,7 @@ function renderHomeScreen(root, ctx) {
       <section class="group">
         <h2 class="group-title">🗣️ 말하기 · 듣기 · 쓰기</h2>
         <div class="tile-grid">
+          ${homeTile({ id: "tableTalkBtn", emoji: "🍽️", title: "저녁 식탁 질문", meta: `카드 ${Object.keys(getProfileData(profileName).tableTalk.best).length} / ${TABLE_TALK.length}` })}
           ${level === "adult" ? homeTile({ id: "parentTalkBtn", emoji: "👪", title: "아이와 쓰는 영어", meta: "아침부터 잠들 때까지" }) : ""}
           ${show.advanced ? homeTile({ id: "dailyWriteBtn", emoji: "🖊️", title: "하루 한 문장 영작", meta: `${Object.keys(getProfileData(profileName).dailyWrite.best).length}문장 써 봤어요` }) : ""}
           ${show.advanced ? homeTile({ id: "konglishBtn", emoji: "🚫", title: "콩글리시 바로잡기", meta: "핸드폰 → cell phone" }) : ""}
@@ -24609,6 +24795,10 @@ function renderHomeScreen(root, ctx) {
       <section class="group">
         <h2 class="group-title">✏️ 문제 풀기</h2>
         <div class="tile-grid">
+          ${homeTile({ id: "boardBtn", emoji: "🎲", title: "주사위 말판", meta: "가족이 함께 · 단어 맞히고 전진" })}
+          ${isKid ? homeTile({ id: "clockBtn", emoji: "🕰️", title: "시계 맞추기", meta: "What time is it?" }) : ""}
+          ${isKid ? homeTile({ id: "blocksBtn", emoji: "🧱", title: "문장 블록", meta: "단어 순서대로 쌓기" }) : ""}
+          ${isKid ? homeTile({ id: "storeGameBtn", emoji: "🛒", title: "영어 가게", meta: "값 듣고 돈 내기" }) : ""}
           ${isKid ? homeTile({ id: "fishingBtn", emoji: "🎣", title: "단어 낚시", meta: "물고기 단어 낚기" }) : ""}
           ${isKid ? homeTile({ id: "coloringBtn", emoji: "🖍️", title: "영어 색칠 놀이", meta: "듣고 색칠하기" }) : ""}
           ${isKid ? homeTile({ id: "basketBtn", emoji: "🧺", title: "과일 바구니", meta: "개수대로 담기" }) : ""}
@@ -24708,6 +24898,12 @@ function renderHomeScreen(root, ctx) {
   bind("linkingBtn", () => actions.openPbook("linking"));
   bind("dailyWriteBtn", actions.openDailyWrite);
   bind("fishingBtn", actions.openFishing);
+  bind("boardBtn", actions.openBoard);
+  bind("clockBtn", actions.openClock);
+  bind("blocksBtn", actions.openBlocks);
+  bind("storeGameBtn", actions.openStoreGame);
+  bind("tableTalkBtn", actions.openTableTalk);
+  bind("newsBtn", actions.openNews);
   bind("coloringBtn", actions.openColoring);
   bind("basketBtn", actions.openBasket);
   bind("balloonBtn", actions.openBalloon);
@@ -32255,6 +32451,12 @@ const HOME_TILE_ALIASES = {
   konglishBtn: "konglish 콩글리시 틀린 영어 핸드폰",
   linkingBtn: "linking pronunciation 연음 발음 gonna wanna",
   dailyWriteBtn: "daily writing 영작 하루 한 문장 쓰기",
+  boardBtn: "board game dice 주사위 말판 보드게임 가족",
+  clockBtn: "clock time 시계 시간 몇 시",
+  blocksBtn: "sentence blocks 문장 블록 순서 쌓기",
+  storeGameBtn: "store money dollar 가게 돈 가격 쇼핑 계산",
+  tableTalkBtn: "table talk question 저녁 식탁 질문 카드 대화 가족",
+  newsBtn: "news 뉴스 기사 신문",
   fishingBtn: "fishing fish 낚시 물고기",
   coloringBtn: "coloring color 색칠 색깔 그림",
   basketBtn: "fruit basket 과일 바구니 숫자 세기",
@@ -33710,6 +33912,662 @@ const balloonActions = {
   home: () => goHome(),
   quit: () => goHome(),
 };
+
+;
+
+/* ── js/screens/familyGames.js ── */
+// 🎲 주사위 말판 · 🕰️ 시계 맞추기 · 🧱 문장 블록 · 🛒 영어 가게 · 🍽️ 저녁 식탁 질문 카드 · 📰 영어 뉴스
+const EN_NUMS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
+
+// ── 🎲 주사위 말판 놀이 ──
+const BOARD_CELLS = 24;
+const BOARD_SPECIAL = { 4: 2, 9: -2, 13: 3, 17: -3, 20: 1 }; // 칸 번호: 앞(+) · 뒤(-)로 가는 칸 수
+const DICE_FACES = ["", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+const GUEST_EMOJI = "🙂";
+
+function boardWordPool(levelId) {
+  const list = (WORD_BANK[levelId] || WORD_BANK["elementary-mid"]).filter((w) => w.meaningKo && /^[a-z ]+$/i.test(w.word));
+  return list.length >= 8 ? list : WORD_BANK["elementary-mid"];
+}
+
+function boardQuestion(playerName) {
+  const level = (findMember(playerName) && getPreferredLevel(playerName)) || "elementary-mid";
+  const pool = boardWordPool(level);
+  const w = pool[Math.floor(Math.random() * pool.length)];
+  const others = [];
+  for (const x of shuffle(pool)) {
+    if (others.length === 3) break;
+    if (x.word !== w.word && !meaningsClash(x.meaningKo, w.meaningKo) && !others.some((o) => meaningsClash(o.meaningKo, x.meaningKo))) others.push(x);
+  }
+  return { word: w.word, emoji: w.emoji || "", answer: w.meaningKo, choices: shuffle([w.meaningKo, ...others.map((o) => o.meaningKo)]) };
+}
+
+function newBoardGame(names) {
+  return { players: names.map((name) => ({ name, emoji: findMember(name)?.emoji || GUEST_EMOJI, pos: 0 })), turn: 0, phase: "roll", dice: 0, q: null, msg: "", winner: null };
+}
+
+function renderBoardSetupScreen(root, { profileName, start, back }) {
+  const family = getFamily();
+  const picked = new Set(family.slice(0, 4).map((m) => m.name));
+  const draw = () => {
+    root.innerHTML = `
+      <div class="screen screen-kidgame">
+        <button class="back-btn" id="backBtn">← 홈</button>
+        <h1 class="title">🎲 주사위 말판 놀이</h1>
+        <p class="subtitle">주사위를 굴리고, 영어 단어 뜻을 맞히면 그만큼 앞으로! 먼저 🏆에 닿으면 이겨요</p>
+        <section class="lesson-section"><p class="lesson-point-text">🚀 칸에 서면 앞으로, 🌀 칸에 서면 뒤로 가요. 문제는 사람마다 자기 단계 단어로 나와요. 휴대폰을 차례로 넘겨 가며 해요.</p></section>
+        ${
+          family.length > 1
+            ? `<h2 class="section-title">함께 할 사람 (최대 4명)</h2>
+               <div class="battle-pick">${family.map((m) => `<button class="battle-member${picked.has(m.name) ? " active" : ""}" data-name="${escapeHtml(m.name)}" style="--accent:${m.color}"><span class="battle-member-emoji">${m.emoji}</span><b>${escapeHtml(m.name)}</b><small>${picked.has(m.name) ? "✓ 함께해요" : "누르면 참가"}</small></button>`).join("")}</div>`
+            : `<p class="settings-help">가족이 한 명뿐이라 '나'와 '가족'으로 번갈아 해요.</p>`
+        }
+        <button class="primary-btn" id="startBtn" ${family.length > 1 && (picked.size < 1 || picked.size > 4) ? "disabled" : ""}>🎲 시작하기 (${family.length > 1 ? picked.size : 2}명)</button>
+      </div>`;
+    root.querySelector("#backBtn").addEventListener("click", back);
+    root.querySelectorAll("[data-name]").forEach((b) =>
+      b.addEventListener("click", () => {
+        const n = b.dataset.name;
+        picked.has(n) ? picked.delete(n) : picked.add(n);
+        draw();
+      })
+    );
+    root.querySelector("#startBtn").addEventListener("click", () => start(family.length > 1 ? family.filter((m) => picked.has(m.name)).map((m) => m.name) : [profileName, "가족"]));
+  };
+  draw();
+}
+
+function boardGridHtml(game) {
+  const cells = [];
+  for (let row = 0; row < BOARD_CELLS / 6; row++) {
+    const idx = [...Array(6).keys()].map((c) => row * 6 + c);
+    if (row % 2) idx.reverse();
+    cells.push(...idx);
+  }
+  return `<div class="board-grid">${cells
+    .map((i) => {
+      const sp = BOARD_SPECIAL[i];
+      const here = game.players.filter((p) => p.pos === i).map((p) => `<span class="board-token">${p.emoji}</span>`).join("");
+      const label = i === 0 ? "출발" : i === BOARD_CELLS - 1 ? "🏆" : sp ? `${sp > 0 ? "🚀" : "🌀"}${sp > 0 ? "+" : ""}${sp}` : i;
+      return `<div class="board-cell${sp ? (sp > 0 ? " board-up" : " board-down") : ""}${i === BOARD_CELLS - 1 ? " board-goal" : ""}"><small>${label}</small>${here}</div>`;
+    })
+    .join("")}</div>`;
+}
+
+function renderBoardScreen(root, { game, actions }) {
+  const who = (p) => `${p.emoji} ${escapeHtml(p.name)}`;
+  if (game.winner) {
+    const ranked = [...game.players].sort((a, b) => b.pos - a.pos);
+    root.innerHTML = `
+      <div class="screen screen-kidgame">
+        <h1 class="title">🏆 ${who(game.winner)} 승리!</h1>
+        ${boardGridHtml(game)}
+        <ol class="rank-list">${ranked.map((p) => `<li>${who(p)} · ${p.pos === BOARD_CELLS - 1 ? "도착!" : `${p.pos}칸`}</li>`).join("")}</ol>
+        <div class="result-actions">
+          <button class="primary-btn" id="againBtn">🔁 한 판 더</button>
+          <button class="secondary-btn" id="homeBtn">🏠 홈으로</button>
+        </div>
+      </div>`;
+    root.querySelector("#againBtn").addEventListener("click", actions.again);
+    root.querySelector("#homeBtn").addEventListener("click", actions.home);
+    return;
+  }
+  const cur = game.players[game.turn];
+  const next = game.players[(game.turn + 1) % game.players.length];
+  let panel = "";
+  if (game.phase === "roll") panel = `<p class="fish-status">${who(cur)} 차례예요!</p><button class="primary-btn board-dice-btn" id="rollBtn">🎲 주사위 굴리기</button>`;
+  else if (game.phase === "question")
+    panel = `
+      <p class="fish-status">${who(cur)} · 주사위 <span class="board-dice">${DICE_FACES[game.dice]}</span> ${game.dice} · 맞히면 ${game.dice}칸 앞으로!</p>
+      <div class="board-q"><span>${game.q.emoji}</span><b>${game.q.word}</b><button class="speak-btn" id="sayBtn" aria-label="듣기" ${speechSupported ? "" : "disabled"}>🔊</button></div>
+      <div class="choice-grid">${game.q.choices.map((c, k) => `<button class="choice-btn" data-k="${k}">${c}</button>`).join("")}</div>`;
+  else panel = `<p class="fish-status">${game.msg}</p><button class="primary-btn" id="nextBtn">${who(next)}에게 넘기기 →</button>`;
+  root.innerHTML = `
+    <div class="screen screen-kidgame no-anim">
+      <div class="cw-top">
+        <button class="back-btn" id="quitBtn">× 그만하기</button>
+        <span class="cw-progress">${game.players.map((p) => `${p.emoji}${p.pos}`).join(" · ")}</span>
+      </div>
+      ${boardGridHtml(game)}
+      ${panel}
+    </div>`;
+  root.querySelector("#quitBtn").addEventListener("click", actions.quit);
+  root.querySelector("#rollBtn")?.addEventListener("click", (e) => {
+    e.currentTarget.disabled = true;
+    let n = 0;
+    const spin = setInterval(() => {
+      const el = root.querySelector("#rollBtn");
+      if (!el) return clearInterval(spin);
+      el.textContent = `🎲 ${DICE_FACES[1 + Math.floor(Math.random() * 6)]}`;
+      if (++n >= 8) {
+        clearInterval(spin);
+        actions.rolled(1 + Math.floor(Math.random() * 6));
+      }
+    }, 80);
+  });
+  if (game.phase === "question") {
+    const say = () => speak(game.q.word, { rate: 0.85 });
+    root.querySelector("#sayBtn").addEventListener("click", say);
+    setTimeout(say, 250);
+    root.querySelectorAll("[data-k]").forEach((b) => b.addEventListener("click", () => actions.answer(game.q.choices[Number(b.dataset.k)])));
+  }
+  root.querySelector("#nextBtn")?.addEventListener("click", actions.nextTurn);
+}
+
+const boardActions = {
+  rolled: (dice) => {
+    const { board: game } = store.getState();
+    game.dice = dice;
+    game.q = boardQuestion(game.players[game.turn].name);
+    game.phase = "question";
+    set({});
+  },
+  answer: (choice) => {
+    const { board: game } = store.getState();
+    const p = game.players[game.turn];
+    const { word, answer } = game.q;
+    if (choice === answer) {
+      playSound("correct");
+      if (findMember(p.name)) recordActivity(p.name);
+      p.pos = Math.min(BOARD_CELLS - 1, p.pos + game.dice);
+      let msg = `🎉 정답! ${word} = ${answer} · ${game.dice}칸 앞으로`;
+      const sp = BOARD_SPECIAL[p.pos];
+      if (sp) {
+        p.pos = Math.max(0, Math.min(BOARD_CELLS - 1, p.pos + sp));
+        msg += sp > 0 ? ` · 🚀 ${sp}칸 더!` : ` · 🌀 ${-sp}칸 뒤로…`;
+      }
+      game.msg = msg;
+      if (p.pos === BOARD_CELLS - 1) {
+        game.winner = p;
+        if (findMember(p.name)) recordCountUp(p.name, "board", "win");
+        game.players.forEach((x) => findMember(x.name) && recordCountUp(x.name, "board", "play"));
+        burstConfetti(80);
+        announceBadges(checkNewBadges(currentProfile()));
+      }
+    } else {
+      playSound("wrong");
+      game.msg = `😅 아쉬워요! ${word}는 '${answer}' · 제자리`;
+    }
+    game.phase = "moved";
+    set({});
+  },
+  nextTurn: () => {
+    const { board: game } = store.getState();
+    game.turn = (game.turn + 1) % game.players.length;
+    game.phase = "roll";
+    set({});
+  },
+  again: () => set({ board: newBoardGame(store.getState().board.players.map((p) => p.name)) }),
+  home: () => goHome(),
+  quit: () => set({ screen: "boardSetup" }),
+};
+
+// ── 🕰️ 시계 맞추기: 영어로 들은 시각에 바늘 맞추기 · 시계 보고 영어 문장 고르기 ──
+const CLOCK_ROUNDS = 8;
+const CLOCK_MIN_WORDS = { 5: "oh five", 10: "ten", 20: "twenty", 25: "twenty-five", 35: "thirty-five", 40: "forty", 50: "fifty", 55: "fifty-five" };
+const nextHour = (h) => (h % 12) + 1;
+function timeSentence(h, m) {
+  if (m === 0) return `It's ${EN_NUMS[h]} o'clock.`;
+  if (m === 30) return `It's half past ${EN_NUMS[h]}.`;
+  if (m === 15) return `It's a quarter past ${EN_NUMS[h]}.`;
+  if (m === 45) return `It's a quarter to ${EN_NUMS[nextHour(h)]}.`;
+  return `It's ${EN_NUMS[h]} ${CLOCK_MIN_WORDS[m]}.`;
+}
+const timeDigits = (h, m) => `${h}:${String(m).padStart(2, "0")}`;
+const CLOCK_KINDS = [[0], [30], [15, 45], [5, 10, 20, 25, 35, 40, 50, 55]];
+
+function newClockGame() {
+  const rounds = Array.from({ length: CLOCK_ROUNDS }, (_, i) => {
+    const mins = CLOCK_KINDS[Math.floor(i / 2)];
+    const h = 1 + Math.floor(Math.random() * 12);
+    const m = mins[Math.floor(Math.random() * mins.length)];
+    const r = { h, m, mode: i % 2 ? "read" : "set", missed: false };
+    if (r.mode === "read") {
+      // 헷갈리는 보기: 시와 분을 바꾼 것, 한 시간 차이, 다른 분
+      const cands = [[nextHour(h), m], [h === 1 ? 12 : h - 1, m], [h, (m + 30) % 60], [Math.max(1, Math.min(12, m / 5 || 12)), (h * 5) % 60]];
+      const seen = new Set([timeSentence(h, m)]);
+      const opts = [];
+      for (const [a, b] of shuffle(cands)) {
+        const s = timeSentence(a, b);
+        if (!seen.has(s) && opts.length < 3) {
+          seen.add(s);
+          opts.push(s);
+        }
+      }
+      while (opts.length < 3) {
+        const s = timeSentence(1 + Math.floor(Math.random() * 12), mins[Math.floor(Math.random() * mins.length)]);
+        if (!seen.has(s)) {
+          seen.add(s);
+          opts.push(s);
+        }
+      }
+      r.choices = shuffle([timeSentence(h, m), ...opts]);
+    }
+    return r;
+  });
+  return { rounds, i: 0, h: 12, m: 0, done: false, isNewBest: false, msg: "" };
+}
+
+function clockSvg(h, m) {
+  const nums = [...Array(12).keys()].map((k) => {
+    const n = k + 1;
+    const a = (n * 30 * Math.PI) / 180;
+    return `<text x="${100 + 78 * Math.sin(a)}" y="${100 - 78 * Math.cos(a) + 7}" text-anchor="middle">${n}</text>`;
+  });
+  const ticks = [...Array(60).keys()].map((k) => `<line x1="100" y1="8" x2="100" y2="${k % 5 ? 13 : 18}" transform="rotate(${k * 6} 100 100)"/>`);
+  const ha = ((h % 12) + m / 60) * 30;
+  const ma = m * 6;
+  return `<svg class="clock-svg" viewBox="0 0 200 200" role="img" aria-label="시계">
+    <circle cx="100" cy="100" r="96" class="clock-face"/>
+    <g class="clock-ticks">${ticks.join("")}</g>
+    <g class="clock-nums">${nums.join("")}</g>
+    <line x1="100" y1="100" x2="100" y2="52" class="clock-hour" transform="rotate(${ha} 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="26" class="clock-min" transform="rotate(${ma} 100 100)"/>
+    <circle cx="100" cy="100" r="6" class="clock-pin"/>
+  </svg>`;
+}
+
+function renderClockScreen(root, { game, actions }) {
+  if (game.done) {
+    const score = game.rounds.filter((r) => !r.missed).length;
+    root.innerHTML = kidDoneHtml({
+      title: "🕰️ 시계 맞추기 결과",
+      score,
+      total: game.rounds.length,
+      isNewBest: game.isNewBest,
+      rows: game.rounds.map((r) => `<li>${r.missed ? "🔁" : "✅"} <b>${timeDigits(r.h, r.m)}</b> ${timeSentence(r.h, r.m)}</li>`).join(""),
+    });
+    root.querySelector("#againBtn").addEventListener("click", actions.again);
+    root.querySelector("#homeBtn").addEventListener("click", actions.home);
+    return;
+  }
+  const r = game.rounds[game.i];
+  const sentence = timeSentence(r.h, r.m);
+  const say = () => speak(sentence, { rate: 0.85 });
+  root.innerHTML = `
+    <div class="screen screen-kidgame no-anim">
+      <div class="cw-top">
+        <button class="back-btn" id="quitBtn">× 그만하기</button>
+        <span class="cw-progress">${game.i + 1} / ${game.rounds.length}</span>
+      </div>
+      ${
+        r.mode === "set"
+          ? `<div class="color-order"><b>${sentence}</b><button class="speak-btn" id="sayBtn" aria-label="듣기" ${speechSupported ? "" : "disabled"}>🔊</button></div><p class="color-help">바늘을 움직여 이 시각을 맞춰요</p>`
+          : `<p class="color-order"><b>🕰️ 몇 시일까요? 알맞은 영어를 골라요</b></p>`
+      }
+      <div class="clock-board">${r.mode === "set" ? clockSvg(game.h, game.m) : clockSvg(r.h, r.m)}</div>
+      ${
+        r.mode === "set"
+          ? `<div class="clock-ctrl">
+          <div><small>시 (짧은 바늘)</small><button class="chip-btn" data-hd="-1" aria-label="한 시간 빼기">◀</button><button class="chip-btn" data-hd="1" aria-label="한 시간 더하기">▶</button></div>
+          <div><small>분 (긴 바늘)</small><button class="chip-btn" data-md="-5" aria-label="5분 빼기">◀</button><button class="chip-btn" data-md="5" aria-label="5분 더하기">▶</button></div>
+        </div>
+        <button class="primary-btn" id="checkBtn">✅ 다 맞췄어요</button>`
+          : `<div class="choice-grid choice-grid--list">${r.choices.map((c, k) => `<button class="choice-btn choice-btn--long" data-k="${k}">${c}</button>`).join("")}</div>`
+      }
+      <p class="fish-status" id="clockMsg">${game.msg}</p>
+    </div>`;
+  root.querySelector("#quitBtn").addEventListener("click", actions.quit);
+  root.querySelector("#sayBtn")?.addEventListener("click", say);
+  if (r.mode === "set" && !r.spoken) {
+    r.spoken = true;
+    setTimeout(say, 300);
+  }
+  root.querySelectorAll("[data-hd]").forEach((b) => b.addEventListener("click", () => actions.turn(Number(b.dataset.hd), 0)));
+  root.querySelectorAll("[data-md]").forEach((b) => b.addEventListener("click", () => actions.turn(0, Number(b.dataset.md))));
+  root.querySelector("#checkBtn")?.addEventListener("click", actions.check);
+  root.querySelectorAll("[data-k]").forEach((b) => b.addEventListener("click", () => actions.pick(r.choices[Number(b.dataset.k)])));
+}
+
+const clockActions = {
+  turn: (dh, dm) => {
+    const { clock: game } = store.getState();
+    game.h = ((game.h - 1 + dh + 12) % 12) + 1;
+    game.m = (game.m + dm + 60) % 60;
+    game.msg = "";
+    set({});
+  },
+  check: () => {
+    const { clock: game } = store.getState();
+    const r = game.rounds[game.i];
+    if (game.h === r.h && game.m === r.m) return clockActions.solved();
+    r.missed = true;
+    playSound("wrong");
+    game.msg = game.h !== r.h ? "🤔 짧은 바늘(시)을 다시 봐요" : "🤔 긴 바늘(분)을 다시 봐요";
+    set({});
+  },
+  pick: (choice) => {
+    const { clock: game } = store.getState();
+    const r = game.rounds[game.i];
+    if (choice === timeSentence(r.h, r.m)) return clockActions.solved();
+    r.missed = true;
+    playSound("wrong");
+    game.msg = `🤔 그건 다른 시각이에요. 바늘을 다시 봐요`;
+    set({});
+  },
+  solved: () => {
+    const { clock: game } = store.getState();
+    const r = game.rounds[game.i];
+    playSound("correct");
+    recordActivity(currentProfile());
+    speak(timeSentence(r.h, r.m), { rate: 0.85 });
+    game.i += 1;
+    game.h = 12;
+    game.m = 0;
+    game.msg = `🎉 ${timeDigits(r.h, r.m)} · ${timeSentence(r.h, r.m)}`;
+    if (game.i >= game.rounds.length) {
+      game.done = true;
+      game.isNewBest = kidFinish("clock", "all", game.rounds.filter((x) => !x.missed).length, game.rounds.length);
+    }
+    set({});
+  },
+  again: () => set({ clock: newClockGame() }),
+  home: () => goHome(),
+  quit: () => goHome(),
+};
+
+// ── 🧱 문장 블록 쌓기: 이야기책 · 읽기 지문의 짧은 문장을 블록으로 섞어 순서대로 쌓아요 ──
+const BLOCK_ROUNDS = 8;
+function blockSentencePool(levelId) {
+  const levels = levelId === "elementary-low" ? ["elementary-low"] : levelId === "elementary-mid" ? ["elementary-low", "elementary-mid"] : ["elementary-mid", "elementary-high"];
+  const max = levelId === "elementary-low" ? 6 : 8;
+  const all = [
+    ...STORY_SERIES.filter((s) => levels.includes(s.levelId)).flatMap((s) => s.chapters.flatMap((c) => c.sentences)),
+    ...READING_PASSAGES.filter((p) => levels.includes(p.levelId)).flatMap((p) => p.sentences),
+  ];
+  const seen = new Set();
+  return all.filter((s) => {
+    const n = s.en.split(" ").length;
+    if (!/^[A-Z][A-Za-z' ]*[a-z][.!?]$/.test(s.en) || n < 3 || n > max || seen.has(s.en)) return false;
+    seen.add(s.en);
+    return true;
+  });
+}
+
+function newBlocksGame(levelId) {
+  const rounds = shuffle(blockSentencePool(levelId))
+    .slice(0, BLOCK_ROUNDS)
+    .map((s) => {
+      const words = s.en.slice(0, -1).split(" ");
+      let order = shuffle(words.map((_, k) => k));
+      for (let t = 0; t < 5 && order.every((k, j) => words[k] === words[j]); t++) order = shuffle(order);
+      return { en: s.en, ko: s.ko, words, punct: s.en.slice(-1), order, placed: [], missed: false, ok: false };
+    });
+  return { levelId, rounds, i: 0, done: false, isNewBest: false };
+}
+
+function renderBlocksScreen(root, { game, actions }) {
+  if (game.done) {
+    const score = game.rounds.filter((r) => !r.missed).length;
+    root.innerHTML = kidDoneHtml({
+      title: "🧱 문장 블록 결과",
+      score,
+      total: game.rounds.length,
+      isNewBest: game.isNewBest,
+      rows: game.rounds.map((r) => `<li>${r.missed ? "🔁" : "✅"} <b>${r.en}</b> <small>${r.ko}</small></li>`).join(""),
+    });
+    root.querySelector("#againBtn").addEventListener("click", actions.again);
+    root.querySelector("#homeBtn").addEventListener("click", actions.home);
+    return;
+  }
+  const r = game.rounds[game.i];
+  const full = r.placed.length === r.words.length;
+  const wrong = full && !r.ok;
+  root.innerHTML = `
+    <div class="screen screen-kidgame no-anim">
+      <div class="cw-top">
+        <button class="back-btn" id="quitBtn">× 그만하기</button>
+        <span class="cw-progress">${game.i + 1} / ${game.rounds.length}</span>
+      </div>
+      <div class="color-order"><b>${r.ko}</b><button class="speak-btn" id="sayBtn" aria-label="영어로 듣기" ${speechSupported ? "" : "disabled"}>🔊</button></div>
+      <div class="block-line${wrong ? " wrong" : ""}${r.ok ? " ok" : ""}">${
+        r.placed.length ? r.placed.map((k, j) => `<button class="word-block placed" data-back="${j}" ${r.ok ? "disabled" : ""}>${r.words[k]}</button>`).join("") + (full ? `<span class="block-punct">${r.punct}</span>` : "") : `<span class="basket-empty">아래 블록을 순서대로 눌러요</span>`
+      }</div>
+      <div class="block-pool">${r.order.map((k) => (r.placed.includes(k) ? `<span class="word-block ghost">${r.words[k]}</span>` : `<button class="word-block" data-put="${k}">${r.words[k]}</button>`)).join("")}</div>
+      <p class="fish-status">${r.ok ? `🎉 ${r.en}` : wrong ? "🤔 순서가 조금 달라요. 위 블록을 눌러 빼고 다시 쌓아요" : "🔊를 누르면 영어 문장을 들을 수 있어요"}</p>
+      ${wrong ? `<button class="secondary-btn" id="resetBtn">↩️ 모두 빼기</button>` : ""}
+    </div>`;
+  root.querySelector("#quitBtn").addEventListener("click", actions.quit);
+  root.querySelector("#sayBtn").addEventListener("click", () => speak(r.en, { rate: 0.85 }));
+  root.querySelectorAll("[data-put]").forEach((b) => b.addEventListener("click", () => actions.put(Number(b.dataset.put))));
+  root.querySelectorAll("[data-back]").forEach((b) => b.addEventListener("click", () => actions.back(Number(b.dataset.back))));
+  root.querySelector("#resetBtn")?.addEventListener("click", actions.reset);
+}
+
+const blocksActions = {
+  put: (k) => {
+    const { blocks: game } = store.getState();
+    const r = game.rounds[game.i];
+    if (r.ok || r.placed.includes(k)) return;
+    r.placed.push(k);
+    if (r.placed.length === r.words.length) {
+      r.ok = r.placed.map((x) => r.words[x]).join(" ") === r.words.join(" ");
+      if (r.ok) {
+        playSound("correct");
+        recordActivity(currentProfile());
+        speak(r.en, { rate: 0.85 });
+        setTimeout(() => blocksActions.advance(game), 1400);
+      } else {
+        r.missed = true;
+        playSound("wrong");
+      }
+    }
+    set({});
+  },
+  back: (j) => {
+    const { blocks: game } = store.getState();
+    const r = game.rounds[game.i];
+    if (r.ok) return;
+    r.placed.splice(j, 1);
+    set({});
+  },
+  reset: () => {
+    const { blocks: game } = store.getState();
+    game.rounds[game.i].placed = [];
+    set({});
+  },
+  advance: (game) => {
+    const s = store.getState();
+    if (s.screen !== "blocks" || s.blocks !== game) return;
+    game.i += 1;
+    if (game.i >= game.rounds.length) {
+      game.done = true;
+      game.isNewBest = kidFinish("blocks", "all", game.rounds.filter((x) => !x.missed).length, game.rounds.length);
+    }
+    set({});
+  },
+  again: () => set({ blocks: newBlocksGame(store.getState().blocks.levelId) }),
+  home: () => goHome(),
+  quit: () => goHome(),
+};
+
+// ── 🛒 영어 가게 놀이: 값을 영어로 듣고 돈을 골라 내요 ──
+const STORE_ROUNDS = 8;
+const STORE_MONEY = [
+  { id: "10", cents: 1000, label: "$10", icon: "💵" },
+  { id: "5", cents: 500, label: "$5", icon: "💵" },
+  { id: "1", cents: 100, label: "$1", icon: "💵" },
+  { id: "q", cents: 25, label: "25¢", icon: "🪙" },
+];
+const moneyText = (cents) => `$${Math.floor(cents / 100)}${cents % 100 ? `.${String(cents % 100).padStart(2, "0")}` : ""}`;
+function priceWords(cents) {
+  const d = Math.floor(cents / 100);
+  const c = cents % 100;
+  const dollars = `${EN_NUMS[d] || d} dollar${d === 1 ? "" : "s"}`;
+  return c ? `${dollars} and ${{ 25: "twenty-five", 50: "fifty", 75: "seventy-five" }[c]} cents` : dollars;
+}
+const storeSentence = (r) => `The ${r.item[0]} is ${priceWords(r.price)}.`;
+
+function newStoreGame() {
+  const items = shuffle(STORE_ITEMS).slice(0, STORE_ROUNDS);
+  const rounds = items.map((item, i) => ({
+    item,
+    price: i < STORE_ROUNDS / 2 ? (1 + Math.floor(Math.random() * 15)) * 100 : (1 + Math.floor(Math.random() * 9)) * 100 + 25 * (1 + Math.floor(Math.random() * 3)),
+    tries: 0,
+  }));
+  return { rounds, i: 0, tray: [], score: 0, done: false, isNewBest: false, msg: "" };
+}
+
+function renderStoreScreen(root, { game, actions }) {
+  if (game.done) {
+    root.innerHTML = kidDoneHtml({
+      title: "🛒 영어 가게 결과",
+      score: game.score,
+      total: game.rounds.length,
+      isNewBest: game.isNewBest,
+      rows: game.rounds.map((r) => `<li>${r.tries <= 1 ? "✅" : "🔁"} ${r.item[1]} <b>${moneyText(r.price)}</b> ${storeSentence(r)}</li>`).join(""),
+    });
+    root.querySelector("#againBtn").addEventListener("click", actions.again);
+    root.querySelector("#homeBtn").addEventListener("click", actions.home);
+    return;
+  }
+  const r = game.rounds[game.i];
+  const total = game.tray.reduce((n, id) => n + STORE_MONEY.find((m) => m.id === id).cents, 0);
+  const say = () => speak(`How much is the ${r.item[0]}? ${storeSentence(r)}`, { rate: 0.85 });
+  root.innerHTML = `
+    <div class="screen screen-kidgame no-anim">
+      <div class="cw-top">
+        <button class="back-btn" id="quitBtn">× 그만하기</button>
+        <span class="cw-progress">${game.i + 1} / ${game.rounds.length} · ⭐ ${game.score}</span>
+      </div>
+      <div class="shop-item"><span>${r.item[1]}</span><b>${r.item[0]}</b><small>${r.item[2]}</small></div>
+      <button class="listen-btn" id="sayBtn" ${speechSupported ? "" : "disabled"}>🔊 값 듣기</button>
+      ${r.tries >= 2 ? `<p class="color-help">💡 값은 <b>${moneyText(r.price)}</b> · ${storeSentence(r)}</p>` : ""}
+      <div class="shop-money">${STORE_MONEY.map((m) => `<button class="money-btn${m.cents < 100 ? " coin" : ""}" data-pay="${m.id}"><span>${m.icon}</span><b>${m.label}</b></button>`).join("")}</div>
+      <div class="shop-tray">${game.tray.length ? game.tray.map((id, k) => `<button class="tray-money" data-take="${k}" aria-label="빼기">${STORE_MONEY.find((m) => m.id === id).label}</button>`).join("") : `<span class="basket-empty">돈을 눌러서 내요</span>`}</div>
+      <p class="fish-status">낸 돈: <b>${moneyText(total)}</b>${game.msg ? ` · ${game.msg}` : ""}</p>
+      <div class="result-actions">
+        <button class="primary-btn" id="payBtn" ${game.tray.length ? "" : "disabled"}>💳 이만큼 낼게요</button>
+        <button class="secondary-btn" id="clearBtn" ${game.tray.length ? "" : "disabled"}>↩️ 다시 고르기</button>
+      </div>
+    </div>`;
+  root.querySelector("#quitBtn").addEventListener("click", actions.quit);
+  root.querySelector("#sayBtn").addEventListener("click", say);
+  if (!r.spoken) {
+    r.spoken = true;
+    setTimeout(say, 300);
+  }
+  root.querySelectorAll("[data-pay]").forEach((b) => b.addEventListener("click", () => actions.pay(b.dataset.pay)));
+  root.querySelectorAll("[data-take]").forEach((b) => b.addEventListener("click", () => actions.take(Number(b.dataset.take))));
+  root.querySelector("#payBtn").addEventListener("click", actions.check);
+  root.querySelector("#clearBtn").addEventListener("click", actions.clear);
+}
+
+const storeActions = {
+  pay: (id) => {
+    const { storeGame: game } = store.getState();
+    if (game.tray.length >= 20) return;
+    game.tray.push(id);
+    game.msg = "";
+    set({});
+  },
+  take: (k) => {
+    const { storeGame: game } = store.getState();
+    game.tray.splice(k, 1);
+    set({});
+  },
+  clear: () => {
+    const { storeGame: game } = store.getState();
+    game.tray = [];
+    game.msg = "";
+    set({});
+  },
+  check: () => {
+    const { storeGame: game } = store.getState();
+    const r = game.rounds[game.i];
+    const total = game.tray.reduce((n, id) => n + STORE_MONEY.find((m) => m.id === id).cents, 0);
+    r.tries += 1;
+    if (total !== r.price) {
+      playSound("wrong");
+      game.msg = total > r.price ? "🤔 너무 많이 냈어요" : "🤔 돈이 모자라요";
+      set({});
+      return;
+    }
+    playSound("correct");
+    recordActivity(currentProfile());
+    if (r.tries === 1) game.score += 1;
+    speak("Thank you! Here you are.", { rate: 0.9 });
+    game.msg = `🎉 딱 맞아요! ${r.item[1]} 샀어요`;
+    set({});
+    setTimeout(() => {
+      const s = store.getState();
+      if (s.screen !== "storeGame" || s.storeGame !== game) return;
+      game.i += 1;
+      game.tray = [];
+      game.msg = "";
+      if (game.i >= game.rounds.length) {
+        game.done = true;
+        game.isNewBest = kidFinish("storeGame", "all", game.score, game.rounds.length);
+      }
+      set({});
+    }, 1300);
+  },
+  again: () => set({ storeGame: newStoreGame() }),
+  home: () => goHome(),
+  quit: () => goHome(),
+};
+
+// ── 🍽️ 저녁 식탁 질문 카드 ──
+function renderTableTalkScreen(root, { profileName, cat, index, back, go }) {
+  const list = cat ? TABLE_TALK.filter((t) => t.cat === cat) : TABLE_TALK;
+  const card = list[((index % list.length) + list.length) % list.length];
+  const seen = getProfileData(profileName).tableTalk.best;
+  if (!seen[card.id]) recordCountUp(profileName, "tableTalk", card.id);
+  const catInfo = TABLE_TALK_CATS.find((c) => c.id === card.cat);
+  root.innerHTML = `
+    <div class="screen screen-tabletalk">
+      <button class="back-btn" id="backBtn">← 홈</button>
+      <h1 class="title">🍽️ 저녁 식탁 질문 카드</h1>
+      <p class="subtitle">부모님이 영어로 묻고, 아이가 영어로 대답해 봐요 · 본 카드 ${Object.keys(getProfileData(profileName).tableTalk.best).length} / ${TABLE_TALK.length}</p>
+      <div class="tt-cats">
+        <button class="chip-btn${cat ? "" : " on"}" data-cat="">🎲 전체</button>
+        ${TABLE_TALK_CATS.map((c) => `<button class="chip-btn${cat === c.id ? " on" : ""}" data-cat="${c.id}">${c.emoji} ${c.title}</button>`).join("")}
+      </div>
+      <section class="tt-card">
+        <small>${catInfo.emoji} ${catInfo.title}</small>
+        <p class="tt-q">${card.q}</p>
+        <button class="listen-btn" id="sayQ" ${speechSupported ? "" : "disabled"}>🔊 질문 듣기</button>
+        <details class="color-help"><summary>뜻 보기</summary>${card.ko}</details>
+      </section>
+      <details class="tt-answer">
+        <summary>💬 이렇게 대답해 봐요</summary>
+        <div class="culture-line"><button class="speak-btn" id="sayA" aria-label="듣기" ${speechSupported ? "" : "disabled"}>🔊</button><p><b>${card.say}</b><small>${card.sayKo}</small></p></div>
+        ${recorderHtml("t:" + card.id)}
+      </details>
+      <div class="result-actions">
+        <button class="primary-btn" id="nextBtn">다음 카드 →</button>
+        <button class="secondary-btn" id="randBtn">🎲 아무 카드나</button>
+      </div>
+    </div>`;
+  root.querySelector("#backBtn").addEventListener("click", back);
+  root.querySelector("#sayQ").addEventListener("click", () => speak(card.q, { rate: 0.85 }));
+  root.querySelector("#sayA").addEventListener("click", () => speak(card.say, { rate: 0.85 }));
+  root.querySelectorAll("[data-cat]").forEach((b) => b.addEventListener("click", () => go(b.dataset.cat || null, 0)));
+  root.querySelector("#nextBtn").addEventListener("click", () => go(cat, index + 1));
+  root.querySelector("#randBtn").addEventListener("click", () => go(cat, index + 1 + Math.floor(Math.random() * (list.length - 1))));
+  bindRecorders(root);
+}
+
+// ── 📰 영어 뉴스: 읽기 지문 중 [뉴스]만 모아 보기 ──
+const newsPassages = () => READING_PASSAGES.filter((p) => p.title.startsWith("[뉴스]"));
+function renderNewsListScreen(root, { profileName, open, back }) {
+  root.innerHTML = `
+    <div class="screen screen-biz">
+      <button class="back-btn" id="backBtn">← 홈</button>
+      <h1 class="title">📰 짧은 영어 뉴스</h1>
+      <p class="subtitle">다섯 문장짜리 기사를 듣고 읽고, 핵심 단어와 3문제로 확인해요</p>
+      <div class="level-grid">
+        ${newsPassages()
+          .map((p) => {
+            const best = getSectionBest(profileName, "reading", p.id);
+            return `<button class="level-card" data-id="${p.id}"><span class="level-icon">${p.emoji}</span><span class="topic-text"><span class="level-label">${p.title.replace("[뉴스] ", "")}</span><span class="topic-summary">${p.sentences[0].en.slice(0, 60)}…</span></span><span class="level-best${best ? "" : " level-best-empty"}">${ratioLabel(best)}</span></button>`;
+          })
+          .join("")}
+      </div>
+    </div>`;
+  root.querySelector("#backBtn").addEventListener("click", back);
+  root.querySelectorAll("[data-id]").forEach((b) => b.addEventListener("click", () => open(b.dataset.id)));
+}
 
 ;
 
@@ -36419,7 +37277,7 @@ const roleplayActions = {
 
 // "이어서 하기" 열기 (홈 · 오늘의 학습 결과에서 같이 쓴다)
 function openNextStep(step) {
-  if (step.type === "passage") set({ passageId: step.id, readingMode: "read", screen: "passage" });
+  if (step.type === "passage") set({ passageId: step.id, readingMode: "read", passageFrom: null, screen: "passage" });
   else if (step.type === "story") openStoryChapter(step.id);
   else if (step.type === "lesson") startBasic(step.id);
   else if (step.type === "listening") startListening(step.id);
@@ -36826,6 +37684,10 @@ const QUIZ_QUIT_TARGET = {
   coloring: (s) => (s.coloring.done ? null : "coloringList"),
   basket: (s) => (s.basket.done ? null : "home"),
   balloon: (s) => (s.balloon.done ? null : "home"),
+  board: (s) => (s.board.winner ? null : "boardSetup"),
+  clock: (s) => (s.clock.done ? null : "home"),
+  blocks: (s) => (s.blocks.done ? null : "home"),
+  storeGame: (s) => (s.storeGame.done ? null : "home"),
 };
 
 function parentScreen(state) {
@@ -36844,7 +37706,9 @@ function parentScreen(state) {
     case "diagnosis": case "roadmap": case "wordRainList":
     case "advent": case "pairsList": case "drawSetup": case "chantList": case "cultureList":
     case "schoolList": case "vacation": case "houseList": case "bizList":
-    case "pbookList": case "dailyWrite": case "fishingList": case "coloringList": case "basket": case "balloon": return "home";
+    case "pbookList": case "dailyWrite": case "fishingList": case "coloringList": case "basket": case "balloon":
+    case "boardSetup": case "clock": case "blocks": case "storeGame": case "tableTalk": case "newsList": return "home";
+    case "board": return "boardSetup";
     case "pbookSet": return "pbookList";
     case "fishing": return "fishingList";
     case "coloring": return "coloringList";
@@ -36882,7 +37746,7 @@ function parentScreen(state) {
     case "basicLesson": return lessonCollectionOf(state.basic.topicId).listScreen;
     case "vocabSession": case "vocabSummary": return "vocab";
     case "memberEdit": return state.memberReturn;
-    case "passage": return "readingList";
+    case "passage": return state.passageFrom || "readingList";
     case "result": return "level";
     case "mcResult": return mcSourceInfo(state.mc.source).listScreen;
     case "chunkResult": return "chunkIntro";
@@ -36921,7 +37785,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation", "houseList", "bizList", "dailyWrite", "fishingList", "coloringList",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation", "houseList", "bizList", "dailyWrite", "fishingList", "coloringList", "boardSetup", "tableTalk", "newsList",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -37117,6 +37981,12 @@ function render() {
           openFishing: () => set({ screen: "fishingList" }),
           openColoring: () => set({ screen: "coloringList" }),
           openBasket: () => set({ basket: newBasketGame(), screen: "basket" }),
+          openBoard: () => set({ screen: "boardSetup" }),
+          openClock: () => set({ clock: newClockGame(), screen: "clock" }),
+          openBlocks: () => set({ blocks: newBlocksGame(kidLevelOf(state.profileName)), screen: "blocks" }),
+          openStoreGame: () => set({ storeGame: newStoreGame(), screen: "storeGame" }),
+          openTableTalk: () => set({ ttCat: null, ttIndex: Math.floor(Math.random() * TABLE_TALK.length), screen: "tableTalk" }),
+          openNews: () => set({ screen: "newsList" }),
           openBalloon: () => set({ balloon: newBalloonGame(kidLevelOf(state.profileName)), screen: "balloon" }),
           openVacation: () => set({ vacationEdit: false, screen: "vacation" }),
           openAdvent: () => set({ adventDay: adventInfo().openUpTo || null, screen: "advent" }),
@@ -37362,6 +38232,13 @@ function render() {
         write: (tplId) => set({ diaryDraft: { tplId, picks: findDiaryTemplate(tplId).lines.map(() => null) }, screen: "diaryWrite" }),
         back: goHome,
       }),
+    boardSetup: () => renderBoardSetupScreen(root, { profileName: state.profileName, start: (names) => set({ board: newBoardGame(names), screen: "board" }), back: goHome }),
+    board: () => renderBoardScreen(root, { game: state.board, actions: boardActions }),
+    clock: () => renderClockScreen(root, { game: state.clock, actions: clockActions }),
+    blocks: () => renderBlocksScreen(root, { game: state.blocks, actions: blocksActions }),
+    storeGame: () => renderStoreScreen(root, { game: state.storeGame, actions: storeActions }),
+    tableTalk: () => renderTableTalkScreen(root, { profileName: state.profileName, cat: state.ttCat || null, index: state.ttIndex || 0, back: goHome, go: (ttCat, ttIndex) => set({ ttCat, ttIndex }) }),
+    newsList: () => renderNewsListScreen(root, { profileName: state.profileName, open: (passageId) => set({ passageId, readingMode: "read", passageFrom: "newsList", screen: "passage" }), back: goHome }),
     pbookList: () =>
       renderPbookListScreen(root, {
         profileName: state.profileName,
@@ -37678,7 +38555,7 @@ function render() {
         profileName: state.profileName,
         mode: state.readingMode,
         setMode: (readingMode) => set({ readingMode }),
-        openPassage: (passageId) => set({ passageId, screen: "passage" }),
+        openPassage: (passageId) => set({ passageId, passageFrom: null, screen: "passage" }),
         startQuiz: startReadingQuiz,
         backToHome: goHome,
       }),
@@ -37688,7 +38565,7 @@ function render() {
         profileName: state.profileName,
         passage: findPassage(state.passageId),
         startQuiz: () => startReadingQuiz(state.passageId),
-        backToList: () => set({ screen: "readingList" }),
+        backToList: () => set({ screen: state.passageFrom || "readingList" }),
         goHome,
       }),
 
