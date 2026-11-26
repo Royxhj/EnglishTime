@@ -21645,6 +21645,605 @@ BIZ_PHRASE_SETS.forEach((s) => s.phrases.forEach((p, i) => (p.id = `${s.id}-${i 
 
 ;
 
+/* ── data/storiesAdult.js ── */
+// 📚 성인 이야기책: 일상 에세이 · 직장 이야기 (4장씩)
+STORY_SERIES.push(
+  {
+    id: "coffee",
+    levelId: "adult",
+    emoji: "☕",
+    title: "모퉁이 카페의 아침",
+    summary: "매일 같은 카페에 들르는 직장인 하나가 겪는 작은 변화들",
+    chapters: [
+      {
+        emoji: "🌅",
+        title: "늘 같은 주문",
+        sentences: [
+          { en: "Every weekday at 7:40, Hana stops by the small café on the corner before heading to the office.", ko: "평일 아침 7시 40분이면 하나는 출근하기 전에 모퉁이의 작은 카페에 들른다." },
+          { en: "She always orders the same thing: a medium Americano with no sugar.", ko: "그녀는 늘 같은 것을 주문한다. 설탕 없는 아메리카노 중간 크기." },
+          { en: "The barista, an older man named Tom, usually has it ready before she reaches the counter.", ko: "톰이라는 나이 지긋한 바리스타는 대개 그녀가 계산대에 닿기도 전에 커피를 준비해 둔다." },
+          { en: "They rarely say more than \"Good morning\" and \"Have a nice day,\" but the routine comforts her.", ko: "둘이 나누는 말은 '좋은 아침이에요'와 '좋은 하루 보내세요' 정도지만, 그 일과가 그녀에게는 위안이 된다." },
+          { en: "One Monday, however, the café is dark, and a handwritten note is taped to the door.", ko: "그런데 어느 월요일, 카페는 불이 꺼져 있고 문에는 손으로 쓴 쪽지가 붙어 있다." },
+        ],
+        glossary: [
+          { w: "stops by", ko: "잠깐 들르다" },
+          { w: "heading to", ko: "~로 향하다" },
+          { w: "rarely", ko: "좀처럼 ~않는" },
+          { w: "routine", ko: "일과, 습관" },
+          { w: "comforts", ko: "위안을 주다" },
+        ],
+        questions: [
+          { q: "하나는 언제 카페에 들르나요?", choices: ["평일 아침 출근 전", "주말 오후", "퇴근 후 저녁", "점심시간"], answer: 0, explain: "Every weekday at 7:40 ... before heading to the office → 평일 아침 출근 전." },
+          { q: "톰은 보통 어떻게 하나요?", choices: ["하나가 오기 전에 커피를 준비해 둔다", "하나와 오래 이야기한다", "주문을 자주 틀린다", "하나에게 새 메뉴를 권한다"], answer: 0, explain: "usually has it ready before she reaches the counter → 미리 준비해 둔다." },
+          { q: "어느 월요일에 일어난 일은?", choices: ["카페 문이 닫혀 있고 쪽지가 붙어 있었다", "카페에 손님이 많았다", "톰이 하나에게 선물을 주었다", "커피 값이 올랐다"], answer: 0, explain: "the café is dark, and a handwritten note is taped to the door." },
+        ],
+      },
+      {
+        emoji: "📝",
+        title: "문에 붙은 쪽지",
+        sentences: [
+          { en: "The note says, \"Closed this week for family reasons. Sorry for the inconvenience. — Tom\"", ko: "쪽지에는 '집안 사정으로 이번 주는 쉽니다. 불편을 드려 죄송합니다. — 톰'이라고 적혀 있다." },
+          { en: "Hana is surprised to realize how much she misses the place after just one day.", ko: "하나는 겨우 하루 만에 그곳이 이렇게 그리워진다는 것에 스스로 놀란다." },
+          { en: "She tries the big chain store across the street, but the coffee tastes ordinary and the line is long.", ko: "길 건너 큰 체인점에 가 보지만, 커피 맛은 평범하고 줄은 길다." },
+          { en: "Nobody there knows her name or her order.", ko: "그곳에서는 아무도 그녀의 이름이나 주문을 모른다." },
+          { en: "On Thursday, she writes a short card that says, \"We miss you. Hope everything is okay,\" and slips it under the door.", ko: "목요일에 그녀는 '보고 싶어요. 별일 없으시길 바라요'라고 짧은 카드를 써서 문 아래로 밀어 넣는다." },
+        ],
+        glossary: [
+          { w: "for family reasons", ko: "집안 사정으로" },
+          { w: "inconvenience", ko: "불편" },
+          { w: "realize", ko: "깨닫다" },
+          { w: "ordinary", ko: "평범한" },
+          { w: "slips", ko: "살짝 밀어 넣다" },
+        ],
+        questions: [
+          { q: "카페가 문을 닫은 이유는?", choices: ["집안 사정", "공사", "휴가", "가게 이전"], answer: 0, explain: "Closed this week for family reasons → 집안 사정." },
+          { q: "체인점에 대한 하나의 느낌은?", choices: ["커피는 평범하고 줄이 길다", "커피가 훨씬 맛있다", "직원이 친절하다", "값이 싸서 좋다"], answer: 0, explain: "the coffee tastes ordinary and the line is long." },
+          { q: "목요일에 하나가 한 일은?", choices: ["카드를 써서 문 아래로 넣었다", "톰에게 전화했다", "카페 앞에서 기다렸다", "체인점 단골이 되었다"], answer: 0, explain: "writes a short card ... and slips it under the door." },
+        ],
+      },
+      {
+        emoji: "🤝",
+        title: "다시 열린 문",
+        sentences: [
+          { en: "The following Monday, the lights are back on, and Tom is behind the counter as usual.", ko: "다음 주 월요일, 불이 다시 켜져 있고 톰은 평소처럼 계산대 뒤에 서 있다." },
+          { en: "This time, though, he walks around the counter to greet her.", ko: "그런데 이번에는 계산대를 돌아 나와 그녀를 맞이한다." },
+          { en: "He explains that his wife had surgery and he needed to take care of her.", ko: "그는 아내가 수술을 받아서 간호를 해야 했다고 설명한다." },
+          { en: "\"Your card meant a lot to us,\" he says. \"I didn't know regulars even noticed me.\"", ko: "\"카드가 저희에게 큰 힘이 됐어요. 단골손님들이 저를 신경 써 주는 줄 몰랐어요.\"" },
+          { en: "For the first time in two years, they talk for ten minutes, and Hana is almost late for work.", ko: "2년 만에 처음으로 둘은 10분 동안 이야기를 나누고, 하나는 하마터면 지각할 뻔한다." },
+        ],
+        glossary: [
+          { w: "as usual", ko: "평소처럼" },
+          { w: "greet", ko: "맞이하다, 인사하다" },
+          { w: "surgery", ko: "수술" },
+          { w: "meant a lot", ko: "큰 의미가 있다" },
+          { w: "regulars", ko: "단골손님" },
+        ],
+        questions: [
+          { q: "톰이 카페를 닫았던 진짜 이유는?", choices: ["아내의 수술과 간호", "본인의 휴가", "가게 수리", "새 직원 교육"], answer: 0, explain: "his wife had surgery and he needed to take care of her." },
+          { q: "톰은 하나의 카드에 대해 뭐라고 했나요?", choices: ["큰 힘이 되었다", "읽지 못했다", "잃어버렸다", "다른 손님 것인 줄 알았다"], answer: 0, explain: "Your card meant a lot to us → 큰 의미가 있었다." },
+          { q: "이날 하나에게 생긴 일은?", choices: ["이야기하느라 지각할 뻔했다", "커피를 쏟았다", "회사에 가지 않았다", "주문을 바꿨다"], answer: 0, explain: "Hana is almost late for work → 지각할 뻔했다." },
+        ],
+      },
+      {
+        emoji: "🌱",
+        title: "작은 연결",
+        sentences: [
+          { en: "Since then, their mornings have changed in small but meaningful ways.", ko: "그 뒤로 둘의 아침은 작지만 의미 있게 달라졌다." },
+          { en: "Tom asks about her projects, and Hana asks how his wife is recovering.", ko: "톰은 그녀의 일에 대해 묻고, 하나는 그의 아내가 잘 회복하고 있는지 묻는다." },
+          { en: "Sometimes he lets her try a new blend before he adds it to the menu.", ko: "가끔 그는 새 원두를 메뉴에 올리기 전에 그녀에게 먼저 맛보게 한다." },
+          { en: "Hana has started greeting other regulars too, and the café feels less like a shop and more like a neighborhood.", ko: "하나는 다른 단골들과도 인사를 나누기 시작했고, 카페는 가게라기보다 동네처럼 느껴진다." },
+          { en: "She often thinks about how a few kind words can turn strangers into friends.", ko: "그녀는 몇 마디 다정한 말이 낯선 사람을 친구로 바꿀 수 있다는 것을 자주 생각한다." },
+        ],
+        glossary: [
+          { w: "meaningful", ko: "의미 있는" },
+          { w: "recovering", ko: "회복하다" },
+          { w: "blend", ko: "(커피) 블렌드, 섞은 원두" },
+          { w: "neighborhood", ko: "동네, 이웃" },
+          { w: "strangers", ko: "낯선 사람" },
+        ],
+        questions: [
+          { q: "톰이 가끔 하는 일은?", choices: ["새 원두를 하나에게 먼저 맛보게 한다", "커피를 공짜로 준다", "하나의 회사에 배달한다", "가게를 일찍 닫는다"], answer: 0, explain: "lets her try a new blend before he adds it to the menu." },
+          { q: "카페는 하나에게 어떻게 느껴지나요?", choices: ["가게라기보다 동네 같다", "예전보다 시끄럽다", "더 비싸졌다", "낯설어졌다"], answer: 0, explain: "feels less like a shop and more like a neighborhood." },
+          { q: "이 이야기가 전하는 생각은?", choices: ["다정한 몇 마디가 사람을 이어 준다", "커피는 체인점이 낫다", "단골이 되면 손해다", "일찍 출근해야 한다"], answer: 0, explain: "a few kind words can turn strangers into friends." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "newjob",
+    levelId: "adult",
+    emoji: "💼",
+    title: "첫 해외 프로젝트",
+    summary: "영어 회의가 두려운 민수가 해외 팀과 일하며 자신감을 찾는 이야기",
+    chapters: [
+      {
+        emoji: "😰",
+        title: "떨리는 첫 화상 회의",
+        sentences: [
+          { en: "Minsu had worked at the company for five years, but he had never led a meeting in English.", ko: "민수는 회사에 5년을 다녔지만 영어로 회의를 이끌어 본 적은 없었다." },
+          { en: "When his manager asked him to coordinate a project with the team in Toronto, his heart sank.", ko: "부장이 토론토 팀과의 프로젝트를 조율해 달라고 했을 때, 그는 가슴이 철렁했다." },
+          { en: "In the first video call, he read from a script and avoided looking at the camera.", ko: "첫 화상 회의에서 그는 원고를 읽기만 하고 카메라를 보지 않았다." },
+          { en: "When someone asked an unexpected question, he froze and said, \"I will check and email you.\"", ko: "누군가 예상 못 한 질문을 하자 그는 얼어붙어서 \"확인하고 메일 드리겠습니다\"라고만 했다." },
+          { en: "After the call, he felt embarrassed and wondered if he was the right person for the job.", ko: "회의가 끝나고 그는 창피했고, 자기가 이 일에 맞는 사람인지 의문이 들었다." },
+        ],
+        glossary: [
+          { w: "led a meeting", ko: "회의를 이끌다" },
+          { w: "coordinate", ko: "조율하다" },
+          { w: "his heart sank", ko: "가슴이 철렁했다" },
+          { w: "unexpected", ko: "예상치 못한" },
+          { w: "embarrassed", ko: "창피한" },
+        ],
+        questions: [
+          { q: "민수가 해 본 적 없는 일은?", choices: ["영어로 회의 이끌기", "해외 출장", "보고서 쓰기", "팀장 맡기"], answer: 0, explain: "he had never led a meeting in English." },
+          { q: "첫 화상 회의에서 민수는 어땠나요?", choices: ["원고만 읽고 카메라를 피했다", "농담을 많이 했다", "회의에 늦었다", "발표를 하지 않았다"], answer: 0, explain: "read from a script and avoided looking at the camera." },
+          { q: "회의 뒤 민수의 기분은?", choices: ["창피하고 자신이 없었다", "뿌듯했다", "화가 났다", "지루했다"], answer: 0, explain: "he felt embarrassed and wondered if he was the right person." },
+        ],
+      },
+      {
+        emoji: "💡",
+        title: "동료의 조언",
+        sentences: [
+          { en: "The next day, Sarah, a project manager in Toronto, sent him a private message.", ko: "다음 날 토론토의 프로젝트 매니저 사라가 그에게 개인 메시지를 보냈다." },
+          { en: "\"Your ideas were really clear in the document,\" she wrote. \"Don't worry about your accent.\"", ko: "\"문서에 담긴 아이디어가 정말 명확했어요. 억양은 걱정하지 마세요.\"" },
+          { en: "She suggested that he share his screen and walk everyone through the plan instead of reading.", ko: "그녀는 원고를 읽지 말고 화면을 공유해서 계획을 하나씩 설명해 보라고 제안했다." },
+          { en: "She also told him that it is perfectly fine to say, \"Could you rephrase that?\" when he doesn't understand.", ko: "또 이해가 안 될 때는 \"다시 말씀해 주시겠어요?\"라고 해도 전혀 문제없다고 말해 주었다." },
+          { en: "Minsu realized that clear communication mattered more than perfect grammar.", ko: "민수는 완벽한 문법보다 분명한 소통이 더 중요하다는 것을 깨달았다." },
+        ],
+        glossary: [
+          { w: "accent", ko: "억양, 말투" },
+          { w: "share his screen", ko: "화면을 공유하다" },
+          { w: "walk everyone through", ko: "~에게 차근차근 설명하다" },
+          { w: "rephrase", ko: "다른 말로 바꿔 말하다" },
+          { w: "mattered", ko: "중요하다" },
+        ],
+        questions: [
+          { q: "사라가 칭찬한 것은?", choices: ["문서 속 아이디어가 명확했다", "발음이 완벽했다", "회의 진행이 빨랐다", "농담이 재미있었다"], answer: 0, explain: "Your ideas were really clear in the document." },
+          { q: "사라가 제안한 방법은?", choices: ["화면을 공유하며 차근차근 설명하기", "원고를 더 길게 쓰기", "회의를 줄이기", "통역을 부르기"], answer: 0, explain: "share his screen and walk everyone through the plan instead of reading." },
+          { q: "민수가 깨달은 것은?", choices: ["완벽한 문법보다 분명한 소통이 중요하다", "영어는 포기해야 한다", "회의는 짧을수록 좋다", "억양을 꼭 고쳐야 한다"], answer: 0, explain: "clear communication mattered more than perfect grammar." },
+        ],
+      },
+      {
+        emoji: "📈",
+        title: "두 번째 회의",
+        sentences: [
+          { en: "For the second meeting, Minsu prepared slides with simple keywords instead of a full script.", ko: "두 번째 회의를 위해 민수는 원고 대신 간단한 핵심어만 적은 슬라이드를 준비했다." },
+          { en: "He opened by saying, \"Let's go over three things today,\" and the meeting felt organized from the start.", ko: "그는 \"오늘은 세 가지를 살펴보겠습니다\"로 시작했고, 회의는 처음부터 짜임새 있게 느껴졌다." },
+          { en: "When a developer spoke too quickly, he asked her to slow down, and she happily did.", ko: "한 개발자가 너무 빨리 말하자 그는 천천히 말해 달라고 부탁했고, 그녀는 기꺼이 그렇게 했다." },
+          { en: "He still made a few grammar mistakes, but nobody seemed to notice or care.", ko: "여전히 문법 실수가 몇 개 있었지만 아무도 알아채거나 신경 쓰지 않는 것 같았다." },
+          { en: "At the end, the team agreed on a deadline, and Sarah sent him a thumbs-up emoji.", ko: "회의 끝에 팀은 마감일에 합의했고, 사라는 그에게 엄지 척 이모티콘을 보냈다." },
+        ],
+        glossary: [
+          { w: "keywords", ko: "핵심어" },
+          { w: "go over", ko: "살펴보다, 검토하다" },
+          { w: "organized", ko: "체계적인" },
+          { w: "notice", ko: "알아채다" },
+          { w: "agreed on", ko: "~에 합의하다" },
+        ],
+        questions: [
+          { q: "두 번째 회의를 위해 민수가 준비한 것은?", choices: ["핵심어만 적은 슬라이드", "더 긴 원고", "통역사", "녹음 파일"], answer: 0, explain: "slides with simple keywords instead of a full script." },
+          { q: "개발자가 빨리 말했을 때 민수는?", choices: ["천천히 말해 달라고 부탁했다", "못 들은 척했다", "회의를 끝냈다", "나중에 메일로 물었다"], answer: 0, explain: "he asked her to slow down." },
+          { q: "회의 끝에 팀이 한 일은?", choices: ["마감일에 합의했다", "프로젝트를 취소했다", "회의를 연기했다", "담당자를 바꿨다"], answer: 0, explain: "the team agreed on a deadline." },
+        ],
+      },
+      {
+        emoji: "🎉",
+        title: "프로젝트를 마치며",
+        sentences: [
+          { en: "Six months later, the project was launched on time, and the client was satisfied with the results.", ko: "여섯 달 뒤 프로젝트는 제때 출시되었고, 고객사는 결과에 만족했다." },
+          { en: "At the final meeting, Minsu thanked everyone and even shared a short story about his first nervous call.", ko: "마지막 회의에서 민수는 모두에게 감사 인사를 하고, 처음 떨렸던 회의 이야기까지 짧게 들려주었다." },
+          { en: "The Toronto team laughed and said they had been nervous too, because they had never worked with a team in Korea.", ko: "토론토 팀은 웃으며, 한국 팀과 일해 본 적이 없어서 자기들도 긴장했었다고 말했다." },
+          { en: "Now Minsu volunteers for international projects and mentors younger colleagues who are afraid of speaking English.", ko: "이제 민수는 해외 프로젝트에 먼저 자원하고, 영어 말하기를 두려워하는 후배들을 이끌어 준다." },
+          { en: "His advice is always the same: \"Be clear, be kind, and don't be afraid to ask again.\"", ko: "그의 조언은 늘 같다. \"분명하게, 친절하게, 그리고 다시 묻는 걸 두려워하지 마.\"" },
+        ],
+        glossary: [
+          { w: "launched", ko: "출시하다" },
+          { w: "on time", ko: "제때" },
+          { w: "satisfied", ko: "만족한" },
+          { w: "volunteers", ko: "자원하다" },
+          { w: "mentors", ko: "(후배를) 이끌어 주다" },
+        ],
+        questions: [
+          { q: "프로젝트의 결과는?", choices: ["제때 출시되었고 고객이 만족했다", "늦게 끝났다", "중간에 취소되었다", "고객이 불만을 말했다"], answer: 0, explain: "launched on time, and the client was satisfied." },
+          { q: "토론토 팀이 털어놓은 것은?", choices: ["자기들도 긴장했었다", "민수의 영어가 어려웠다", "프로젝트가 지루했다", "한국에 가고 싶다"], answer: 0, explain: "they had been nervous too." },
+          { q: "민수가 후배들에게 하는 조언에 없는 것은?", choices: ["완벽하게 말하라", "분명하게 말하라", "친절하게 말하라", "다시 묻는 걸 두려워하지 마라"], answer: 0, explain: "Be clear, be kind, and don't be afraid to ask again. → '완벽하게'는 없어요." },
+        ],
+      },
+    ],
+  }
+);
+for (const s of STORY_SERIES) s.chapters.forEach((c, i) => Object.assign(c, { id: `story-${s.id}-${i + 1}`, levelId: s.levelId, seriesId: s.id, no: i + 1 }));
+
+;
+
+/* ── data/adultBooks.js ── */
+// 👨‍👩 부모님 표현책: 아이와 쓰는 영어 · 콩글리시 바로잡기 · 연음 · 발음 연습
+// 표현: { en, ko, tip } / 콩글리시는 wrong(틀린 말)이 더 있고, 연음은 sound(들리는 소리)가 더 있다.
+const PHRASE_BOOKS = [
+  {
+    id: "parentTalk",
+    emoji: "👪",
+    title: "아이와 쓰는 영어",
+    subtitle: "아침부터 잠들 때까지 집에서 아이에게 바로 쓰는 말",
+    quizLabel: "👪 아이에게 이렇게 말하려면?",
+    sets: [
+      {
+        id: "pt-morning", emoji: "🌅", title: "아침 준비",
+        phrases: [
+          { en: "Rise and shine!", ko: "일어나, 아침이야!", tip: "아이를 깨울 때 쓰는 밝은 인사예요." },
+          { en: "Time to get up, sweetie.", ko: "일어날 시간이야, 우리 아가.", tip: "sweetie, honey, buddy처럼 다정한 호칭을 붙여요." },
+          { en: "Did you sleep well?", ko: "잘 잤어?" },
+          { en: "Go wash your face.", ko: "가서 세수해.", tip: "Go + 동사: 가서 ~해." },
+          { en: "Get dressed, please.", ko: "옷 입자." },
+          { en: "Don't forget your backpack.", ko: "가방 잊지 마.", tip: "책가방은 bag보다 backpack이 자연스러워요." },
+          { en: "Hurry up, or you'll be late!", ko: "서둘러, 안 그러면 늦어!", tip: "명령문 + or ~: ~해, 안 그러면 ~." },
+        ],
+      },
+      {
+        id: "pt-meal", emoji: "🍚", title: "밥 먹기",
+        phrases: [
+          { en: "Dinner is ready!", ko: "저녁 다 됐다!" },
+          { en: "Wash your hands before you eat.", ko: "먹기 전에 손 씻어." },
+          { en: "Take one more bite.", ko: "한 입만 더 먹자.", tip: "bite = 한 입." },
+          { en: "Don't play with your food.", ko: "음식 가지고 장난치지 마." },
+          { en: "Chew with your mouth closed.", ko: "입 다물고 씹어야지." },
+          { en: "Are you full?", ko: "배불러?" },
+          { en: "Put your dishes in the sink.", ko: "다 먹은 그릇은 싱크대에 갖다 놔." },
+        ],
+      },
+      {
+        id: "pt-study", emoji: "📚", title: "숙제 · 공부",
+        phrases: [
+          { en: "Did you finish your homework?", ko: "숙제 다 했어?" },
+          { en: "Let's do it together.", ko: "같이 해 보자." },
+          { en: "Take your time.", ko: "천천히 해도 돼.", tip: "서두르지 말라는 다정한 말이에요." },
+          { en: "Read it out loud.", ko: "소리 내서 읽어 봐." },
+          { en: "What does this word mean?", ko: "이 단어 무슨 뜻이야?" },
+          { en: "Let's take a short break.", ko: "잠깐 쉬자." },
+          { en: "Show me what you learned today.", ko: "오늘 배운 거 보여 줘." },
+        ],
+      },
+      {
+        id: "pt-praise", emoji: "👏", title: "칭찬 · 격려",
+        phrases: [
+          { en: "Good job!", ko: "잘했어!" },
+          { en: "I'm so proud of you.", ko: "네가 정말 자랑스러워.", tip: "결과보다 노력을 칭찬할 때 가장 많이 써요." },
+          { en: "You worked really hard.", ko: "정말 열심히 했구나." },
+          { en: "Nice try! You can do it next time.", ko: "잘했어! 다음엔 할 수 있어." },
+          { en: "Don't give up.", ko: "포기하지 마." },
+          { en: "It's okay to make mistakes.", ko: "실수해도 괜찮아." },
+          { en: "You did it all by yourself!", ko: "혼자 다 해냈구나!", tip: "by yourself = 혼자서, 스스로." },
+        ],
+      },
+      {
+        id: "pt-play", emoji: "🧸", title: "놀이 · 외출",
+        phrases: [
+          { en: "Let's play a game.", ko: "게임하자." },
+          { en: "It's your turn.", ko: "네 차례야." },
+          { en: "Please share with your sister.", ko: "동생이랑 나눠 쓰렴.", tip: "남동생이면 brother, 누나 · 언니도 sister예요." },
+          { en: "Put on your shoes. We're going out.", ko: "신발 신어. 나갈 거야." },
+          { en: "Hold my hand.", ko: "엄마(아빠) 손 잡아." },
+          { en: "Stay close to me.", ko: "가까이 있어.", tip: "사람 많은 곳에서 쓰는 말이에요." },
+          { en: "Time to clean up your toys.", ko: "장난감 정리할 시간이야." },
+        ],
+      },
+      {
+        id: "pt-feelings", emoji: "🫶", title: "마음 읽기 · 달래기",
+        phrases: [
+          { en: "What's wrong?", ko: "무슨 일이야?" },
+          { en: "Are you okay?", ko: "괜찮아?" },
+          { en: "Use your words.", ko: "말로 해 보렴.", tip: "울거나 떼쓸 때, 말로 표현해 보라는 뜻이에요." },
+          { en: "Take a deep breath.", ko: "숨 크게 쉬어 보자." },
+          { en: "I understand how you feel.", ko: "네 마음 알아." },
+          { en: "Say sorry to your brother.", ko: "형(동생)한테 미안하다고 해." },
+          { en: "Come here. Let me give you a hug.", ko: "이리 와. 안아 줄게." },
+        ],
+      },
+      {
+        id: "pt-bedtime", emoji: "🌙", title: "씻기 · 잠자기",
+        phrases: [
+          { en: "Time for a bath.", ko: "목욕할 시간이야." },
+          { en: "Brush your teeth.", ko: "이 닦아." },
+          { en: "Put on your pajamas.", ko: "잠옷 입어." },
+          { en: "Which book do you want to read?", ko: "어떤 책 읽고 싶어?" },
+          { en: "Lights out!", ko: "불 끈다!" },
+          { en: "Sleep tight.", ko: "푹 자.", tip: "Good night, sleep tight! 처럼 붙여서 많이 써요." },
+          { en: "Sweet dreams. I love you.", ko: "좋은 꿈 꿔. 사랑해." },
+        ],
+      },
+      {
+        id: "pt-chores", emoji: "🧹", title: "집안일 · 약속",
+        phrases: [
+          { en: "Can you help me set the table?", ko: "식탁 차리는 거 도와줄래?", tip: "set the table = 수저 · 그릇을 놓아 식탁을 차리다." },
+          { en: "Hang up your coat.", ko: "외투 걸어 둬." },
+          { en: "Turn off the TV, please.", ko: "TV 끄자." },
+          { en: "Five more minutes.", ko: "5분만 더야." },
+          { en: "That's the rule.", ko: "그게 규칙이야." },
+          { en: "Remember what we promised?", ko: "우리 약속한 거 기억나?" },
+          { en: "Thank you for helping.", ko: "도와줘서 고마워." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "konglish",
+    emoji: "🚫",
+    title: "콩글리시 바로잡기",
+    subtitle: "우리말처럼 굳어서 외국인은 못 알아듣는 말을 진짜 영어로",
+    quizLabel: "🚫 콩글리시 말고 진짜 영어는?",
+    sets: [
+      {
+        id: "kg-things", emoji: "📱", title: "물건",
+        phrases: [
+          { en: "cell phone", wrong: "handphone", ko: "핸드폰", tip: "미국은 cell phone, 영국은 mobile phone. 그냥 phone이라고도 해요." },
+          { en: "laptop", wrong: "notebook", ko: "노트북", tip: "notebook은 공책이에요." },
+          { en: "remote control", wrong: "rimocon", ko: "리모컨", tip: "줄여서 the remote라고 해요." },
+          { en: "mechanical pencil", wrong: "sharp", ko: "샤프", tip: "sharp는 '날카로운'이라는 뜻이에요." },
+          { en: "outlet", wrong: "consent", ko: "콘센트", tip: "영국에서는 socket. consent는 '동의'라는 뜻이에요." },
+          { en: "stapler", wrong: "hotchkiss", ko: "호치키스", tip: "호치키스는 옛 회사 이름에서 온 말이에요." },
+          { en: "marker", wrong: "magic", ko: "매직", tip: "유성 매직은 permanent marker." },
+          { en: "ballpoint pen", wrong: "ball pen", ko: "볼펜", tip: "그냥 pen이라고 하면 보통 볼펜이에요." },
+        ],
+      },
+      {
+        id: "kg-life", emoji: "🏠", title: "생활 · 장소",
+        phrases: [
+          { en: "studio apartment", wrong: "one-room", ko: "원룸" },
+          { en: "apartment", wrong: "apart", ko: "아파트", tip: "apart는 '떨어져서'라는 뜻이에요." },
+          { en: "gas station", wrong: "oil bank", ko: "주유소", tip: "영국에서는 petrol station." },
+          { en: "window shopping", wrong: "eye shopping", ko: "아이쇼핑", tip: "I'm just window shopping. = 그냥 구경만 해요." },
+          { en: "part-time job", wrong: "arbeit", ko: "아르바이트", tip: "arbeit는 독일어예요." },
+          { en: "repair service", wrong: "after service", ko: "A/S(애프터서비스)", tip: "보증 수리는 warranty service, 고객 센터는 customer service." },
+          { en: "blind date", wrong: "meeting", ko: "미팅 · 소개팅", tip: "meeting은 회의예요." },
+          { en: "motorcycle", wrong: "auto bike", ko: "오토바이" },
+        ],
+      },
+      {
+        id: "kg-food", emoji: "🍔", title: "음식",
+        phrases: [
+          { en: "lemon-lime soda", wrong: "cider", ko: "사이다", tip: "영어 cider는 사과 주스나 사과술이에요. Sprite라고 해도 돼요." },
+          { en: "buffet", wrong: "viking", ko: "뷔페 · 바이킹", tip: "viking은 북유럽의 옛 해적이에요." },
+          { en: "whipped cream", wrong: "fresh cream", ko: "생크림" },
+          { en: "on the house", wrong: "service", ko: "서비스(공짜)", tip: "This is on the house. = 이건 서비스예요." },
+          { en: "creamer", wrong: "prim", ko: "프림" },
+          { en: "pub", wrong: "hof", ko: "호프집", tip: "hof는 독일어 '마당'에서 온 말이에요." },
+          { en: "pork cutlet", wrong: "donkatsu", ko: "돈가스" },
+          { en: "refill", wrong: "service refill", ko: "리필", tip: "Can I get a refill? = 리필 돼요?" },
+        ],
+      },
+      {
+        id: "kg-people", emoji: "👗", title: "사람 · 옷",
+        phrases: [
+          { en: "physical affection", wrong: "skinship", ko: "스킨십" },
+          { en: "sweatshirt", wrong: "man-to-man", ko: "맨투맨" },
+          { en: "puffer jacket", wrong: "padding", ko: "패딩", tip: "down jacket이라고도 해요." },
+          { en: "selfie", wrong: "self-camera", ko: "셀카" },
+          { en: "dress", wrong: "one-piece", ko: "원피스", tip: "one-piece는 수영복(원피스 수영복)으로 알아들어요." },
+          { en: "dress shirt", wrong: "Y-shirt", ko: "와이셔츠" },
+          { en: "tank top", wrong: "running shirt", ko: "런닝(셔츠)", tip: "속옷으로 입는 건 undershirt." },
+          { en: "backup dancer", wrong: "back dancer", ko: "백댄서" },
+        ],
+      },
+      {
+        id: "kg-car", emoji: "🚗", title: "자동차 · 운동 · 응원",
+        phrases: [
+          { en: "steering wheel", wrong: "handle", ko: "(자동차) 핸들" },
+          { en: "rearview mirror", wrong: "back mirror", ko: "백미러" },
+          { en: "convertible", wrong: "open car", ko: "오픈카" },
+          { en: "horn", wrong: "klaxon", ko: "클랙슨", tip: "경적을 울리다 = honk the horn." },
+          { en: "window tint", wrong: "sunting", ko: "썬팅" },
+          { en: "gym", wrong: "health", ko: "헬스장", tip: "운동하다는 work out. I work out at the gym." },
+          { en: "You can do it!", wrong: "Fighting!", ko: "파이팅!", tip: "Go for it! / Good luck! 도 응원할 때 써요." },
+          { en: "one more time", wrong: "one more", ko: "한 번 더 · 앵콜", tip: "공연 앙코르는 encore." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "linking",
+    emoji: "🗣️",
+    title: "연음 · 발음 연습",
+    subtitle: "원어민이 이어서 말할 때 실제로 들리는 소리",
+    quizLabel: "🗣️ 이 표현의 뜻에 맞는 것은?",
+    listenLabel: "🎧 잘 듣고, 들린 표현을 고르세요",
+    sets: [
+      {
+        id: "lk-gonna", emoji: "⏩", title: "gonna · wanna · gotta",
+        phrases: [
+          { en: "I'm going to call you.", sound: "암거나 콜 유", ko: "너한테 전화할게.", tip: "going to → gonna(거나)." },
+          { en: "I want to go home.", sound: "아이 워너 고 홈", ko: "집에 가고 싶어.", tip: "want to → wanna(워너)." },
+          { en: "I've got to go.", sound: "아이브 가러 고", ko: "나 가야 해.", tip: "got to → gotta(가러)." },
+          { en: "Do you want to come?", sound: "듀 워너 컴?", ko: "너도 올래?" },
+          { en: "Let me see.", sound: "레미 씨", ko: "어디 보자.", tip: "let me → lemme(레미)." },
+          { en: "I don't know.", sound: "아이 도노", ko: "모르겠어.", tip: "don't know → dunno(더노)처럼 들리기도 해요." },
+        ],
+      },
+      {
+        id: "lk-link", emoji: "🔗", title: "자음 + 모음 이어 말하기",
+        phrases: [
+          { en: "Check it out.", sound: "체끼라웃", ko: "한번 봐 봐.", tip: "앞 단어 끝 자음이 뒤 모음과 붙어요." },
+          { en: "Pick it up.", sound: "피끼럽", ko: "그거 주워." },
+          { en: "Come on in.", sound: "커머닌", ko: "어서 들어와." },
+          { en: "Not at all.", sound: "나래롤", ko: "천만에요." },
+          { en: "Turn it off.", sound: "터니러프", ko: "그거 꺼." },
+          { en: "Take it easy.", sound: "테이끼리지", ko: "진정해. / 잘 가." },
+        ],
+      },
+      {
+        id: "lk-flap", emoji: "🪶", title: "t가 ㄹ처럼 들려요",
+        phrases: [
+          { en: "water", sound: "워러", ko: "물", tip: "모음 사이 t는 부드러운 ㄹ처럼 소리 나요(미국식)." },
+          { en: "better", sound: "베러", ko: "더 나은" },
+          { en: "Get out of here.", sound: "게라우러히얼", ko: "말도 안 돼! / 나가!" },
+          { en: "What are you doing?", sound: "워라유 두잉?", ko: "뭐 해?" },
+          { en: "a lot of", sound: "얼라러브", ko: "많은" },
+          { en: "Shut up!", sound: "셔럽", ko: "닥쳐! / 말도 안 돼!", tip: "친한 사이에서 '진짜?' 하는 놀람으로도 써요." },
+        ],
+      },
+      {
+        id: "lk-you", emoji: "🤝", title: "~d you · ~t you",
+        phrases: [
+          { en: "Did you eat?", sound: "디쥬 잇?", ko: "밥 먹었어?", tip: "d + you → 쥬." },
+          { en: "Would you like some?", sound: "우쥴 라익 썸?", ko: "좀 드실래요?" },
+          { en: "Nice to meet you.", sound: "나이스 투 미츄", ko: "만나서 반가워요.", tip: "t + you → 츄." },
+          { en: "Could you help me?", sound: "쿠쥬 헬프 미?", ko: "좀 도와줄래요?" },
+          { en: "What do you mean?", sound: "워루유 민?", ko: "무슨 뜻이야?" },
+          { en: "I'll get you one.", sound: "아일 게츄 원", ko: "하나 갖다줄게." },
+        ],
+      },
+      {
+        id: "lk-drop", emoji: "🔇", title: "사라지는 소리",
+        phrases: [
+          { en: "next door", sound: "넥스 도어", ko: "옆집", tip: "같은 · 비슷한 자음이 겹치면 앞 소리가 거의 안 들려요." },
+          { en: "last night", sound: "래스 나잇", ko: "어젯밤", tip: "st 다음에 자음이 오면 t가 거의 안 들려요." },
+          { en: "Hold on a second.", sound: "홀더너 쎄컨", ko: "잠깐만요." },
+          { en: "I don't think so.", sound: "아이 돈 띵쏘", ko: "그렇지 않은 것 같아." },
+          { en: "Can I have one?", sound: "캐나이 해브 원?", ko: "하나 가져도 돼요?" },
+          { en: "Give me a break.", sound: "기미어 브레익", ko: "좀 봐줘. / 그만 좀 해." },
+        ],
+      },
+    ],
+  },
+];
+
+// ✍️ 하루 한 문장 영작: ko를 보고 영어로 쓰면 answers(모범 답안 여러 개)와 비교한다.
+const DAILY_WRITES = [
+  { ko: "나는 매일 아침 커피를 마셔요.", answers: ["I drink coffee every morning.", "I have coffee every morning."], hint: "drink / every morning" },
+  { ko: "오늘 날씨가 정말 좋네요.", answers: ["The weather is really nice today.", "It's a beautiful day today.", "The weather is great today."], hint: "weather / nice" },
+  { ko: "저는 주말에 보통 집에서 쉬어요.", answers: ["I usually rest at home on weekends.", "I usually relax at home on the weekend."], hint: "usually / rest(relax) / on weekends" },
+  { ko: "어제 친구와 영화를 봤어요.", answers: ["I watched a movie with my friend yesterday.", "I saw a movie with a friend yesterday."], hint: "watched / with my friend" },
+  { ko: "내일 회의는 몇 시에 시작해요?", answers: ["What time does tomorrow's meeting start?", "What time does the meeting start tomorrow?"], hint: "What time does ~ start?" },
+  { ko: "저는 영어를 더 잘하고 싶어요.", answers: ["I want to speak English better.", "I want to get better at English.", "I want to improve my English."], hint: "want to / better at" },
+  { ko: "길이 막혀서 늦었어요.", answers: ["I was late because of the traffic.", "I was late because there was heavy traffic.", "I'm late because of the traffic."], hint: "because of the traffic" },
+  { ko: "이거 얼마예요?", answers: ["How much is this?", "How much does this cost?"], hint: "How much" },
+  { ko: "아이들이 벌써 잠들었어요.", answers: ["The kids are already asleep.", "The kids have already fallen asleep.", "The children already fell asleep."], hint: "already / asleep" },
+  { ko: "저녁으로 뭐 먹고 싶어?", answers: ["What do you want for dinner?", "What do you want to eat for dinner?"], hint: "for dinner" },
+  { ko: "저는 서울에서 10년째 살고 있어요.", answers: ["I have lived in Seoul for ten years.", "I've been living in Seoul for ten years.", "I've lived in Seoul for 10 years."], hint: "have lived / for ten years" },
+  { ko: "시간 있을 때 전화 주세요.", answers: ["Please call me when you have time.", "Call me when you have time.", "Give me a call when you're free."], hint: "when you have time" },
+  { ko: "도와주셔서 정말 감사합니다.", answers: ["Thank you so much for your help.", "Thank you very much for helping me.", "Thanks a lot for your help."], hint: "Thank you for ~" },
+  { ko: "그건 좋은 생각인 것 같아요.", answers: ["I think that's a good idea.", "That sounds like a good idea."], hint: "I think / sounds like" },
+  { ko: "다음 주에 휴가를 갈 거예요.", answers: ["I'm going on vacation next week.", "I'm going to take a vacation next week.", "I will go on vacation next week."], hint: "go on vacation" },
+  { ko: "이 근처에 약국이 있나요?", answers: ["Is there a pharmacy near here?", "Is there a pharmacy around here?", "Is there a drugstore nearby?"], hint: "Is there ~ near here?" },
+  { ko: "저는 매운 음식을 잘 못 먹어요.", answers: ["I can't eat spicy food very well.", "I'm not good with spicy food.", "I can't handle spicy food."], hint: "spicy food" },
+  { ko: "숙제 끝나면 놀아도 돼.", answers: ["You can play after you finish your homework.", "You can play when you finish your homework.", "After you finish your homework, you can play."], hint: "after you finish" },
+  { ko: "요즘 운동을 시작했어요.", answers: ["I started working out recently.", "I've started exercising these days.", "I recently started exercising."], hint: "started working out / recently" },
+  { ko: "조금 더 천천히 말씀해 주시겠어요?", answers: ["Could you speak a little more slowly?", "Could you please speak more slowly?", "Can you speak a bit more slowly?"], hint: "Could you ~ more slowly?" },
+  { ko: "그 일은 내일까지 끝낼게요.", answers: ["I'll finish it by tomorrow.", "I will get it done by tomorrow.", "I'll have it done by tomorrow."], hint: "by tomorrow" },
+  { ko: "비가 올 것 같아요.", answers: ["It looks like it's going to rain.", "I think it's going to rain.", "It looks like rain."], hint: "It looks like ~" },
+  { ko: "저는 아직 그 책을 다 못 읽었어요.", answers: ["I haven't finished the book yet.", "I haven't finished reading that book yet."], hint: "haven't finished ~ yet" },
+  { ko: "어디서 만날까요?", answers: ["Where should we meet?", "Where shall we meet?"], hint: "Where should we ~?" },
+  { ko: "주문한 물건이 아직 안 왔어요.", answers: ["My order hasn't arrived yet.", "The item I ordered hasn't arrived yet."], hint: "hasn't arrived yet" },
+  { ko: "피곤해서 일찍 자려고요.", answers: ["I'm tired, so I'm going to bed early.", "I'm going to sleep early because I'm tired.", "I'm tired, so I'll go to bed early."], hint: "tired, so ~ / go to bed early" },
+  { ko: "이 문장은 무슨 뜻인가요?", answers: ["What does this sentence mean?"], hint: "What does ~ mean?" },
+  { ko: "우리 아이는 초등학교 4학년이에요.", answers: ["My child is in fourth grade.", "My kid is in the fourth grade.", "My son is in fourth grade.", "My daughter is in fourth grade."], hint: "in fourth grade" },
+  { ko: "생각보다 어렵네요.", answers: ["It's harder than I thought.", "It's more difficult than I expected."], hint: "harder than I thought" },
+  { ko: "다시 한번 확인해 볼게요.", answers: ["Let me check again.", "I'll double-check.", "I'll check it again."], hint: "Let me ~ / double-check" },
+  { ko: "창문 좀 열어도 될까요?", answers: ["Do you mind if I open the window?", "Can I open the window?", "May I open the window?"], hint: "Do you mind if ~?" },
+  { ko: "저는 그 영화를 두 번 봤어요.", answers: ["I've seen that movie twice.", "I have watched that movie twice.", "I saw that movie twice."], hint: "twice" },
+  { ko: "휴대폰 배터리가 거의 다 됐어요.", answers: ["My phone is almost dead.", "My phone battery is almost dead.", "My phone is running out of battery."], hint: "almost dead / running out of" },
+  { ko: "그 가게는 몇 시에 문을 닫아요?", answers: ["What time does the store close?", "When does that store close?"], hint: "What time does ~ close?" },
+  { ko: "오늘은 제가 살게요.", answers: ["It's on me today.", "I'll pay today.", "Today is on me.", "Let me get this today."], hint: "It's on me." },
+  { ko: "어렸을 때 피아노를 배웠어요.", answers: ["I learned the piano when I was young.", "I learned to play the piano when I was a kid.", "I took piano lessons when I was little."], hint: "when I was young" },
+  { ko: "아이랑 공원에 산책하러 갔어요.", answers: ["I went for a walk in the park with my child.", "I took a walk in the park with my kid.", "I went to the park for a walk with my child."], hint: "went for a walk" },
+  { ko: "그 소식을 듣고 깜짝 놀랐어요.", answers: ["I was surprised to hear the news.", "I was shocked when I heard the news."], hint: "surprised to hear" },
+  { ko: "마감이 언제예요?", answers: ["When is the deadline?", "When's the deadline?"], hint: "deadline" },
+  { ko: "새해에는 매일 영어 공부를 할 거예요.", answers: ["I'm going to study English every day in the new year.", "I will study English every day next year.", "In the new year, I'll study English every day."], hint: "every day / in the new year" },
+];
+
+// ✈️ 여행 롤플레이 더하기 (실전 연습 > 롤플레이에 함께 나온다)
+ROLEPLAYS.push(
+  {
+    id: "rp-immigration",
+    emoji: "🛂",
+    title: "공항 입국 심사",
+    setting: "미국 공항에 도착해 입국 심사대 앞에 섰어요.",
+    turns: [
+      { them: "Good afternoon. May I see your passport, please?", ko: "안녕하세요. 여권 좀 보여 주시겠어요?", choices: ["Sure, here you are.", "Yes, you may see.", "I don't have time."], answer: 0, why: "물건을 건넬 때는 Here you are. / Here it is.라고 해요." },
+      { them: "What's the purpose of your visit?", ko: "방문 목적이 뭔가요?", choices: ["I'm here on vacation with my family.", "My purpose is good.", "I visit purpose."], answer: 0, why: "목적은 I'm here on vacation / for business / to visit family.로 말해요." },
+      { them: "How long will you be staying?", ko: "얼마나 머무르실 건가요?", choices: ["For about ten days.", "Since ten days.", "I'm staying long."], answer: 0, why: "기간은 For + 기간으로 말해요." },
+      { them: "Where will you be staying?", ko: "어디에서 묵으세요?", choices: ["At the Hilton hotel downtown.", "I will stay well.", "In America, of course."], answer: 0, why: "숙소 이름을 At ~으로 정확히 말해요." },
+      { them: "Alright. Enjoy your stay.", ko: "좋습니다. 즐거운 여행 되세요.", choices: ["Thank you. Have a nice day.", "You too, enjoy your stay.", "Okay, bye bye."], answer: 0, why: "Thank you로 마무리하면 자연스러워요." },
+    ],
+  },
+  {
+    id: "rp-checkin",
+    emoji: "🧳",
+    title: "공항 탑승 수속",
+    setting: "항공사 카운터에서 짐을 부치고 좌석을 정해요.",
+    turns: [
+      { them: "Hello. Where are you flying to today?", ko: "안녕하세요. 오늘 어디로 가시나요?", choices: ["To Los Angeles. Here's my passport.", "I'm flying very high.", "Today is good."], answer: 0, why: "목적지를 To ~로 말하고 여권을 같이 건네요." },
+      { them: "How many bags are you checking in?", ko: "부칠 짐이 몇 개인가요?", choices: ["Just two bags.", "My bag is heavy.", "I check in everything."], answer: 0, why: "check in a bag = 짐을 부치다. 개수로 대답해요." },
+      { them: "Would you like a window or an aisle seat?", ko: "창가 자리와 통로 자리 중 어느 쪽이 좋으세요?", choices: ["An aisle seat, please.", "Yes, I'd like.", "A seat is fine."], answer: 0, why: "A or B 질문은 하나를 골라요. 통로 = aisle(아일)." },
+      { them: "Alright. Is there anything else I can help you with?", ko: "알겠습니다. 더 도와드릴 일이 있을까요?", choices: ["Could we sit together? I'm traveling with my kids.", "We are together family.", "Give us together seats."], answer: 0, why: "아이와 함께라면 Could we sit together?로 정중하게 부탁해요." },
+      { them: "Here's your boarding pass. Boarding starts at gate 23 at 10:30.", ko: "탑승권입니다. 23번 게이트에서 10시 30분에 탑승 시작해요.", choices: ["Thank you. Which way is gate 23?", "Thank you, I'm boarding pass.", "Gate is 10:30?"], answer: 0, why: "감사 인사와 함께 길을 물어보면 좋아요." },
+    ],
+  },
+  {
+    id: "rp-hotelcheckin",
+    emoji: "🛎️",
+    title: "호텔 체크인",
+    setting: "예약한 호텔 프런트에 도착했어요.",
+    turns: [
+      { them: "Welcome! Checking in?", ko: "어서 오세요! 체크인하시나요?", choices: ["Yes, I have a reservation under Kim.", "Yes, I'm checking.", "I'm in."], answer: 0, why: "예약자 이름은 a reservation under + 이름." },
+      { them: "Let me see... Two nights, a double room. Is that right?", ko: "보자... 2박, 더블룸이네요. 맞으세요?", choices: ["That's right.", "Yes, it is right room.", "Two nights is right?"], answer: 0, why: "확인에는 That's right. / Yes, that's correct." },
+      { them: "You're all set. Do you have any questions?", ko: "다 됐습니다. 궁금한 거 있으세요?", choices: ["What time is breakfast served?", "When eat breakfast?", "Breakfast time please."], answer: 0, why: "아침 식사 시간은 What time is breakfast (served)?" },
+      { them: "From 7 to 10 on the second floor. Here's your key card.", ko: "2층에서 7시부터 10시까지예요. 카드 키 여기 있어요.", choices: ["Thanks. What's the Wi-Fi password?", "You're welcome.", "Second floor is key?"], answer: 0, why: "와이파이 비밀번호는 What's the Wi-Fi password?" },
+      { them: "It's on the card. Enjoy your stay!", ko: "카드에 적혀 있어요. 편히 쉬세요!", choices: ["Thank you very much.", "Enjoy your stay too.", "Okay, I'm staying."], answer: 0, why: "간단히 감사 인사로 마무리해요." },
+    ],
+  },
+  {
+    id: "rp-order",
+    emoji: "🍝",
+    title: "식당에서 주문하기",
+    setting: "여행지 식당에 가족과 들어왔어요.",
+    turns: [
+      { them: "Hi, how many in your party?", ko: "안녕하세요, 몇 분이세요?", choices: ["A table for four, please.", "We are party.", "Four people is many."], answer: 0, why: "인원은 A table for + 숫자, please." },
+      { them: "Are you ready to order?", ko: "주문하시겠어요?", choices: ["Could we have a few more minutes?", "No, I'm not ready to order you.", "Yes, ready."], answer: 0, why: "아직이면 Could we have a few more minutes?" },
+      { them: "What can I get for you?", ko: "뭘 드릴까요?", choices: ["I'll have the pasta, and a kids' meal for my son.", "I want eat pasta.", "Give pasta."], answer: 0, why: "주문은 I'll have ~ 가 가장 자연스러워요." },
+      { them: "How is everything?", ko: "음식은 괜찮으세요?", choices: ["Everything is great, thanks.", "Everything is everything.", "I'm eating."], answer: 0, why: "식사 중 확인에는 짧게 It's great, thanks." },
+      { them: "Can I get you anything else?", ko: "더 필요한 거 있으세요?", choices: ["Just the check, please.", "Check me, please.", "No more anything."], answer: 0, why: "계산서는 the check(미국) / the bill(영국)." },
+    ],
+  },
+  {
+    id: "rp-directions",
+    emoji: "🗺️",
+    title: "길 묻기",
+    setting: "지하철역을 찾다가 지나가는 사람에게 물어봐요.",
+    turns: [
+      { them: "Hi, can I help you? You look lost.", ko: "안녕하세요, 도와드릴까요? 길을 잃으신 것 같아서요.", choices: ["Yes, please. How do I get to the subway station?", "Yes, I'm lost person.", "Where am I going?"], answer: 0, why: "길을 물을 때 How do I get to ~?" },
+      { them: "Go straight two blocks and turn left at the bank.", ko: "두 블록 직진해서 은행에서 왼쪽으로 도세요.", choices: ["Turn left at the bank. Got it.", "Turn bank left?", "Straight is two?"], answer: 0, why: "들은 걸 다시 말하며 확인하면 실수가 줄어요." },
+      { them: "It's right across from the post office.", ko: "우체국 바로 맞은편이에요.", choices: ["Is it within walking distance?", "Across is where?", "Post office is closed?"], answer: 0, why: "within walking distance = 걸어갈 만한 거리." },
+      { them: "Yes, it's about a five-minute walk.", ko: "네, 걸어서 5분쯤이에요.", choices: ["Great. Thank you so much!", "Five minutes walk me.", "You're welcome."], answer: 0, why: "도움을 받았으니 Thank you so much!" },
+    ],
+  },
+  {
+    id: "rp-shopping",
+    emoji: "👕",
+    title: "옷 가게에서",
+    setting: "여행 중 옷 가게에 들어갔어요.",
+    turns: [
+      { them: "Hi! Are you looking for anything special?", ko: "안녕하세요! 특별히 찾으시는 거 있으세요?", choices: ["I'm just looking, thanks.", "I'm looking special.", "No, I'm not anything."], answer: 0, why: "구경만 할 때 I'm just looking, thanks." },
+      { them: "Let me know if you need any help.", ko: "필요하면 말씀하세요.", choices: ["Actually, do you have this in a medium?", "I don't need you.", "Help is fine."], answer: 0, why: "사이즈는 Do you have this in a medium / size 8?" },
+      { them: "Here you go. Would you like to try it on?", ko: "여기 있어요. 입어 보시겠어요?", choices: ["Yes, where is the fitting room?", "Yes, try on me.", "No, I like it on."], answer: 0, why: "탈의실 = fitting room." },
+      { them: "How does it fit?", ko: "잘 맞으세요?", choices: ["It's a little tight. Do you have a larger size?", "It fits me a lot.", "It's fitting."], answer: 0, why: "작으면 a little tight, 크면 a little loose." },
+      { them: "Here's a large. That will be 35 dollars.", ko: "라지 여기 있어요. 35달러입니다.", choices: ["I'll take it. Can I pay by card?", "Large is 35?", "Too expensive, bye."], answer: 0, why: "살 때는 I'll take it." },
+    ],
+  },
+  {
+    id: "rp-pharmacy",
+    emoji: "💊",
+    title: "약국에서",
+    setting: "여행 중 아이가 열이 나서 약국에 왔어요.",
+    turns: [
+      { them: "Hi, what can I do for you?", ko: "안녕하세요, 무엇을 도와드릴까요?", choices: ["My son has a fever. Do you have any medicine for kids?", "My son is hot.", "Give me fever."], answer: 0, why: "증상: have a fever(열), have a cold(감기), have a stomachache(배탈)." },
+      { them: "How old is he?", ko: "아이가 몇 살이에요?", choices: ["He's eight years old.", "He's eight old.", "He is age eight years."], answer: 0, why: "나이는 He's ~ years old." },
+      { them: "This one is for children. Give it every six hours.", ko: "이건 어린이용이에요. 6시간마다 먹이세요.", choices: ["Should he take it after meals?", "Six hours is long.", "Every is fine."], answer: 0, why: "복용법을 확인할 때 Should he take it after meals?" },
+      { them: "It's fine either way. If the fever doesn't go down, see a doctor.", ko: "아무 때나 괜찮아요. 열이 안 내리면 병원에 가세요.", choices: ["I will. Thank you for your help.", "Doctor is down.", "Either way is either."], answer: 0, why: "조언에는 I will. Thank you.로 답해요." },
+    ],
+  }
+);
+
+;
+
 /* ── js/state.js ── */
 function createStore(initialState) {
   let state = initialState;
@@ -21820,7 +22419,7 @@ function normalizeProfile(profile) {
   p.care = { day: typeof p.care.day === "string" ? p.care.day : "", pets: Number(p.care.pets) || 0, snacks: Number(p.care.snacks) || 0, bond: Math.max(0, Math.floor(Number(p.care.bond) || 0)) };
   if (p.petKind !== undefined && !(typeof p.petKind === "string" && /^[a-z]{2,10}$/.test(p.petKind))) delete p.petKind;
   if (p.diag && !(typeof p.diag === "object" && levelById(p.diag.levelId) && /^\d{4}-\d{2}-\d{2}$/.test(p.diag.date))) delete p.diag;
-  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster", "wordrain", "xmas", "pairs", "chant", "culture", "drawgame", "school", "house", "biz"]) {
+  for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster", "wordrain", "xmas", "pairs", "chant", "culture", "drawgame", "school", "house", "biz", "fishing", "coloring", "basket", "balloon", "parentTalk", "konglish", "linking", "dailyWrite"]) {
     p[section] ||= { best: {}, wrong: {} };
     p[section].best ||= {};
     p[section].wrong ||= {};
@@ -22568,6 +23167,12 @@ const BADGES = [
   { id: "wordSearch", emoji: "🔍", title: "숨은 단어 탐험가", desc: "단어 찾기 퍼즐 완성하기", test: (p) => Object.keys(p.wordsearch.best).length >= 1 },
   { id: "wordGuess", emoji: "🕵️", title: "명탐정", desc: "단어 추리 5개 모두 맞히기", test: (p) => perfectCount(p.wordguess.best) >= 1 },
   { id: "riddle", emoji: "❓", title: "수수께끼 박사", desc: "영어 수수께끼 만점", test: (p) => perfectCount(p.riddle.best) >= 1 },
+  { id: "fishing", emoji: "🎣", title: "낚시왕", desc: "단어 낚시 10마리 한 번에 다 낚기", test: (p) => perfectCount(p.fishing.best) >= 1 },
+  { id: "coloring", emoji: "🖍️", title: "꼬마 색칠가", desc: "영어 색칠 놀이 그림 3장 모두 완성", test: (p) => Object.keys(p.coloring.best).length >= 3 },
+  { id: "basket", emoji: "🧺", title: "과일 가게 사장님", desc: "과일 바구니 8문제 모두 한 번에 맞히기", test: (p) => perfectCount(p.basket.best) >= 1 },
+  { id: "balloon", emoji: "🎈", title: "풍선 팡팡", desc: "알파벳 풍선 8단어 하나도 안 틀리기", test: (p) => perfectCount(p.balloon.best) >= 1 },
+  { id: "konglish", emoji: "🚫", title: "콩글리시 탈출", desc: "콩글리시 섞기 퀴즈 80점 이상", test: (p) => { const b = p.konglish.best.mix; return !!b && b.correct / b.total >= 0.8; } },
+  { id: "dailyWrite", emoji: "🖊️", title: "꾸준한 영작가", desc: "하루 한 문장 영작 10문장 쓰기", test: (p) => Object.keys(p.dailyWrite.best).length >= 10 },
   { id: "bizMeeting", emoji: "💼", title: "회의 달인", desc: "회의 표현 섞기 퀴즈 80점 이상", test: (p) => { const b = p.biz.best["mix-meeting"]; return !!b && b.correct / b.total >= 0.8; } },
   { id: "town", emoji: "🏘️", title: "우리 동네 박사", desc: "우리 동네 장소 6곳에서 별 2개 이상", test: (p) => HOUSE_ROOMS.filter((r) => r.group === "town").every((r) => ["listen", "look"].some((m) => { const b = p.house.best[`${r.id}:${m}`]; return b && b.correct / b.total >= 0.8; })) },
   { id: "house", emoji: "🏠", title: "우리 집 박사", desc: "우리 집 물건 방 7곳에서 별 2개 이상", test: (p) => HOUSE_ROOMS.filter((r) => r.group === "home").every((r) => ["listen", "look"].some((m) => { const b = p.house.best[`${r.id}:${m}`]; return b && b.correct / b.total >= 0.8; })) },
@@ -23985,6 +24590,10 @@ function renderHomeScreen(root, ctx) {
       <section class="group">
         <h2 class="group-title">🗣️ 말하기 · 듣기 · 쓰기</h2>
         <div class="tile-grid">
+          ${level === "adult" ? homeTile({ id: "parentTalkBtn", emoji: "👪", title: "아이와 쓰는 영어", meta: "아침부터 잠들 때까지" }) : ""}
+          ${show.advanced ? homeTile({ id: "dailyWriteBtn", emoji: "🖊️", title: "하루 한 문장 영작", meta: `${Object.keys(getProfileData(profileName).dailyWrite.best).length}문장 써 봤어요` }) : ""}
+          ${show.advanced ? homeTile({ id: "konglishBtn", emoji: "🚫", title: "콩글리시 바로잡기", meta: "핸드폰 → cell phone" }) : ""}
+          ${show.advanced ? homeTile({ id: "linkingBtn", emoji: "🗣️", title: "연음 · 발음", meta: "Check it out → 체끼라웃" }) : ""}
           ${show.advanced ? homeTile({ id: "bizBtn", emoji: "💼", title: "업무 영어 표현", meta: "회의 · 이메일 · 발표" }) : ""}
           ${show.practice ? homeTile({ id: "practiceBtn", emoji: "💼", title: "실전 연습", meta: "롤플레이 · 이메일" }) : ""}
           ${homeTile({ id: "speakingBtn", emoji: "🎙️", title: "따라 말하기", meta: `${sectionCount(profileName, "speaking", TALK_GROUPS)} / ${TALK_GROUPS.length} 묶음` })}
@@ -24000,6 +24609,10 @@ function renderHomeScreen(root, ctx) {
       <section class="group">
         <h2 class="group-title">✏️ 문제 풀기</h2>
         <div class="tile-grid">
+          ${isKid ? homeTile({ id: "fishingBtn", emoji: "🎣", title: "단어 낚시", meta: "물고기 단어 낚기" }) : ""}
+          ${isKid ? homeTile({ id: "coloringBtn", emoji: "🖍️", title: "영어 색칠 놀이", meta: "듣고 색칠하기" }) : ""}
+          ${isKid ? homeTile({ id: "basketBtn", emoji: "🧺", title: "과일 바구니", meta: "개수대로 담기" }) : ""}
+          ${isKid ? homeTile({ id: "balloonBtn", emoji: "🎈", title: "알파벳 풍선", meta: "글자 풍선 터뜨리기" }) : ""}
           ${homeTile({ id: "houseBtn", emoji: "🏠", title: "집 · 동네 물건", meta: "그림 보고 · 듣고 맞히기" })}
           ${isKid ? homeTile({ id: "pictureBtn", emoji: "🎧", title: "그림 퀴즈", meta: "듣고 · 보고 고르기" }) : ""}
           ${isKid ? homeTile({ id: "memoryBtn", emoji: "🃏", title: "짝 맞추기", meta: "카드 뒤집기 게임" }) : ""}
@@ -24090,6 +24703,14 @@ function renderHomeScreen(root, ctx) {
   bind("schoolBtn", actions.openSchool);
   bind("houseBtn", actions.openHouse);
   bind("bizBtn", actions.openBiz);
+  bind("parentTalkBtn", () => actions.openPbook("parentTalk"));
+  bind("konglishBtn", () => actions.openPbook("konglish"));
+  bind("linkingBtn", () => actions.openPbook("linking"));
+  bind("dailyWriteBtn", actions.openDailyWrite);
+  bind("fishingBtn", actions.openFishing);
+  bind("coloringBtn", actions.openColoring);
+  bind("basketBtn", actions.openBasket);
+  bind("balloonBtn", actions.openBalloon);
   bind("vacationBtn", actions.openVacation);
   bind("vacationCardBtn", actions.openVacation);
   bind("chantBtn", actions.openChants);
@@ -24768,7 +25389,7 @@ function renderMcDetailPhase(root, ctx) {
       </div>
 
       <div class="explain-card">
-        <p class="${question.bigEmoji ? "question-emoji" : "grammar-question"}">${question.speakText ? `${question.correctAnswer} <b>${question.speakText}</b>` : question.big ? question.q : withBlank(question.q, question.correctAnswer)}</p>
+        <p class="${question.bigEmoji ? "question-emoji" : "grammar-question"}">${question.speakText && question.speakText !== question.correctAnswer ? `${question.correctAnswer} <b>${question.speakText}</b>` : question.speakText ? `<b>${question.correctAnswer}</b>` : question.big ? question.q : withBlank(question.q, question.correctAnswer)}</p>
         ${question.ko ? `<p class="grammar-question-ko">${question.ko}</p>` : ""}
         ${!isCorrect ? `<p class="explain-mine">내가 고른 답: <b>${question.selectedAnswer}</b></p>` : ""}
         <div class="explain-body">
@@ -31630,6 +32251,14 @@ const HOME_TILE_ALIASES = {
   diagBtn: "test 진단 레벨",
   schoolBtn: "school 교과서 학교 교과",
   vacationBtn: "vacation 방학 계획",
+  parentTalkBtn: "parent child kids 아이 육아 엄마 아빠 부모 집에서",
+  konglishBtn: "konglish 콩글리시 틀린 영어 핸드폰",
+  linkingBtn: "linking pronunciation 연음 발음 gonna wanna",
+  dailyWriteBtn: "daily writing 영작 하루 한 문장 쓰기",
+  fishingBtn: "fishing fish 낚시 물고기",
+  coloringBtn: "coloring color 색칠 색깔 그림",
+  basketBtn: "fruit basket 과일 바구니 숫자 세기",
+  balloonBtn: "balloon alphabet 풍선 알파벳 철자 글자",
   bizBtn: "business meeting 회의 업무 비즈니스 이메일 전화 발표 협상 직장",
   houseBtn: "house home town 집 가구 물건 생활 방 동네 학교 교실 마트 놀이터 공원 병원 길 바다 캠핑",
 };
@@ -32227,6 +32856,860 @@ function buildBizQuestions(id) {
     };
   });
 }
+
+;
+
+/* ── js/screens/adultExtras.js ── */
+// 👨‍👩 부모님 표현책(아이와 쓰는 영어 · 콩글리시 바로잡기 · 연음 연습)과 ✍️ 하루 한 문장 영작
+const PBOOK_QUIZ_SIZE = 10;
+const pbook = (id) => PHRASE_BOOKS.find((b) => b.id === id);
+const pbookSet = (book, setId) => book && book.sets.find((s) => s.id === setId);
+PHRASE_BOOKS.forEach((b) => b.sets.forEach((s) => s.phrases.forEach((p, i) => (p.id = `${s.id}-${i + 1}`))));
+
+function pbookPhraseHtml(book, p, k) {
+  const head =
+    book.id === "konglish"
+      ? `<p><span class="kg-wrong">❌ ${p.wrong}</span> → <b>${p.en}</b><small>${p.ko}</small></p>`
+      : `<p><b>${p.en}</b>${p.sound ? `<span class="pb-sound">🔉 ${p.sound}</span>` : ""}<small>${p.ko}</small></p>`;
+  return `
+    <div class="biz-phrase" data-k="${k}">
+      <div class="culture-line"><button class="speak-btn" data-say="${k}" aria-label="듣기" ${speechSupported ? "" : "disabled"}>🔊</button>${head}${
+        book.id === "linking" ? `<button class="speak-btn" data-slow="${k}" aria-label="천천히 듣기" ${speechSupported ? "" : "disabled"}>🐢</button>` : ""
+      }</div>
+      ${p.tip ? `<p class="biz-tip">💡 ${p.tip}</p>` : ""}
+      ${book.id === "konglish" ? "" : recorderHtml("p:" + p.en)}
+    </div>`;
+}
+
+function renderPbookListScreen(root, { profileName, bookId, open, start, back }) {
+  const book = pbook(bookId);
+  const total = book.sets.reduce((n, s) => n + s.phrases.length, 0);
+  const card = (s) => {
+    const best = getSectionBest(profileName, book.id, s.id);
+    const first = s.phrases[0];
+    return `
+      <button class="level-card" data-set="${s.id}">
+        <span class="level-icon">${s.emoji}</span>
+        <span class="topic-text"><span class="level-label">${s.title}</span><span class="topic-summary">${book.id === "konglish" ? `${first.wrong} → ${first.en}` : first.en}</span></span>
+        <span class="level-best${best ? "" : " level-best-empty"}">${best ? ratioLabel(best) : `${s.phrases.length}개`}</span>
+      </button>`;
+  };
+  root.innerHTML = `
+    <div class="screen screen-biz">
+      <button class="back-btn" id="backBtn">← 홈</button>
+      <h1 class="title">${book.emoji} ${book.title}</h1>
+      <p class="subtitle">${book.subtitle} · ${total}개</p>
+      <div class="level-grid">${book.sets.map(card).join("")}</div>
+      <button class="secondary-btn" id="mixBtn">🎲 전체 섞어서 퀴즈 ${PBOOK_QUIZ_SIZE}문제</button>
+    </div>`;
+  root.querySelector("#backBtn").addEventListener("click", back);
+  root.querySelectorAll("[data-set]").forEach((b) => b.addEventListener("click", () => open(b.dataset.set)));
+  root.querySelector("#mixBtn").addEventListener("click", () => start("mix"));
+}
+
+function renderPbookSetScreen(root, { bookId, setId, actions }) {
+  const book = pbook(bookId);
+  const s = pbookSet(book, setId);
+  const next = book.sets[book.sets.indexOf(s) + 1];
+  root.innerHTML = `
+    <div class="screen screen-biz">
+      <button class="back-btn" id="backBtn">← ${book.title}</button>
+      <div class="lesson-head"><span class="lesson-emoji">${s.emoji}</span><h1 class="title">${s.title}</h1><p class="subtitle">${book.emoji} ${book.title}</p></div>
+      <button class="listen-btn" id="allBtn" ${speechSupported ? "" : "disabled"}>▶ 전체 듣기</button>
+      <div class="biz-list">${s.phrases.map((p, k) => pbookPhraseHtml(book, p, k)).join("")}</div>
+      <button class="primary-btn" id="quizBtn">✅ 이 묶음 퀴즈</button>
+      ${next ? `<button class="secondary-btn" id="nextBtn">다음: ${next.emoji} ${next.title} →</button>` : ""}
+    </div>`;
+  let token = 0;
+  const items = [...root.querySelectorAll(".biz-phrase")];
+  const leave = (fn) => () => {
+    token++;
+    stopSpeaking();
+    fn();
+  };
+  root.querySelector("#backBtn").addEventListener("click", leave(actions.back));
+  root.querySelectorAll("[data-say]").forEach((b) => b.addEventListener("click", () => speak(s.phrases[Number(b.dataset.say)].en, { rate: 0.9 })));
+  root.querySelectorAll("[data-slow]").forEach((b) => b.addEventListener("click", () => speak(s.phrases[Number(b.dataset.slow)].en, { rate: 0.55 })));
+  root.querySelector("#allBtn").addEventListener("click", async () => {
+    const my = ++token;
+    for (let k = 0; k < s.phrases.length; k++) {
+      if (my !== token || !items[k].isConnected) return;
+      items.forEach((el, j) => el.classList.toggle("now", j === k));
+      await speakAsync(s.phrases[k].en, { rate: 0.9 });
+    }
+    items.forEach((el) => el.classList.remove("now"));
+  });
+  root.querySelector("#quizBtn").addEventListener("click", leave(() => actions.quiz(setId)));
+  root.querySelector("#nextBtn")?.addEventListener("click", leave(() => actions.open(next.id)));
+  bindRecorders(root);
+}
+
+// 문제: 콩글리시는 우리말 → 진짜 영어(콩글리시가 오답 보기), 연음은 뜻 문제와 듣기 문제를 번갈아, 나머지는 뜻 → 영어
+function buildPbookQuestions(bookId, setId) {
+  const book = pbook(bookId);
+  const mix = setId === "mix";
+  const all = book.sets.flatMap((s) => s.phrases);
+  const mine = mix ? all : pbookSet(book, setId).phrases;
+  const pool = shuffle(mine).slice(0, mix ? PBOOK_QUIZ_SIZE : mine.length);
+  return pool.map((p, i) => {
+    const listen = book.id === "linking" && i % 2 === 1;
+    // 듣기 문제는 비슷한 소리끼리(같은 묶음) 헷갈리게, 나머지는 다른 묶음 표현으로
+    const near = listen ? mine.filter((x) => x !== p) : all.filter((x) => x !== p && !mine.includes(x));
+    const others = shuffle(near.length >= 3 ? near : all.filter((x) => x !== p)).slice(0, book.id === "konglish" ? 2 : 3).map((x) => x.en);
+    const choices = shuffle([p.en, ...(book.id === "konglish" ? [p.wrong] : []), ...others]);
+    const soundLine = p.sound ? ` <small>🔉 ${p.sound}</small>` : "";
+    return {
+      id: p.id,
+      kind: "pbook",
+      label: listen ? book.listenLabel : book.id === "konglish" ? `🚫 '${p.ko}' → 진짜 영어로는?` : book.quizLabel,
+      q: listen ? "🎧" : p.ko,
+      big: listen,
+      ko: null,
+      speakText: listen ? p.en : undefined,
+      choices,
+      correctAnswer: p.en,
+      explain: `${book.id === "konglish" ? `❌ ${p.wrong} → ✅ ` : ""}<b>${p.en}</b>${soundLine}<br>${p.ko}${p.tip ? `<br><small>💡 ${p.tip}</small>` : ""}`,
+      summary: `${p.en} <small>${p.ko}</small>`,
+      listenText: p.en,
+      selectedAnswer: null,
+    };
+  });
+}
+
+// ── ✍️ 하루 한 문장 영작 ──
+const DAY_MS = 86400000;
+const dailyWriteIndex = (offset = 0) => {
+  const [y, m, d] = dateKey().split("-").map(Number);
+  const day = Math.floor(Date.UTC(y, m - 1, d) / DAY_MS);
+  return (((day + offset) % DAILY_WRITES.length) + DAILY_WRITES.length) % DAILY_WRITES.length;
+};
+
+// 비교용으로 낱말을 고른다: 소문자, 줄임말 풀기, 문장부호 빼기
+function writeWords(text) {
+  return String(text)
+    .toLowerCase()
+    .replace(/[’‘]/g, "'")
+    .replace(/\bcan't\b/g, "can not")
+    .replace(/\bwon't\b/g, "will not")
+    .replace(/n't\b/g, " not")
+    .replace(/'m\b/g, " am")
+    .replace(/'re\b/g, " are")
+    .replace(/'s\b/g, " is")
+    .replace(/'ll\b/g, " will")
+    .replace(/'ve\b/g, " have")
+    .replace(/'d\b/g, " would")
+    .replace(/\bcannot\b/g, "can not")
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+// 두 낱말 목록의 가장 긴 공통 순서(LCS): 모범 답안에서 내가 쓴 낱말 위치를 표시한다
+function lcsMarks(mine, model) {
+  const n = mine.length;
+  const m = model.length;
+  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) dp[i][j] = mine[i] === model[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const hit = new Array(m).fill(false);
+  for (let i = 0, j = 0; i < n && j < m; ) {
+    if (mine[i] === model[j]) {
+      hit[j] = true;
+      i++;
+      j++;
+    } else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
+    else j++;
+  }
+  return { common: dp[0][0], hit };
+}
+
+function gradeDailyWrite(text, answers) {
+  const mine = writeWords(text);
+  const graded = answers.map((a) => {
+    const model = writeWords(a);
+    const { common, hit } = lcsMarks(mine, model);
+    return { a, model, hit, score: mine.length ? common / Math.max(mine.length, model.length) : 0 };
+  });
+  graded.sort((x, y) => y.score - x.score);
+  return graded;
+}
+
+function renderDailyWriteScreen(root, { profileName, offset, back, move }) {
+  const idx = dailyWriteIndex(offset);
+  const item = DAILY_WRITES[idx];
+  const written = Object.keys(getProfileData(profileName).dailyWrite.best).length;
+  const todayLabel = offset === 0 ? "오늘의 문장" : offset < 0 ? `${-offset}일 전 문장` : `${offset}일 뒤 문장`;
+  root.innerHTML = `
+    <div class="screen screen-dailywrite">
+      <button class="back-btn" id="backBtn">← 홈</button>
+      <h1 class="title">🖊️ 하루 한 문장 영작</h1>
+      <p class="subtitle">우리말을 보고 영어로 써 보세요 · 지금까지 ${written}문장</p>
+      <div class="dw-nav">
+        <button class="chip-btn" id="prevBtn" aria-label="이전 문장">◀</button>
+        <span>${todayLabel} · ${idx + 1} / ${DAILY_WRITES.length}</span>
+        <button class="chip-btn" id="nextBtn" aria-label="다음 문장">▶</button>
+      </div>
+      <section class="dw-card">
+        <p class="dw-ko">${item.ko}</p>
+        <button class="chip-btn" id="hintBtn">💡 힌트</button>
+        <p class="dw-hint" id="hint" hidden>${item.hint}</p>
+      </section>
+      <textarea class="dw-input" id="dwInput" rows="3" placeholder="여기에 영어로 써 보세요" autocomplete="off" autocapitalize="sentences" spellcheck="false"></textarea>
+      <button class="primary-btn" id="checkBtn">✅ 모범 답안과 비교하기</button>
+      <div id="dwResult"></div>
+    </div>`;
+  const input = root.querySelector("#dwInput");
+  root.querySelector("#backBtn").addEventListener("click", back);
+  root.querySelector("#prevBtn").addEventListener("click", () => move(offset - 1));
+  root.querySelector("#nextBtn").addEventListener("click", () => move(offset + 1));
+  root.querySelector("#hintBtn").addEventListener("click", () => (root.querySelector("#hint").hidden = false));
+  root.querySelector("#checkBtn").addEventListener("click", () => {
+    const text = input.value.trim();
+    if (writeWords(text).length < 2) {
+      showToast(`<span class="toast-emoji">✍️</span><span>영어 문장을 먼저 써 주세요</span>`);
+      input.focus();
+      return;
+    }
+    const graded = gradeDailyWrite(text, item.answers);
+    const best = graded[0];
+    const verdict = best.score >= 0.95 ? "🎉 완벽해요!" : best.score >= 0.7 ? "👍 거의 맞았어요!" : best.score >= 0.4 ? "💪 좋아요! 모범 답안과 비교해 봐요" : "📖 모범 답안을 보고 다시 써 봐요";
+    const marked = (g) => g.a.split(/\s+/).map((w, j) => (g.hit[j] === false && writeWords(w).length ? `<mark>${w}</mark>` : w)).join(" ");
+    root.querySelector("#dwResult").innerHTML = `
+      <div class="result-banner ${best.score >= 0.7 ? "correct" : "wrong"}" role="status">${verdict} <small>(${Math.round(best.score * 100)}% 일치)</small></div>
+      <ul class="dw-answers">
+        ${graded
+          .map((g, k) => `<li><button class="speak-btn" data-a="${k}" aria-label="듣기" ${speechSupported ? "" : "disabled"}>🔊</button><span>${k === 0 ? marked(g) : g.a}</span></li>`)
+          .join("")}
+      </ul>
+      <p class="dw-legend"><mark>노란 낱말</mark>은 내 문장에 없거나 다르게 쓴 부분이에요. 뜻이 같으면 다른 표현도 정답이에요!</p>`;
+    root.querySelectorAll("[data-a]").forEach((b) => b.addEventListener("click", () => speak(graded[Number(b.dataset.a)].a, { rate: 0.9 })));
+    recordCountUp(profileName, "dailyWrite", String(idx));
+    recordActivity(profileName);
+    if (best.score >= 0.95) burstConfetti(30);
+    announceBadges(checkNewBadges(profileName));
+  });
+}
+
+;
+
+/* ── js/screens/kidGames.js ── */
+// 🧒 쉬운 아이 게임: 🎣 단어 낚시 · 🖍️ 영어 색칠 놀이 · 🧺 과일 바구니 · 🎈 알파벳 풍선
+const kidLevelOf = (profileName) => (myLevelOf(profileName) === "elementary-low" ? "elementary-low" : "elementary-mid");
+
+function kidDoneHtml({ title, score, total, isNewBest, rows, extra = "" }) {
+  const perfect = score === total;
+  return `
+    <div class="screen screen-kidgame">
+      <h1 class="title">${title}</h1>
+      <div class="result-banner ${score / total >= 0.7 ? "correct" : "wrong"}" role="status">${perfect ? "🎉 하나도 안 틀렸어요!" : "잘했어요!"} · ${score} / ${total}${isNewBest ? " · 🏆 최고 기록!" : ""}</div>
+      ${extra}
+      ${rows ? `<ul class="pair-review">${rows}</ul>` : ""}
+      <div class="result-actions">
+        <button class="primary-btn" id="againBtn">🔁 다시 하기</button>
+        <button class="secondary-btn" id="homeBtn">🏠 홈으로</button>
+      </div>
+    </div>`;
+}
+
+function kidFinish(section, id, score, total) {
+  const isNewBest = recordSectionResult(currentProfile(), section, id, score, total);
+  if (score === total) burstConfetti(60);
+  announceBadges(checkNewBadges(currentProfile()));
+  return isNewBest;
+}
+
+// ── 🎣 단어 낚시: 소리를 듣거나 그림을 보고, 헤엄치는 물고기 중 맞는 단어를 낚아요 ──
+const FISH_ROUNDS = 10;
+const FISH_EMOJIS = ["🐟", "🐠", "🐡", "🦈"];
+const FISH_MODES = [
+  { id: "listen", emoji: "🎧", title: "듣고 낚기", desc: "소리를 듣고 그 단어가 적힌 물고기를 낚아요" },
+  { id: "look", emoji: "🖼️", title: "그림 보고 낚기", desc: "그림을 보고 맞는 영어 단어 물고기를 낚아요" },
+];
+
+function newFishGame(mode, levelId) {
+  const pool = pictureWordPool(levelId);
+  const rounds = shuffle(pool)
+    .slice(0, FISH_ROUNDS)
+    .map((w) => ({ w, missed: false, choices: shuffle([w, ...shuffle(pool.filter((x) => x.word !== w.word && !meaningsClash(x.meaningKo, w.meaningKo))).slice(0, 3)]) }));
+  return { mode, levelId, rounds, i: 0, score: 0, done: false, isNewBest: false };
+}
+
+function renderFishListScreen(root, { profileName, start, back }) {
+  root.innerHTML = `
+    <div class="screen screen-kidgame">
+      <button class="back-btn" id="backBtn">← 홈</button>
+      <h1 class="title">🎣 단어 낚시</h1>
+      <p class="subtitle">헤엄치는 물고기 중에서 맞는 단어를 톡! 한 번에 ${FISH_ROUNDS}마리</p>
+      <div class="level-grid">
+        ${FISH_MODES.map((m) => {
+          const best = getSectionBest(profileName, "fishing", m.id);
+          return `<button class="level-card" data-mode="${m.id}"><span class="level-icon">${m.emoji}</span><span class="topic-text"><span class="level-label">${m.title}</span><span class="topic-summary">${m.desc}</span></span><span class="level-best${best ? "" : " level-best-empty"}">${ratioLabel(best)}</span></button>`;
+        }).join("")}
+      </div>
+    </div>`;
+  root.querySelector("#backBtn").addEventListener("click", back);
+  root.querySelectorAll("[data-mode]").forEach((b) => b.addEventListener("click", () => start(b.dataset.mode)));
+}
+
+function renderFishScreen(root, { game, actions }) {
+  if (game.done) {
+    root.innerHTML = kidDoneHtml({
+      title: "🎣 단어 낚시 결과",
+      score: game.score,
+      total: game.rounds.length,
+      isNewBest: game.isNewBest,
+      rows: game.rounds.map((r) => `<li>${r.missed ? "🔁" : "✅"} ${r.w.emoji} <b>${r.w.word}</b> <small>${r.w.meaningKo}</small></li>`).join(""),
+    });
+    root.querySelector("#againBtn").addEventListener("click", actions.again);
+    root.querySelector("#homeBtn").addEventListener("click", actions.home);
+    return;
+  }
+  const r = game.rounds[game.i];
+  const say = () => speak(r.w.word, { rate: 0.85 });
+  root.innerHTML = `
+    <div class="screen screen-kidgame no-anim">
+      <div class="cw-top">
+        <button class="back-btn" id="quitBtn">× 그만하기</button>
+        <span class="cw-progress">${game.i + 1} / ${game.rounds.length} · 🐟 ${game.score}</span>
+      </div>
+      <div class="fish-prompt">
+        ${game.mode === "look" ? `<span class="fish-target">${r.w.emoji}</span>` : `<span class="fish-target">🎧</span>`}
+        <button class="listen-btn" id="sayBtn" ${speechSupported ? "" : "disabled"}>🔊 ${game.mode === "look" ? "소리 힌트" : "다시 듣기"}</button>
+      </div>
+      <p class="fish-status" id="fishStatus">${game.mode === "look" ? "그림에 맞는 단어 물고기를 낚아요!" : "들리는 단어 물고기를 낚아요!"}</p>
+      <div class="pond">
+        ${r.choices
+          .map((c, k) => {
+            const dur = 7 + Math.random() * 4;
+            return `<button class="fish${k % 2 ? " fish-rev" : ""}" data-k="${k}" style="top:${8 + k * 23}%;--dur:${dur.toFixed(1)}s;--delay:-${(Math.random() * dur).toFixed(1)}s"><span class="fish-emoji">${FISH_EMOJIS[k % FISH_EMOJIS.length]}</span><b>${c.word}</b></button>`;
+          })
+          .join("")}
+        <span class="pond-weed" aria-hidden="true">🌿</span><span class="pond-weed pond-weed2" aria-hidden="true">🪸</span>
+      </div>
+    </div>`;
+  root.querySelector("#quitBtn").addEventListener("click", actions.quit);
+  root.querySelector("#sayBtn").addEventListener("click", say);
+  if (game.mode === "listen") setTimeout(say, 300);
+  let locked = false;
+  root.querySelectorAll(".fish").forEach((b) =>
+    b.addEventListener("click", () => {
+      if (locked) return;
+      const c = r.choices[Number(b.dataset.k)];
+      if (c.word === r.w.word) {
+        locked = true;
+        b.classList.add("caught");
+        playSound("correct");
+        speak(r.w.word, { rate: 0.85 });
+        if (!r.missed) game.score += 1;
+        recordActivity(currentProfile());
+        root.querySelector("#fishStatus").innerHTML = `🎉 ${r.w.emoji} <b>${r.w.word}</b> = ${r.w.meaningKo}`;
+        setTimeout(() => actions.next(game), 1300);
+      } else {
+        r.missed = true;
+        b.disabled = true;
+        b.classList.add("escape");
+        playSound("wrong");
+        root.querySelector("#fishStatus").innerHTML = `앗, 그건 <b>${c.word}</b>(${c.meaningKo})! 다시 낚아 봐요`;
+      }
+    })
+  );
+}
+
+const fishActions = {
+  next: (game) => {
+    const s = store.getState();
+    if (s.screen !== "fishing" || s.fish !== game) return;
+    game.i += 1;
+    if (game.i >= game.rounds.length) {
+      game.done = true;
+      game.isNewBest = kidFinish("fishing", game.mode, game.score, game.rounds.length);
+    }
+    set({});
+  },
+  again: () => {
+    const { fish } = store.getState();
+    set({ fish: newFishGame(fish.mode, fish.levelId) });
+  },
+  home: () => goHome(),
+  quit: () => set({ screen: "fishingList" }),
+};
+
+// ── 🖍️ 영어 색칠 놀이: "Color the roof red." 를 듣고 맞는 곳에 맞는 색을 칠해요 ──
+const COLOR_WORDS = [
+  { en: "red", ko: "빨간색", hex: "#f03e3e" },
+  { en: "orange", ko: "주황색", hex: "#fd7e14" },
+  { en: "yellow", ko: "노란색", hex: "#fcc419" },
+  { en: "green", ko: "초록색", hex: "#40c057" },
+  { en: "blue", ko: "파란색", hex: "#339af0" },
+  { en: "purple", ko: "보라색", hex: "#845ef7" },
+  { en: "pink", ko: "분홍색", hex: "#f783ac" },
+  { en: "brown", ko: "갈색", hex: "#a0522d" },
+  { en: "black", ko: "검은색", hex: "#343a40" },
+  { en: "gray", ko: "회색", hex: "#adb5bd" },
+];
+const COLOR_STEPS = 8;
+
+// parts: [id(영어), 우리말, SVG 도형] — 앞에 있는 것이 뒤에 그려진다
+const COLOR_SCENES = [
+  {
+    id: "house",
+    emoji: "🏠",
+    title: "우리 집",
+    parts: [
+      ["sky", "하늘", `<rect x="0" y="0" width="300" height="250"/>`],
+      ["sun", "해", `<circle cx="250" cy="48" r="26"/>`],
+      ["cloud", "구름", `<path d="M40 70 a18 18 0 0 1 20 -24 a24 24 0 0 1 44 4 a16 16 0 0 1 10 30 h-68 a14 14 0 0 1 -6 -10 z"/>`],
+      ["grass", "잔디", `<rect x="0" y="250" width="300" height="50"/>`],
+      ["chimney", "굴뚝", `<rect x="158" y="92" width="20" height="45"/>`],
+      ["wall", "벽", `<rect x="60" y="150" width="130" height="100"/>`],
+      ["roof", "지붕", `<polygon points="45,152 125,86 205,152"/>`],
+      ["door", "문", `<rect x="110" y="195" width="30" height="55" rx="3"/>`],
+      ["windows", "창문", `<rect x="72" y="168" width="28" height="28"/><rect x="150" y="168" width="28" height="28"/>`],
+      ["trunk", "나무 기둥", `<rect x="236" y="180" width="16" height="72"/>`],
+      ["leaves", "나뭇잎", `<circle cx="244" cy="160" r="34"/>`],
+      ["flowers", "꽃", `<circle cx="22" cy="240" r="10"/><circle cx="44" cy="262" r="10"/>`],
+    ],
+  },
+  {
+    id: "sea",
+    emoji: "🌊",
+    title: "바다",
+    parts: [
+      ["sky", "하늘", `<rect x="0" y="0" width="300" height="160"/>`],
+      ["sun", "해", `<circle cx="60" cy="55" r="28"/>`],
+      ["sea", "바다", `<path d="M0 160 q25 -12 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 V250 H0 z"/>`],
+      ["sand", "모래", `<path d="M0 250 q75 -14 150 0 t150 0 V300 H0 z"/>`],
+      ["sail", "돛", `<polygon points="200,60 200,140 250,140"/>`],
+      ["boat", "배", `<polygon points="160,145 262,145 245,172 177,172"/>`],
+      ["fish", "물고기", `<ellipse cx="90" cy="210" rx="24" ry="13"/><polygon points="112,210 130,198 130,222"/>`],
+      ["starfish", "불가사리", `<polygon points="230,256 236,270 251,271 239,280 243,295 230,286 217,295 221,280 209,271 224,270"/>`],
+      ["shell", "조개", `<path d="M40 292 a22 22 0 0 1 44 0 z"/>`],
+    ],
+  },
+  {
+    id: "robot",
+    emoji: "🤖",
+    title: "로봇",
+    parts: [
+      ["antenna", "안테나", `<rect x="147" y="22" width="6" height="28"/><circle cx="150" cy="20" r="9"/>`],
+      ["head", "머리", `<rect x="100" y="48" width="100" height="76" rx="12"/>`],
+      ["eyes", "눈", `<circle cx="128" cy="80" r="11"/><circle cx="172" cy="80" r="11"/>`],
+      ["mouth", "입", `<rect x="128" y="102" width="44" height="10" rx="4"/>`],
+      ["arms", "팔", `<rect x="58" y="138" width="30" height="74" rx="10"/><rect x="212" y="138" width="30" height="74" rx="10"/>`],
+      ["hands", "손", `<circle cx="73" cy="222" r="14"/><circle cx="227" cy="222" r="14"/>`],
+      ["legs", "다리", `<rect x="112" y="232" width="26" height="40"/><rect x="162" y="232" width="26" height="40"/>`],
+      ["feet", "발", `<rect x="102" y="270" width="42" height="18" rx="6"/><rect x="156" y="270" width="42" height="18" rx="6"/>`],
+      ["body", "몸", `<rect x="90" y="132" width="120" height="104" rx="14"/>`],
+      ["heart", "하트", `<path d="M150 200 l-22 -22 a12 12 0 0 1 22 -14 a12 12 0 0 1 22 14 z"/>`],
+    ],
+  },
+];
+const colorScene = (id) => COLOR_SCENES.find((s) => s.id === id);
+const colorWord = (en) => COLOR_WORDS.find((c) => c.en === en);
+const colorSentence = (step) => `Color the ${step.part} ${step.color}.`;
+
+function newColoringGame(sceneId) {
+  const scene = colorScene(sceneId);
+  let prev = null;
+  const steps = shuffle(scene.parts)
+    .slice(0, COLOR_STEPS)
+    .map(([part]) => {
+      const color = shuffle(COLOR_WORDS.filter((c) => c.en !== prev))[0].en;
+      prev = color;
+      return { part, color, missed: false };
+    });
+  return { sceneId, steps, i: 0, fills: {}, pen: null, done: false, free: false, isNewBest: false, msg: "" };
+}
+
+function renderColoringListScreen(root, { profileName, start, back }) {
+  root.innerHTML = `
+    <div class="screen screen-kidgame">
+      <button class="back-btn" id="backBtn">← 홈</button>
+      <h1 class="title">🖍️ 영어 색칠 놀이</h1>
+      <p class="subtitle">"Color the roof red." 처럼 영어 말을 듣고, 맞는 곳에 맞는 색을 칠해요</p>
+      <div class="level-grid">
+        ${COLOR_SCENES.map((s) => {
+          const best = getSectionBest(profileName, "coloring", s.id);
+          return `<button class="level-card" data-scene="${s.id}"><span class="level-icon">${s.emoji}</span><span class="topic-text"><span class="level-label">${s.title}</span><span class="topic-summary">${s.parts.slice(0, 4).map((p) => p[0]).join(" · ")} …</span></span><span class="level-best${best ? "" : " level-best-empty"}">${ratioLabel(best)}</span></button>`;
+        }).join("")}
+      </div>
+      <section class="lesson-section"><p class="lesson-point-text">🎨 색 이름: ${COLOR_WORDS.map((c) => `<span class="cw-chip" style="--c:${c.hex}"></span>${c.en}`).join(" · ")}</p></section>
+    </div>`;
+  root.querySelector("#backBtn").addEventListener("click", back);
+  root.querySelectorAll("[data-scene]").forEach((b) => b.addEventListener("click", () => start(b.dataset.scene)));
+}
+
+function coloringSvg(scene, fills) {
+  return `<svg class="color-svg" viewBox="0 0 300 300" role="img" aria-label="${scene.title} 그림">${scene.parts
+    .map(([id, , shapes]) => `<g class="cpart" data-part="${id}" style="fill:${fills[id] || "#fff"}">${shapes}</g>`)
+    .join("")}</svg>`;
+}
+
+function renderColoringScreen(root, { game, actions }) {
+  const scene = colorScene(game.sceneId);
+  const partKo = (id) => scene.parts.find((p) => p[0] === id)[1];
+  const step = game.steps[game.i];
+  const firstTry = game.steps.filter((s) => !s.missed).length;
+  const palette = `<div class="draw-palette color-palette">${COLOR_WORDS.map((c) => `<button class="draw-color${game.pen === c.en ? " active" : ""}" data-pen="${c.en}" style="background:${c.hex}" aria-label="${c.en}"></button>`).join("")}</div>`;
+  if (game.done && !game.free) {
+    root.innerHTML = kidDoneHtml({
+      title: `🖍️ ${scene.title} 완성!`,
+      score: firstTry,
+      total: game.steps.length,
+      isNewBest: game.isNewBest,
+      extra: `<div class="color-board">${coloringSvg(scene, game.fills)}</div><button class="secondary-btn" id="freeBtn">🎨 나머지도 자유롭게 칠하기</button>`,
+      rows: game.steps.map((s) => `<li>${s.missed ? "🔁" : "✅"} ${colorSentence(s)} <small>${partKo(s.part)} → ${colorWord(s.color).ko}</small></li>`).join(""),
+    });
+    root.querySelector("#againBtn").addEventListener("click", actions.again);
+    root.querySelector("#homeBtn").addEventListener("click", actions.home);
+    root.querySelector("#freeBtn").addEventListener("click", actions.free);
+    return;
+  }
+  root.innerHTML = `
+    <div class="screen screen-kidgame no-anim">
+      <div class="cw-top">
+        <button class="back-btn" id="quitBtn">${game.free ? "← 결과로" : "× 그만하기"}</button>
+        <span class="cw-progress">${game.free ? "🎨 자유롭게 칠하기" : `${game.i + 1} / ${game.steps.length}`}</span>
+      </div>
+      ${
+        game.free
+          ? `<p class="color-order">색을 고르고 칠하고 싶은 곳을 톡!</p>`
+          : `<div class="color-order"><b>${colorSentence(step)}</b><button class="speak-btn" id="sayBtn" aria-label="듣기" ${speechSupported ? "" : "disabled"}>🔊</button></div>
+      <details class="color-help"><summary>뜻 보기</summary>${partKo(step.part)}을(를) ${colorWord(step.color).ko}으로 칠해요</details>`
+      }
+      ${palette}
+      <p class="fish-status" id="colorMsg">${game.msg || (game.pen ? `🖍️ ${game.pen}` : "먼저 색을 골라요")}</p>
+      <div class="color-board">${coloringSvg(scene, game.fills)}</div>
+    </div>`;
+  root.querySelector("#quitBtn").addEventListener("click", game.free ? actions.endFree : actions.quit);
+  const say = () => step && speak(colorSentence(step), { rate: 0.8 });
+  root.querySelector("#sayBtn")?.addEventListener("click", say);
+  if (!game.free && !step.spoken) {
+    step.spoken = true;
+    setTimeout(say, 300);
+  }
+  const msg = (html) => (root.querySelector("#colorMsg").innerHTML = html);
+  root.querySelectorAll("[data-pen]").forEach((b) =>
+    b.addEventListener("click", () => {
+      game.pen = b.dataset.pen;
+      game.msg = "";
+      root.querySelectorAll("[data-pen]").forEach((x) => x.classList.toggle("active", x === b));
+      msg(`🖍️ ${game.pen}`);
+      speak(game.pen, { rate: 0.85 });
+    })
+  );
+  root.querySelectorAll(".cpart").forEach((g) =>
+    g.addEventListener("click", () => {
+      const part = g.dataset.part;
+      if (!game.pen) return msg("🎨 먼저 위에서 색을 골라요!");
+      if (game.free) {
+        game.fills[part] = colorWord(game.pen).hex;
+        g.style.fill = game.fills[part];
+        msg(`${part} <small>${partKo(part)}</small> → ${game.pen}`);
+        return;
+      }
+      if (part !== step.part) {
+        step.missed = true;
+        playSound("wrong");
+        g.classList.remove("shake");
+        void g.getBBox();
+        g.classList.add("shake");
+        return msg(`📍 그곳은 <b>${part}</b>(${partKo(part)})! 다시 <b>${step.part}</b> 찾기`);
+      }
+      if (game.pen !== step.color) {
+        step.missed = true;
+        playSound("wrong");
+        return msg(`🎨 자리는 맞아요! 그런데 색이 달라요. <b>${step.color}</b> 색을 골라요`);
+      }
+      game.fills[part] = colorWord(step.color).hex;
+      playSound("correct");
+      recordActivity(currentProfile());
+      game.msg = `🎉 ${colorSentence(step)}`;
+      actions.next();
+    })
+  );
+}
+
+const coloringActions = {
+  next: () => {
+    const { coloring: game } = store.getState();
+    game.i += 1;
+    if (game.i >= game.steps.length) {
+      game.done = true;
+      game.isNewBest = kidFinish("coloring", game.sceneId, game.steps.filter((s) => !s.missed).length, game.steps.length);
+    }
+    set({});
+  },
+  again: () => set({ coloring: newColoringGame(store.getState().coloring.sceneId) }),
+  free: () => {
+    const { coloring: game } = store.getState();
+    game.free = true;
+    game.msg = "";
+    set({});
+  },
+  endFree: () => {
+    store.getState().coloring.free = false;
+    set({});
+  },
+  home: () => goHome(),
+  quit: () => set({ screen: "coloringList" }),
+};
+
+// ── 🧺 과일 바구니: "Put three apples in the basket." 을 듣고 과일을 개수대로 담아요 ──
+const BASKET_FRUITS = [
+  ["apple", "apples", "🍎", "사과"],
+  ["banana", "bananas", "🍌", "바나나"],
+  ["orange", "oranges", "🍊", "오렌지"],
+  ["strawberry", "strawberries", "🍓", "딸기"],
+  ["peach", "peaches", "🍑", "복숭아"],
+  ["lemon", "lemons", "🍋", "레몬"],
+  ["cherry", "cherries", "🍒", "체리"],
+  ["pear", "pears", "🍐", "배"],
+  ["tomato", "tomatoes", "🍅", "토마토"],
+  ["kiwi", "kiwis", "🥝", "키위"],
+  ["pineapple", "pineapples", "🍍", "파인애플"],
+  ["coconut", "coconuts", "🥥", "코코넛"],
+];
+const BASKET_NUMS = ["zero", "one", "two", "three", "four", "five", "six"];
+const BASKET_KO_NUMS = ["", "한", "두", "세", "네", "다섯", "여섯"];
+const BASKET_ROUNDS = 8;
+const basketFruit = (id) => BASKET_FRUITS.find((f) => f[0] === id);
+const basketPhrase = ({ fruit, n }) => {
+  const f = basketFruit(fruit);
+  return `${BASKET_NUMS[n]} ${n === 1 ? f[0] : f[1]}`;
+};
+const basketSentence = (r) => `Put ${r.want.map(basketPhrase).join(" and ")} in the basket.`;
+
+function newBasketGame() {
+  const rounds = Array.from({ length: BASKET_ROUNDS }, (_, i) => {
+    const two = i >= BASKET_ROUNDS / 2;
+    const fruits = shuffle(BASKET_FRUITS).slice(0, two ? 2 : 1);
+    const want = fruits.map((f) => ({ fruit: f[0], n: 1 + Math.floor(Math.random() * (two ? 4 : 6)) }));
+    const shelf = shuffle([...fruits, ...shuffle(BASKET_FRUITS.filter((f) => !fruits.includes(f))).slice(0, 6 - fruits.length)]).map((f) => f[0]);
+    return { want, shelf, tries: 0, ok: false };
+  });
+  return { rounds, i: 0, basket: [], score: 0, done: false, isNewBest: false, msg: "" };
+}
+
+function renderBasketScreen(root, { game, actions }) {
+  if (game.done) {
+    root.innerHTML = kidDoneHtml({
+      title: "🧺 과일 바구니 결과",
+      score: game.score,
+      total: game.rounds.length,
+      isNewBest: game.isNewBest,
+      rows: game.rounds.map((r) => `<li>${r.tries <= 1 ? "✅" : "🔁"} ${basketSentence(r)} <small>${r.want.map((w) => basketFruit(w.fruit)[2].repeat(w.n)).join(" ")}</small></li>`).join(""),
+    });
+    root.querySelector("#againBtn").addEventListener("click", actions.again);
+    root.querySelector("#homeBtn").addEventListener("click", actions.home);
+    return;
+  }
+  const r = game.rounds[game.i];
+  const sentence = basketSentence(r);
+  const say = () => speak(sentence, { rate: 0.8 });
+  root.innerHTML = `
+    <div class="screen screen-kidgame no-anim">
+      <div class="cw-top">
+        <button class="back-btn" id="quitBtn">× 그만하기</button>
+        <span class="cw-progress">${game.i + 1} / ${game.rounds.length} · ⭐ ${game.score}</span>
+      </div>
+      <div class="color-order"><b>${sentence}</b><button class="speak-btn" id="sayBtn" aria-label="듣기" ${speechSupported ? "" : "disabled"}>🔊</button></div>
+      ${r.tries >= 2 ? `<p class="color-help">💡 ${r.want.map((w) => `${basketFruit(w.fruit)[3]} ${BASKET_KO_NUMS[w.n]} 개`).join(", ")}를 담아요</p>` : ""}
+      <div class="fruit-shelf">${r.shelf.map((id) => `<button class="fruit-btn" data-add="${id}" aria-label="${id}"><span>${basketFruit(id)[2]}</span><small>${id}</small></button>`).join("")}</div>
+      <div class="basket" aria-label="바구니">
+        <div class="basket-items">${game.basket.length ? game.basket.map((id, k) => `<button class="basket-fruit" data-remove="${k}" aria-label="${id} 빼기">${basketFruit(id)[2]}</button>`).join("") : `<span class="basket-empty">과일을 눌러서 담아요</span>`}</div>
+        <div class="basket-body">🧺</div>
+      </div>
+      <p class="fish-status">${game.msg || "바구니 속 과일을 누르면 다시 빠져요"}</p>
+      <div class="result-actions">
+        <button class="primary-btn" id="checkBtn" ${game.basket.length ? "" : "disabled"}>✅ 다 담았어요</button>
+        <button class="secondary-btn" id="emptyBtn" ${game.basket.length ? "" : "disabled"}>🗑️ 비우기</button>
+      </div>
+    </div>`;
+  root.querySelector("#quitBtn").addEventListener("click", actions.quit);
+  root.querySelector("#sayBtn").addEventListener("click", say);
+  if (!r.spoken) {
+    r.spoken = true;
+    setTimeout(say, 300);
+  }
+  root.querySelectorAll("[data-add]").forEach((b) => b.addEventListener("click", () => actions.add(b.dataset.add)));
+  root.querySelectorAll("[data-remove]").forEach((b) => b.addEventListener("click", () => actions.remove(Number(b.dataset.remove))));
+  root.querySelector("#checkBtn").addEventListener("click", actions.check);
+  root.querySelector("#emptyBtn").addEventListener("click", actions.empty);
+}
+
+const basketActions = {
+  add: (id) => {
+    const { basket: game } = store.getState();
+    if (game.basket.length >= 12) return;
+    game.basket.push(id);
+    game.msg = `${basketFruit(id)[2]} ${id}`;
+    speak(id, { rate: 0.9 });
+    set({});
+  },
+  remove: (k) => {
+    const { basket: game } = store.getState();
+    game.basket.splice(k, 1);
+    game.msg = "";
+    set({});
+  },
+  empty: () => {
+    const { basket: game } = store.getState();
+    game.basket = [];
+    game.msg = "";
+    set({});
+  },
+  check: () => {
+    const { basket: game } = store.getState();
+    const r = game.rounds[game.i];
+    r.tries += 1;
+    const count = (id) => game.basket.filter((x) => x === id).length;
+    const ok = game.basket.length === r.want.reduce((n, w) => n + w.n, 0) && r.want.every((w) => count(w.fruit) === w.n);
+    if (!ok) {
+      playSound("wrong");
+      game.msg = r.tries >= 2 ? "🤔 위의 힌트를 보고 다시 담아 봐요" : "🤔 다시 세어 봐요! 🔊로 한 번 더 들어 볼까요?";
+      set({});
+      return;
+    }
+    playSound("correct");
+    recordActivity(currentProfile());
+    if (r.tries === 1) game.score += 1;
+    game.msg = `🎉 딩동댕! ${basketSentence(r)}`;
+    set({});
+    setTimeout(() => {
+      const s = store.getState();
+      if (s.screen !== "basket" || s.basket !== game) return;
+      game.i += 1;
+      game.basket = [];
+      game.msg = "";
+      if (game.i >= game.rounds.length) {
+        game.done = true;
+        game.isNewBest = kidFinish("basket", "all", game.score, game.rounds.length);
+      }
+      set({});
+    }, 1200);
+  },
+  again: () => set({ basket: newBasketGame() }),
+  home: () => goHome(),
+  quit: () => goHome(),
+};
+
+// ── 🎈 알파벳 풍선: 단어 글자를 순서대로 담은 풍선을 터뜨려요 ──
+const BALLOON_WORDS = 8;
+const BALLOON_COLORS = ["#ff6b6b", "#ffa94d", "#ffd43b", "#69db7c", "#4dabf7", "#9775fa", "#f783ac", "#3bc9db"];
+const BALLOON_LANES = 6;
+
+function newBalloonGame(levelId) {
+  const max = levelId === "elementary-low" ? 5 : 6;
+  const words = shuffle(pictureWordPool(levelId).filter((w) => new RegExp(`^[a-z]{3,${max}}$`).test(w.word))).slice(0, BALLOON_WORDS);
+  return { levelId, words: words.map((w) => ({ w, misses: 0 })), i: 0, done: false, isNewBest: false };
+}
+
+function renderBalloonScreen(root, { game, actions }) {
+  const perfect = game.words.filter((x) => x.misses === 0).length;
+  if (game.done) {
+    root.innerHTML = kidDoneHtml({
+      title: "🎈 알파벳 풍선 결과",
+      score: perfect,
+      total: game.words.length,
+      isNewBest: game.isNewBest,
+      rows: game.words.map((x) => `<li>${x.misses ? "🔁" : "✅"} ${x.w.emoji} <b>${x.w.word}</b> <small>${x.w.meaningKo}</small></li>`).join(""),
+    });
+    root.querySelector("#againBtn").addEventListener("click", actions.again);
+    root.querySelector("#homeBtn").addEventListener("click", actions.home);
+    return;
+  }
+  const cur = game.words[game.i];
+  const word = cur.w.word;
+  let filled = 0;
+  root.innerHTML = `
+    <div class="screen screen-kidgame no-anim">
+      <div class="cw-top">
+        <button class="back-btn" id="quitBtn">× 그만하기</button>
+        <span class="cw-progress">${game.i + 1} / ${game.words.length} · 🎈 ${game.words.slice(0, game.i).filter((x) => x.misses === 0).length}</span>
+      </div>
+      <div class="fish-prompt">
+        <span class="fish-target">${cur.w.emoji}</span>
+        <button class="listen-btn" id="sayBtn" ${speechSupported ? "" : "disabled"}>🔊 듣기</button>
+      </div>
+      <p class="fish-status" id="bStatus">${cur.w.meaningKo} · 글자 풍선을 순서대로 터뜨려요!</p>
+      <div class="b-slots">${[...word].map(() => `<span class="b-slot"></span>`).join("")}</div>
+      <div class="sky" id="sky"></div>
+    </div>`;
+  const sky = root.querySelector("#sky");
+  const slots = [...root.querySelectorAll(".b-slot")];
+  const status = root.querySelector("#bStatus");
+  const say = () => speak(word, { rate: 0.85 });
+  root.querySelector("#quitBtn").addEventListener("click", actions.quit);
+  root.querySelector("#sayBtn").addEventListener("click", say);
+  setTimeout(say, 300);
+  const usedLanes = () => [...sky.querySelectorAll(".balloon:not(.popped)")].map((b) => Number(b.dataset.lane));
+  const spawn = (letter, fresh) => {
+    const busy = usedLanes();
+    const free = [...Array(BALLOON_LANES).keys()].filter((l) => !busy.includes(l));
+    const lane = free.length ? free[Math.floor(Math.random() * free.length)] : Math.floor(Math.random() * BALLOON_LANES);
+    const dur = 8 + Math.random() * 3;
+    const b = document.createElement("button");
+    b.className = "balloon";
+    b.dataset.lane = lane;
+    b.dataset.letter = letter;
+    b.innerHTML = `<span class="b-in">${letter}</span>`;
+    b.setAttribute("aria-label", `풍선 ${letter}`);
+    b.style.cssText = `left:${2 + lane * (96 / BALLOON_LANES)}%;--bc:${BALLOON_COLORS[Math.floor(Math.random() * BALLOON_COLORS.length)]};--dur:${dur.toFixed(1)}s;--delay:-${(fresh ? dur * 0.12 : Math.random() * dur * 0.8).toFixed(1)}s`;
+    b.addEventListener("click", () => tap(b));
+    sky.appendChild(b);
+  };
+  const randomLetter = () => "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)];
+  const ensureNext = () => {
+    if (filled >= word.length) return;
+    const live = [...sky.querySelectorAll(".balloon:not(.popped)")];
+    if (!live.some((b) => b.dataset.letter === word[filled])) spawn(word[filled], true);
+    while (sky.querySelectorAll(".balloon:not(.popped)").length < BALLOON_LANES) spawn(Math.random() < 0.5 ? word[Math.floor(Math.random() * word.length)] : randomLetter(), true);
+  };
+  const tap = (b) => {
+    if (filled >= word.length || b.classList.contains("popped")) return;
+    if (b.dataset.letter === word[filled]) {
+      b.classList.add("popped");
+      setTimeout(() => b.remove(), 350);
+      slots[filled].textContent = word[filled];
+      slots[filled].classList.add("on");
+      filled += 1;
+      playSound("correct");
+      if (filled === word.length) {
+        recordActivity(currentProfile());
+        status.innerHTML = `🎉 ${cur.w.emoji} <b>${word}</b> = ${cur.w.meaningKo}`;
+        say();
+        setTimeout(() => actions.next(game), 1500);
+      } else ensureNext();
+    } else {
+      cur.misses += 1;
+      playSound("wrong");
+      b.firstChild.classList.remove("shake");
+      void b.offsetWidth;
+      b.firstChild.classList.add("shake");
+      status.innerHTML = `앗, <b>${b.dataset.letter}</b> 말고 다음 글자를 찾아요!`;
+    }
+  };
+  // 처음 풍선: 첫 글자, 단어 속 글자 몇 개, 아무 글자
+  spawn(word[0], false);
+  [...word.slice(1)].slice(0, 3).forEach((l) => spawn(l, false));
+  while (sky.querySelectorAll(".balloon").length < BALLOON_LANES) spawn(randomLetter(), false);
+}
+
+const balloonActions = {
+  next: (game) => {
+    const s = store.getState();
+    if (s.screen !== "balloon" || s.balloon !== game) return;
+    game.i += 1;
+    if (game.i >= game.words.length) {
+      game.done = true;
+      game.isNewBest = kidFinish("balloon", "all", game.words.filter((x) => x.misses === 0).length, game.words.length);
+    }
+    set({});
+  },
+  again: () => set({ balloon: newBalloonGame(store.getState().balloon.levelId) }),
+  home: () => goHome(),
+  quit: () => goHome(),
+};
 
 ;
 
@@ -34163,6 +35646,12 @@ function mcSourceInfo(source) {
     const ss = SOUND_PAIR_SETS.find((x) => x.id === source.id);
     return { label: ss ? `${ss.emoji} ${ss.title}` : "🎲 소리 구별 모두 섞기", level: null, quitTo: "soundsList", listScreen: "soundsList" };
   }
+  if (source.type === "pbook") {
+    const [bookId, setId] = source.id.split(":");
+    const book = pbook(bookId);
+    const s = pbookSet(book, setId);
+    return { label: s ? `${s.emoji} ${s.title}` : `🎲 ${book.title} 섞기`, level: levelById("adult"), quitTo: s ? "pbookSet" : "pbookList", listScreen: "pbookList" };
+  }
   if (source.type === "biz") {
     const s = bizSet(source.id);
     return { label: s ? `${s.emoji} ${s.title}` : `🎲 ${BIZ_GROUPS.find((g) => `mix-${g.id}` === source.id)?.title || ""} 표현 섞기`, level: levelById("adult"), quitTo: s ? "bizSet" : "bizList", listScreen: "bizList" };
@@ -34233,6 +35722,10 @@ function nextMcQuestion() {
     }
   }
   if (mc.source.type === "wordlist") isNewBest = recordSectionResult(currentProfile(), "wordlist", `${mc.source.id}:choice`, correct, total);
+  if (mc.source.type === "pbook") {
+    const [bookId, setId] = mc.source.id.split(":");
+    isNewBest = recordSectionResult(currentProfile(), bookId, setId, correct, total);
+  }
   if (["topic", "numbers", "sounds", "story", "riddle", "school", "biz"].includes(mc.source.type)) isNewBest = recordSectionResult(currentProfile(), mc.source.type, mc.source.id, correct, total);
   if (mc.source.type === "weekly") isNewBest = recordSectionResult(currentProfile(), "weekly", mc.source.id, correct, total);
   set({ mc: { ...mc, isNewBest }, screen: "mcResult" });
@@ -34363,6 +35856,20 @@ function mcResultActions(source, hasWrong) {
         { label: "📋 단어 다시 보기", onClick: () => set({ topicId: source.id, screen: "topicView" }) },
         ...(next ? [{ label: `다음 주제: ${next.emoji} ${next.title}`, onClick: () => set({ topicId: next.id, screen: "topicView" }) }] : []),
         { label: "주제 목록", onClick: () => set({ screen: "topicList" }) },
+      ],
+    };
+  }
+  if (source.type === "pbook") {
+    const [bookId, setId] = source.id.split(":");
+    const book = pbook(bookId);
+    const s = pbookSet(book, setId);
+    const next = s && book.sets[book.sets.indexOf(s) + 1];
+    return {
+      actions: [
+        { ...retry, onClick: () => startMc({ type: "pbook", id: source.id }, buildPbookQuestions(bookId, setId)) },
+        ...(s ? [{ label: "📖 표현 다시 보기", onClick: () => set({ pbookId: bookId, pbookSetId: setId, screen: "pbookSet" }) }] : []),
+        ...(next ? [{ label: `다음: ${next.emoji} ${next.title}`, onClick: () => set({ pbookId: bookId, pbookSetId: next.id, screen: "pbookSet" }) }] : []),
+        { label: `${book.emoji} 목록`, onClick: () => set({ pbookId: bookId, screen: "pbookList" }) },
       ],
     };
   }
@@ -35315,6 +36822,10 @@ const QUIZ_QUIT_TARGET = {
   pairs: (s) => (s.pairs.done ? null : "pairsList"),
   houseGame: (s) => (s.house.done ? null : isHouseMix(s.house.roomId) ? "houseList" : "houseRoom"),
   draw: (s) => (s.draw.done ? null : "drawSetup"),
+  fishing: (s) => (s.fish.done ? null : "fishingList"),
+  coloring: (s) => (s.coloring.done ? null : "coloringList"),
+  basket: (s) => (s.basket.done ? null : "home"),
+  balloon: (s) => (s.balloon.done ? null : "home"),
 };
 
 function parentScreen(state) {
@@ -35332,7 +36843,11 @@ function parentScreen(state) {
     case "wordLists": case "typingList": case "monster":
     case "diagnosis": case "roadmap": case "wordRainList":
     case "advent": case "pairsList": case "drawSetup": case "chantList": case "cultureList":
-    case "schoolList": case "vacation": case "houseList": case "bizList": return "home";
+    case "schoolList": case "vacation": case "houseList": case "bizList":
+    case "pbookList": case "dailyWrite": case "fishingList": case "coloringList": case "basket": case "balloon": return "home";
+    case "pbookSet": return "pbookList";
+    case "fishing": return "fishingList";
+    case "coloring": return "coloringList";
     case "bizSet": return "bizList";
     case "houseRoom": return "houseList";
     case "houseGame": return state.house && isHouseMix(state.house.roomId) ? "houseList" : "houseRoom";
@@ -35406,7 +36921,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation", "houseList", "bizList",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation", "houseList", "bizList", "dailyWrite", "fishingList", "coloringList",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -35466,7 +36981,7 @@ function render() {
   }
 
   // 지문 듣기 중에 다른 화면으로 가면 소리를 멈춘다.
-  if (["passage", "basicLesson", "storyRead", "chant", "schoolTalk", "culture", "bizSet"].includes(lastScreen) && state.screen !== lastScreen) stopSpeaking();
+  if (["passage", "basicLesson", "storyRead", "chant", "schoolTalk", "culture", "bizSet", "pbookSet"].includes(lastScreen) && state.screen !== lastScreen) stopSpeaking();
   if (lastScreen !== state.screen) stopRecording(); // 녹음 중에 화면을 옮기면 녹음을 멈춘다
   lastScreen = state.screen;
 
@@ -35597,6 +37112,12 @@ function render() {
           openSchool: () => set({ screen: "schoolList" }),
           openHouse: () => set({ screen: "houseList" }),
           openBiz: () => set({ screen: "bizList" }),
+          openPbook: (pbookId) => set({ pbookId, screen: "pbookList" }),
+          openDailyWrite: () => set({ dwOffset: 0, screen: "dailyWrite" }),
+          openFishing: () => set({ screen: "fishingList" }),
+          openColoring: () => set({ screen: "coloringList" }),
+          openBasket: () => set({ basket: newBasketGame(), screen: "basket" }),
+          openBalloon: () => set({ balloon: newBalloonGame(kidLevelOf(state.profileName)), screen: "balloon" }),
           openVacation: () => set({ vacationEdit: false, screen: "vacation" }),
           openAdvent: () => set({ adventDay: adventInfo().openUpTo || null, screen: "advent" }),
           openPairs: () => set({ screen: "pairsList" }),
@@ -35841,6 +37362,31 @@ function render() {
         write: (tplId) => set({ diaryDraft: { tplId, picks: findDiaryTemplate(tplId).lines.map(() => null) }, screen: "diaryWrite" }),
         back: goHome,
       }),
+    pbookList: () =>
+      renderPbookListScreen(root, {
+        profileName: state.profileName,
+        bookId: state.pbookId,
+        open: (pbookSetId) => set({ pbookSetId, screen: "pbookSet" }),
+        start: (setId) => startMc({ type: "pbook", id: `${state.pbookId}:${setId}` }, buildPbookQuestions(state.pbookId, setId)),
+        back: goHome,
+      }),
+    pbookSet: () =>
+      renderPbookSetScreen(root, {
+        bookId: state.pbookId,
+        setId: state.pbookSetId,
+        actions: {
+          back: () => set({ screen: "pbookList" }),
+          open: (pbookSetId) => set({ pbookSetId }),
+          quiz: (setId) => startMc({ type: "pbook", id: `${state.pbookId}:${setId}` }, buildPbookQuestions(state.pbookId, setId)),
+        },
+      }),
+    dailyWrite: () => renderDailyWriteScreen(root, { profileName: state.profileName, offset: state.dwOffset || 0, back: goHome, move: (dwOffset) => set({ dwOffset }) }),
+    fishingList: () => renderFishListScreen(root, { profileName: state.profileName, start: (mode) => set({ fish: newFishGame(mode, kidLevelOf(state.profileName)), screen: "fishing" }), back: goHome }),
+    fishing: () => renderFishScreen(root, { game: state.fish, actions: fishActions }),
+    coloringList: () => renderColoringListScreen(root, { profileName: state.profileName, start: (sceneId) => set({ coloring: newColoringGame(sceneId), screen: "coloring" }), back: goHome }),
+    coloring: () => renderColoringScreen(root, { game: state.coloring, actions: coloringActions }),
+    basket: () => renderBasketScreen(root, { game: state.basket, actions: basketActions }),
+    balloon: () => renderBalloonScreen(root, { game: state.balloon, actions: balloonActions }),
     bizList: () =>
       renderBizListScreen(root, {
         profileName: state.profileName,

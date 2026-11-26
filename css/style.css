@@ -2454,3 +2454,75 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .biz-phrase .culture-line b { font-size: 17px; }
 .biz-tip { margin: 0 0 4px 38px; font-size: 13px; color: var(--muted); }
 .biz-phrase .rec-row { justify-content: flex-start; margin: 4px 0 0 38px; }
+
+/* ── 👨‍👩 부모님 표현책 · ✍️ 하루 한 문장 ── */
+.kg-wrong { color: var(--wrong); text-decoration: line-through; font-weight: 700; }
+.pb-sound { display: block; color: var(--primary); font-weight: 700; font-size: 14px; }
+.dw-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 700; color: var(--muted); }
+.dw-card { background: var(--card-bg); border-radius: 18px; box-shadow: var(--shadow); padding: 16px; text-align: center; }
+.dw-ko { font-size: 20px; font-weight: 800; margin: 0 0 10px; }
+.dw-hint { margin: 8px 0 0; color: var(--primary); font-weight: 700; }
+.dw-input { width: 100%; box-sizing: border-box; font: inherit; font-size: 17px; padding: 12px; border-radius: 14px; border: 2px solid color-mix(in srgb, var(--primary) 35%, transparent); background: var(--card-bg); color: var(--text); resize: vertical; }
+.dw-answers { list-style: none; padding: 0; margin: 10px 0; display: flex; flex-direction: column; gap: 6px; }
+.dw-answers li { display: flex; gap: 8px; align-items: center; background: var(--card-bg); border-radius: 12px; box-shadow: var(--shadow); padding: 8px 10px; font-size: 16px; }
+.dw-answers li:first-child { outline: 2px solid var(--primary); }
+.dw-answers mark, .dw-legend mark { background: #ffe066; color: #222; border-radius: 4px; padding: 0 2px; }
+.dw-legend { font-size: 13px; color: var(--muted); margin: 0; }
+
+/* ── 🧒 쉬운 아이 게임 공통 ── */
+.fish-prompt { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.fish-target { font-size: 54px; line-height: 1; }
+.fish-status { text-align: center; margin: 0; min-height: 22px; font-weight: 700; font-size: 15px; }
+
+/* 🎣 단어 낚시 */
+.pond { position: relative; height: 330px; border-radius: 22px; overflow: hidden; background: linear-gradient(#74c0fc, #1c7ed6); box-shadow: var(--shadow); }
+.fish { position: absolute; left: 0; display: flex; align-items: center; gap: 4px; padding: 6px 10px; border: none; border-radius: 999px; background: rgba(255, 255, 255, 0.92); color: #1b1b1b; font: inherit; font-size: 17px; cursor: pointer; white-space: nowrap; animation: swim var(--dur) ease-in-out var(--delay) infinite alternate; }
+.fish-emoji { font-size: 26px; display: inline-block; transform: scaleX(-1); }
+.fish-rev { animation-direction: alternate-reverse; }
+.fish.caught { animation-play-state: paused; background: #d3f9d8; transform: translateY(-14px) scale(1.15); transition: transform 0.3s; box-shadow: 0 0 0 3px #40c057; }
+.fish.escape { opacity: 0.35; }
+.pond-weed { position: absolute; bottom: -6px; left: 8px; font-size: 40px; pointer-events: none; }
+.pond-weed2 { left: auto; right: 10px; }
+@keyframes swim { from { left: 0; } to { left: calc(100% - 150px); } }
+
+/* 🖍️ 색칠 놀이 */
+.color-order { display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center; font-size: 20px; margin: 0; }
+.color-help { text-align: center; color: var(--muted); font-size: 14px; margin: 0; }
+.color-help summary { cursor: pointer; }
+.color-palette { grid-template-columns: repeat(5, 1fr); max-width: 260px; }
+.color-board { background: #fff; border-radius: 20px; box-shadow: var(--shadow); padding: 8px; max-width: 360px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+.color-svg { display: block; width: 100%; height: auto; }
+.cpart { stroke: #333; stroke-width: 2.5; stroke-linejoin: round; cursor: pointer; transition: fill 0.25s; }
+.cpart.shake { animation: shake 0.4s ease; transform-box: fill-box; }
+.cw-chip { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--c); margin-right: 3px; vertical-align: -1px; border: 1px solid rgba(0, 0, 0, 0.2); }
+
+/* 🧺 과일 바구니 */
+.fruit-shelf { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.fruit-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border: none; border-radius: 16px; background: var(--card-bg); box-shadow: var(--shadow); color: var(--text); font: inherit; cursor: pointer; }
+.fruit-btn span { font-size: 34px; line-height: 1.1; }
+.fruit-btn small { font-size: 13px; font-weight: 700; }
+.fruit-btn:active { transform: scale(0.94); }
+.basket { position: relative; text-align: center; }
+.basket-items { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; min-height: 48px; padding: 0 30px; }
+.basket-fruit { border: none; background: none; font-size: 32px; padding: 0 2px; cursor: pointer; animation: pop 0.25s ease; }
+.basket-empty { color: var(--muted); font-size: 14px; align-self: center; }
+.basket-body { font-size: 84px; line-height: 0.9; margin-top: -18px; }
+@keyframes pop { from { transform: scale(0.4); } to { transform: scale(1); } }
+
+/* 🎈 알파벳 풍선 */
+.b-slots { display: flex; justify-content: center; gap: 6px; }
+.b-slot { width: 38px; height: 46px; border-bottom: 4px solid var(--muted); display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 800; }
+.b-slot.on { border-color: var(--correct); color: var(--correct); animation: pop 0.25s ease; }
+.sky { position: relative; height: 360px; border-radius: 22px; overflow: hidden; background: linear-gradient(#a5d8ff, #e7f5ff); box-shadow: var(--shadow); }
+.balloon { position: absolute; bottom: -90px; width: 52px; height: 82px; padding: 0; border: none; background: none; cursor: pointer; animation: rise var(--dur) linear var(--delay) infinite; }
+.b-in { display: flex; align-items: center; justify-content: center; width: 52px; height: 62px; border-radius: 50% 50% 46% 46%; background: var(--bc); color: #fff; font-size: 28px; font-weight: 800; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); box-shadow: inset -6px -8px 0 rgba(0, 0, 0, 0.12); position: relative; }
+.b-in::after { content: ""; position: absolute; top: 100%; left: 50%; width: 2px; height: 20px; background: rgba(0, 0, 0, 0.3); }
+.b-in.shake { animation: shake 0.4s ease; }
+.balloon.popped { pointer-events: none; }
+.balloon.popped .b-in { transform: scale(1.5); opacity: 0; transition: transform 0.3s, opacity 0.3s; }
+@keyframes rise { from { transform: translateY(0); } to { transform: translateY(-470px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .fish { animation: none !important; left: 12px; }
+  .balloon { animation: none !important; bottom: auto; top: 35%; }
+}
