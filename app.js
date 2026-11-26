@@ -31075,7 +31075,14 @@ const pairsActions = {
 
 // ── 🎨 그림 그리고 맞히기 (가족 게임) ──
 const DRAW_SECONDS = 60;
-const DRAW_COLORS = ["#222222", "#e03131", "#1971c2", "#2f9e44", "#f08c00"];
+// 색 16가지 (영어 이름은 누르면 보여 줘서 색 단어도 함께 익히기)
+const DRAW_COLORS = [
+  ["#222222", "black", "검정"], ["#868e96", "gray", "회색"], ["#8b5a2b", "brown", "갈색"], ["#e03131", "red", "빨강"],
+  ["#f76707", "orange", "주황"], ["#fcc419", "yellow", "노랑"], ["#94d82d", "light green", "연두"], ["#2f9e44", "green", "초록"],
+  ["#15aabf", "sky blue", "하늘"], ["#1971c2", "blue", "파랑"], ["#364fc7", "navy", "남색"], ["#7048e8", "purple", "보라"],
+  ["#f783ac", "pink", "분홍"], ["#ffd8a8", "peach", "살구"], ["#ffffff", "white", "하양"], ["#c2255c", "magenta", "자주"],
+];
+const DRAW_SIZES = [["가늘게", 3], ["보통", 6], ["굵게", 12]];
 let drawTimer = null;
 
 function drawWordPool() {
@@ -31175,10 +31182,15 @@ function renderDrawScreen(root, { game, actions }) {
         ${top}
         <div class="draw-word"><span>${game.word.emoji}</span><b>${game.word.word}</b><small>${game.word.meaningKo}</small><span class="draw-time" id="drawTime">${DRAW_SECONDS}</span></div>
         <canvas class="draw-canvas" id="drawCanvas" aria-label="그림판"></canvas>
+        <div class="draw-palette">
+          ${DRAW_COLORS.map(([c, en, ko], i) => `<button class="draw-color${i === 0 ? " active" : ""}" data-color="${c}" data-name="${en} · ${ko}" style="background:${c}" aria-label="${ko} ${en}"></button>`).join("")}
+        </div>
+        <p class="draw-color-name" id="colorName">${DRAW_COLORS[0][1]} · ${DRAW_COLORS[0][2]}</p>
         <div class="draw-tools">
-          ${DRAW_COLORS.map((c, i) => `<button class="draw-color${i === 0 ? " active" : ""}" data-color="${c}" style="background:${c}" aria-label="색"></button>`).join("")}
-          <button class="chip-btn" id="eraseBtn">🧽</button>
-          <button class="chip-btn" id="clearBtn">🗑️</button>
+          ${DRAW_SIZES.map(([label, w], i) => `<button class="chip-btn draw-size${i === 1 ? " on" : ""}" data-size="${w}" aria-label="${label}"><span style="width:${w + 2}px;height:${w + 2}px"></span></button>`).join("")}
+          <button class="chip-btn" id="eraseBtn" aria-label="지우개">🧽</button>
+          <button class="chip-btn" id="undoBtn" aria-label="되돌리기">↩️</button>
+          <button class="chip-btn" id="clearBtn" aria-label="모두 지우기">🗑️</button>
         </div>
         <button class="primary-btn" id="doneBtn">✅ 다 그렸어요 → ${who(guesser)}에게 넘기기</button>
       </div>`;
@@ -31194,9 +31206,16 @@ function renderDrawScreen(root, { game, actions }) {
     ctx.fillRect(0, 0, size, size);
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    let color = DRAW_COLORS[0];
-    let width = 5;
+    let color = DRAW_COLORS[0][0];
+    let penWidth = 6;
+    let erasing = false;
+    let width = penWidth;
     let last = null;
+    const history = [];
+    const snapshot = () => {
+      history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+      if (history.length > 20) history.shift();
+    };
     const pos = (e) => {
       const r = canvas.getBoundingClientRect();
       return [e.clientX - r.left, e.clientY - r.top];
@@ -31204,6 +31223,7 @@ function renderDrawScreen(root, { game, actions }) {
     canvas.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       canvas.setPointerCapture?.(e.pointerId);
+      snapshot();
       last = pos(e);
       ctx.fillStyle = color;
       ctx.beginPath();
@@ -31225,18 +31245,34 @@ function renderDrawScreen(root, { game, actions }) {
     root.querySelectorAll("[data-color]").forEach((b) =>
       b.addEventListener("click", () => {
         color = b.dataset.color;
-        width = 5;
+        erasing = false;
+        width = penWidth;
         root.querySelectorAll(".draw-color, #eraseBtn").forEach((x) => x.classList.remove("active"));
         b.classList.add("active");
+        root.querySelector("#colorName").textContent = b.dataset.name;
+      })
+    );
+    root.querySelectorAll("[data-size]").forEach((b) =>
+      b.addEventListener("click", () => {
+        penWidth = Number(b.dataset.size);
+        width = erasing ? penWidth * 3 : penWidth;
+        root.querySelectorAll("[data-size]").forEach((x) => x.classList.toggle("on", x === b));
       })
     );
     root.querySelector("#eraseBtn").addEventListener("click", (e) => {
       color = "#ffffff";
-      width = 22;
+      erasing = true;
+      width = penWidth * 3;
       root.querySelectorAll(".draw-color").forEach((x) => x.classList.remove("active"));
       e.currentTarget.classList.add("active");
+      root.querySelector("#colorName").textContent = "🧽 지우개";
+    });
+    root.querySelector("#undoBtn").addEventListener("click", () => {
+      const img = history.pop();
+      if (img) ctx.putImageData(img, 0, 0);
     });
     root.querySelector("#clearBtn").addEventListener("click", () => {
+      snapshot();
       ctx.fillStyle = "#fff";
       ctx.fillRect(0, 0, size, size);
     });

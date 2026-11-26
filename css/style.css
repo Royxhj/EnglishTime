@@ -2357,9 +2357,13 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .draw-time { margin-left: auto; font-weight: 800; color: var(--primary-dark, var(--primary)); }
 .draw-time.hurry { color: var(--wrong); }
 .draw-canvas { width: 100%; aspect-ratio: 1; display: block; background: #fff; border-radius: 16px; box-shadow: var(--shadow); touch-action: none; }
-.draw-tools { display: flex; gap: 8px; align-items: center; justify-content: center; }
-.draw-color { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--card-bg); box-shadow: var(--shadow); cursor: pointer; }
-.draw-color.active, #eraseBtn.active { outline: 3px solid var(--primary); }
+.draw-tools { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
+.draw-palette { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; max-width: 340px; margin: 0 auto; width: 100%; }
+.draw-color { width: 100%; aspect-ratio: 1; max-width: 36px; justify-self: center; padding: 0; border-radius: 50%; border: 3px solid var(--card-bg); box-shadow: var(--shadow), inset 0 0 0 1px rgba(0, 0, 0, 0.15); cursor: pointer; }
+.draw-color.active, #eraseBtn.active { outline: 3px solid var(--primary); outline-offset: 1px; }
+.draw-color-name { text-align: center; margin: 0; font-size: 14px; font-weight: 700; color: var(--muted); }
+.draw-size { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 40px; padding: 0; }
+.draw-size span { display: block; border-radius: 50%; background: var(--text); }
 
 /* ── 🎵 챈트 ── */
 .chant-beat { text-align: center; font-size: 34px; opacity: 0.35; }
