@@ -36827,8 +36827,8 @@ const COUPON_KINDS = [
   { id: "grow", emoji: "🌱", name: "성장", desc: "친구가 문제를 푼 것처럼 자라요", amounts: [10, 30, 50, 100, 300, 500] },
   { id: "tier", emoji: "🏆", name: "등급 올리기", desc: "친구가 바로 다음 등급이 돼요 (전설 → 신화 → 고대 → 초월 …)", amounts: [1, 99], unit: "단계" }, // 99 = 한 번에 최종 진화(태초)
   // 🧪 부모님 테스트용 (숫자 쿠폰만): 몇 번이든 다시 쓸 수 있고, 한 번 더 넣으면 꺼진다
-  //   1 = ⭐ 별 무한대 (사도 줄지 않음, 한 번 더 넣으면 꺼짐) · 2 = 🌈 지금 친구를 초월로 (그 친구만)
-  { id: "test", emoji: "🧪", name: "테스트", desc: "1 = 별 무한대 · 2 = 지금 친구를 초월로", amounts: [1, 2], reusable: true },
+  //   1 = ⭐ 별 무한대 (사도 줄지 않음, 한 번 더 넣으면 꺼짐) · 2 = 🌈 지금 친구만 다음 등급으로 한 칸씩 (태초까지)
+  { id: "test", emoji: "🧪", name: "테스트", desc: "1 = 별 무한대 · 2 = 지금 친구 등급 한 칸 올리기", amounts: [1, 2], reusable: true },
 ];
 const TEST_STARS = 99999; // 별 무한대일 때 보이는 별 수
 const COUPON_WRONG_MAX = 5;
@@ -36938,13 +36938,15 @@ function redeemTestCoupon(profileName, amount) {
       msg = p.testStars ? "⭐ 별 무한대! 마음껏 써 봐요. (한 번 더 넣으면 꺼져요)" : "⭐ 별 무한대를 껐어요.";
       return;
     }
-    const goal = PET_TIERS.find((t) => t.id === "transcend").min;
-    if (petGrowth(p) >= goal) {
-      msg = "이미 초월 등급 이상이에요. 다른 친구로 바꾸고 넣어 봐요.";
+    // 넣을 때마다 지금 친구만 다음 등급으로 한 칸 (전설 → 신화 → 고대 → 초월 → 불멸 → 천상 → 태초)
+    const next = PET_TIERS.find((t) => petGrowth(p) < t.min);
+    if (!next) {
+      msg = "🌌 이미 맨 끝 태초 등급이에요! 다른 친구로 바꾸고 넣어 봐요.";
       return;
     }
-    addPetXp(p, goal - petGrowth(p));
-    msg = "🌈 지금 친구가 초월 등급이 됐어요! 이 친구만 초월이고, 다른 친구로 바꾸면 그 친구는 알부터 시작해요.";
+    addPetXp(p, next.min - petGrowth(p));
+    const left = PET_TIERS.length - 1 - PET_TIERS.indexOf(next);
+    msg = `${next.icon} ${next.name} 등급이 됐어요! ${left ? `한 번 더 넣으면 다음 등급 (태초까지 ${left}번 더)` : "맨 끝 등급이에요 🎉"}`;
   });
   const after = petStatus(profileName);
   const levelUp = after.total > before.total && (after.stage.emoji !== before.stage.emoji || after.tier?.id !== before.tier?.id) ? after : null;
