@@ -2825,3 +2825,85 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .coupon-form { display: flex; gap: 8px; margin-top: 8px; }
 .coupon-form .text-input { flex: 1; min-width: 0; font-size: 20px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; text-align: center; }
 .coupon-form .primary-btn { width: auto; padding-inline: 18px; margin: 0; }
+
+/* ── 🌌 움직이는 배경 (별 상점 배경 아이템의 dark · fx) ── */
+.pet-themed.pet-dark { color: #f5f3ff; }
+.pet-themed.pet-dark .pet-text small, .pet-themed.pet-dark > .settings-help, .pet-themed.pet-dark .shop-stars, .park-card.pet-dark small { color: #ddd6fe; }
+.pet-themed.pet-dark .pet-text b, .pet-themed.pet-dark .shop-stars b, .park-card.pet-dark b { color: #fff; }
+.pet-themed.pet-dark .pet-bubble, .pet-themed.pet-dark .pet-bubble b { color: #2a2620; }
+.pet-themed.pet-dark .pet-bubble small { color: #5b5446; }
+.pet-themed.pet-dark .reward-card { background: rgba(10, 8, 40, 0.5); color: #f5f3ff; }
+.pet-themed.pet-dark .reward-card small, .pet-themed.pet-dark .reward-card span { color: #e9e5ff; }
+.pet-themed.pet-dark .progress-track { background: rgba(255, 255, 255, 0.22); }
+.bgfx { isolation: isolate; overflow: hidden; }
+.bgfx:not(.previewing) { position: relative; }
+.bgfx::before, .bgfx::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit; }
+/* 별 (::before) */
+.bgfx-stars::before {
+  background-image: radial-gradient(1.5px 1.5px at 20px 30px, #fff, transparent), radial-gradient(1px 1px at 80px 70px, #fff, transparent), radial-gradient(2px 2px at 130px 20px, #fffbe6, transparent), radial-gradient(1px 1px at 160px 110px, #fff, transparent), radial-gradient(1.5px 1.5px at 50px 140px, #d0bfff, transparent), radial-gradient(1px 1px at 110px 150px, #fff, transparent), radial-gradient(1.5px 1.5px at 170px 60px, #bae6fd, transparent);
+  background-size: 180px 160px;
+  animation: bgTwinkle 3.2s ease-in-out infinite alternate;
+}
+/* 보석 반짝임 (::before) */
+.bgfx-gems::before {
+  background-image: radial-gradient(2.5px 2.5px at 30px 40px, #fff, transparent), radial-gradient(2px 2px at 120px 90px, #a5f3fc, transparent), radial-gradient(3px 3px at 70px 130px, #f5d0fe, transparent), radial-gradient(2px 2px at 150px 30px, #fef08a, transparent);
+  background-size: 170px 150px;
+  animation: bgTwinkle 1.6s ease-in-out infinite alternate;
+}
+/* ::after 효과 */
+.bgfx-twinkle::after {
+  background-image: radial-gradient(2px 2px at 40px 90px, #fff, transparent), radial-gradient(1.5px 1.5px at 140px 40px, #fde68a, transparent), radial-gradient(2.5px 2.5px at 100px 120px, #fff, transparent), radial-gradient(1.5px 1.5px at 10px 10px, #c4b5fd, transparent);
+  background-size: 150px 140px;
+  animation: bgTwinkle 2.1s ease-in-out infinite alternate-reverse;
+}
+.bgfx-shoot::after {
+  inset: auto; top: 12%; left: 70%; width: 110px; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, #fff, rgba(255, 255, 255, 0));
+  transform: rotate(-25deg); opacity: 0;
+  animation: bgShoot 5s ease-in infinite;
+}
+.bgfx-bubbles::after, .bgfx-embers::after {
+  background-image: radial-gradient(circle at 20px 150px, rgba(255, 255, 255, 0.5) 0 3px, transparent 4px), radial-gradient(circle at 90px 60px, rgba(255, 255, 255, 0.35) 0 5px, transparent 6px), radial-gradient(circle at 150px 120px, rgba(255, 255, 255, 0.45) 0 2px, transparent 3px), radial-gradient(circle at 60px 20px, rgba(255, 255, 255, 0.3) 0 4px, transparent 5px);
+  background-size: 180px 170px;
+  animation: bgRise 7s linear infinite;
+}
+.bgfx-embers::after {
+  background-image: radial-gradient(circle at 20px 150px, #fde047 0 2px, transparent 3px), radial-gradient(circle at 90px 60px, #fb923c 0 3px, transparent 4px), radial-gradient(circle at 150px 120px, #fef3c7 0 1.5px, transparent 2.5px), radial-gradient(circle at 60px 20px, #f97316 0 2px, transparent 3px);
+  animation-duration: 4s;
+}
+.bgfx-petals::after {
+  background-image: radial-gradient(ellipse 5px 3px at 30px 20px, #fbcfe8, transparent), radial-gradient(ellipse 4px 3px at 120px 70px, #f9a8d4, transparent), radial-gradient(ellipse 5px 3.5px at 80px 140px, #fce7f3, transparent), radial-gradient(ellipse 4px 2.5px at 160px 110px, #f472b6, transparent);
+  background-size: 180px 170px;
+  animation: bgFall 9s linear infinite;
+}
+.bgfx-burst::after {
+  background-image: radial-gradient(circle at 25% 30%, transparent 18px, rgba(251, 113, 133, 0.9) 19px, transparent 22px), radial-gradient(circle at 75% 25%, transparent 24px, rgba(250, 204, 21, 0.9) 25px, transparent 28px), radial-gradient(circle at 60% 60%, transparent 14px, rgba(96, 165, 250, 0.9) 15px, transparent 18px);
+  animation: bgBurst 2.6s ease-out infinite;
+}
+.bgfx-aurora::after {
+  inset: -10% -50%;
+  background: linear-gradient(100deg, transparent 25%, rgba(52, 211, 153, 0.5) 38%, rgba(45, 212, 191, 0.35) 45%, rgba(167, 139, 250, 0.45) 55%, transparent 70%);
+  filter: blur(10px);
+  animation: bgAurora 9s ease-in-out infinite alternate;
+}
+.bgfx-swirl::after, .bgfx-rainbow::after {
+  inset: -60%; border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent, rgba(196, 181, 253, 0.55), transparent 25%, rgba(125, 211, 252, 0.5), transparent 50%, rgba(244, 114, 182, 0.5), transparent 75%, rgba(253, 230, 138, 0.45), transparent);
+  filter: blur(6px);
+  animation: bgSpin 18s linear infinite;
+}
+.bgfx-rainbow::after { background: conic-gradient(#f8717180, #fbbf2480, #4ade8080, #38bdf880, #a78bfa80, #f472b680, #f8717180); filter: blur(14px); animation-duration: 12s; opacity: 0.8; }
+.bgfx-rays::after {
+  inset: -50%;
+  background: repeating-conic-gradient(from 0deg at 50% 40%, rgba(255, 255, 255, 0.55) 0 6deg, transparent 6deg 18deg);
+  animation: bgSpin 40s linear infinite;
+  opacity: 0.6;
+}
+@keyframes bgTwinkle { from { opacity: 0.45; } to { opacity: 1; } }
+@keyframes bgShoot { 0%, 70% { opacity: 0; transform: translate(0, 0) rotate(-25deg); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-260px, 120px) rotate(-25deg); } }
+@keyframes bgRise { from { background-position: 0 0; } to { background-position: 0 -170px; } }
+@keyframes bgFall { from { background-position: 0 0; } to { background-position: 40px 170px; } }
+@keyframes bgBurst { 0% { transform: scale(0.4); opacity: 0; } 20% { opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
+@keyframes bgAurora { from { transform: translateX(-12%) skewX(-6deg); } to { transform: translateX(12%) skewX(6deg); } }
+@keyframes bgSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .bgfx::before, .bgfx::after { animation: none !important; } .bgfx-shoot::after { opacity: 0; } }

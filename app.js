@@ -29490,7 +29490,10 @@ function dressedPetHtml(profileName, petEmoji, big, scale = 1, override = null) 
 
 function petBackgroundStyle(profileName, override = null) {
   const bg = shopItem({ ...shopStatus(profileName).equip, ...override }.bg);
-  return bg ? { cls: " pet-themed", style: ` style="background:${bg.bg}"` } : { cls: "", style: "" };
+  if (!bg) return { cls: "", style: "" };
+  // dark: 어두운 배경이라 글씨를 밝게 · fx: 반짝이는 별 같은 움직임 (css의 .bgfx-*)
+  const fx = (bg.fx || "").split(" ").filter(Boolean).map((f) => ` bgfx-${f}`).join("");
+  return { cls: ` pet-themed${bg.dark ? " pet-dark" : ""}${fx ? ` bgfx${fx}` : ""}`, style: ` style="background:${bg.bg}"` };
 }
 
 function renderShopScreen(root, { profileName, actions }) {
@@ -29504,7 +29507,7 @@ function renderShopScreen(root, { profileName, actions }) {
     const label = on ? "벗기" : owned ? "꾸미기" : !open ? shopLockLabel(it) : it.price ? `⭐ ${it.price}` : "🎁 받기";
     const cant = !owned && (!open || s.stars < it.price);
     return `<button class="shop-item${on ? " on" : ""}${owned ? " owned" : ""}${cant ? " cant" : ""}${preview === it.id ? " trying" : ""}" data-item="${it.id}">
-      <span class="shop-emoji"${it.bg ? ` style="background:${it.bg}"` : ""}>${it.emoji}</span>
+      <span class="shop-emoji${it.fx ? ` bgfx${it.fx.split(" ").map((f) => ` bgfx-${f}`).join("")}` : ""}"${it.bg ? ` style="background:${it.bg}"` : ""}>${it.emoji}</span>
       <b>${it.name}</b>
       <small>${label}</small>
     </button>`;
@@ -35611,10 +35614,27 @@ SHOP_ITEMS.push(
   { id: "bg-autumn", cat: "bg", emoji: "🍂", name: "가을", price: 30, bg: "linear-gradient(135deg, #ffd8a8, #fff4e6)" },
   { id: "bg-beach", cat: "bg", emoji: "🏖️", name: "해변", price: 35, bg: "linear-gradient(180deg, #a5d8ff 55%, #ffe8a3 55%)" },
   { id: "bg-blossom", cat: "bg", emoji: "🌸", name: "벚꽃", price: 40, bg: "linear-gradient(135deg, #ffdeeb, #fff0f6)" },
-  { id: "bg-night", cat: "bg", emoji: "🌃", name: "밤하늘", price: 50, bg: "linear-gradient(135deg, #364fc7, #748ffc)" },
+  { id: "bg-night", cat: "bg", emoji: "🌃", name: "밤하늘", price: 50, dark: true, fx: "stars", bg: "linear-gradient(135deg, #364fc7, #748ffc)" },
   { id: "bg-castle", cat: "bg", emoji: "🏰", name: "성", price: 60, bg: "linear-gradient(135deg, #e5dbff, #fff9db)" },
   { id: "bg-home", cat: "bg", emoji: "🏡", name: "우리 집", price: 0, bond: 5, bg: "linear-gradient(135deg, #ffe3e3, #fff9db, #d3f9d8)" },
-  { id: "bg-galaxy", cat: "bg", emoji: "🌌", name: "은하수", price: 400, tier: "origin", bg: "radial-gradient(circle at 30% 30%, #9775fa, #364fc7 45%, #1a1b4b)" }
+  { id: "bg-galaxy", cat: "bg", emoji: "🌌", name: "태초의 은하수", price: 400, tier: "origin", dark: true, fx: "stars shoot", bg: "linear-gradient(115deg, transparent 30%, rgba(255, 214, 255, 0.35) 44%, rgba(255, 255, 255, 0.5) 50%, rgba(165, 216, 255, 0.35) 56%, transparent 70%), radial-gradient(circle at 30% 30%, #9775fa, #364fc7 45%, #1a1b4b)" },
+  // ✨ 움직이는 우주 · 밤 배경 (dark: 글씨를 밝게, fx: 반짝임 · 별똥별 같은 움직임)
+  { id: "bg-starry", cat: "bg", emoji: "⭐", name: "별이 빛나는 밤", price: 80, dark: true, fx: "stars twinkle", bg: "linear-gradient(160deg, #0b1d51, #1e3a8a 60%, #312e81)" },
+  { id: "bg-moon", cat: "bg", emoji: "🌕", name: "보름달 밤", price: 90, dark: true, fx: "stars", bg: "radial-gradient(circle at 82% 24%, #fffbe6 0 22px, rgba(255, 244, 190, 0.45) 26px, transparent 60px), linear-gradient(170deg, #0f1c3f, #23396e)" },
+  { id: "bg-shooting", cat: "bg", emoji: "🌠", name: "별똥별 하늘", price: 100, dark: true, fx: "stars shoot", bg: "linear-gradient(200deg, #020617, #172554 55%, #3b0764)" },
+  { id: "bg-deepsea", cat: "bg", emoji: "🫧", name: "깊은 바다", price: 100, dark: true, fx: "bubbles", bg: "radial-gradient(ellipse at 50% -10%, rgba(165, 243, 252, 0.45), transparent 55%), linear-gradient(180deg, #0e7490, #083344 70%, #020617)" },
+  { id: "bg-sakura", cat: "bg", emoji: "🌙", name: "밤 벚꽃", price: 110, dark: true, fx: "stars petals", bg: "radial-gradient(circle at 15% 85%, rgba(252, 165, 213, 0.55), transparent 45%), linear-gradient(160deg, #2e1065, #581c87 55%, #831843)" },
+  { id: "bg-fireworks", cat: "bg", emoji: "🎆", name: "불꽃놀이", price: 120, dark: true, fx: "stars burst", bg: "linear-gradient(180deg, #0b1023, #1e1b4b 70%, #312e81)" },
+  { id: "bg-nebula", cat: "bg", emoji: "🔮", name: "보랏빛 성운", price: 120, dark: true, fx: "stars twinkle", bg: "radial-gradient(circle at 25% 35%, rgba(244, 114, 182, 0.55), transparent 45%), radial-gradient(circle at 75% 65%, rgba(56, 189, 248, 0.5), transparent 45%), radial-gradient(circle at 60% 20%, rgba(167, 139, 250, 0.6), transparent 40%), #0f0a2e" },
+  { id: "bg-crystal", cat: "bg", emoji: "💎", name: "보석 동굴", price: 130, dark: true, fx: "gems", bg: "radial-gradient(circle at 20% 80%, rgba(45, 212, 191, 0.5), transparent 40%), radial-gradient(circle at 80% 30%, rgba(192, 132, 252, 0.5), transparent 40%), linear-gradient(135deg, #042f2e, #1e1b4b)" },
+  { id: "bg-aurora", cat: "bg", emoji: "🏔️", name: "오로라", price: 140, dark: true, fx: "stars aurora", bg: "linear-gradient(160deg, transparent 72%, #0b1324 72.5%), linear-gradient(200deg, transparent 76%, #111a2e 76.5%), linear-gradient(180deg, #021024, #0b3b4a 70%, #0f2a3a)" },
+  { id: "bg-earthrise", cat: "bg", emoji: "🌅", name: "우주에서 본 해돋이", price: 140, dark: true, fx: "stars", bg: "radial-gradient(ellipse 120% 60% at 50% 115%, #60a5fa 0 48%, #fcd34d 50%, rgba(251, 146, 60, 0.6) 54%, transparent 64%), linear-gradient(180deg, #020617, #0b1437)" },
+  { id: "bg-planet", cat: "bg", emoji: "🪐", name: "행성 여행", price: 150, dark: true, fx: "stars", bg: "radial-gradient(ellipse 70px 14px at 80% 28%, transparent 60%, rgba(253, 230, 138, 0.9) 62%, rgba(253, 230, 138, 0.9) 72%, transparent 75%), radial-gradient(circle at 80% 28%, #f59e0b 0 30px, transparent 31px), radial-gradient(circle at 12% 80%, #a78bfa 0 14px, transparent 15px), linear-gradient(160deg, #09090b, #1e1b4b)" },
+  { id: "bg-swirl", cat: "bg", emoji: "💫", name: "별빛 소용돌이", price: 160, dark: true, fx: "stars swirl", bg: "radial-gradient(circle at 50% 50%, #312e81, #0f0a2e 70%)" },
+  // 등급이 되면 살 수 있는 특별 배경
+  { id: "bg-rainbow-space", cat: "bg", emoji: "🎇", name: "무지갯빛 우주", price: 200, tier: "transcend", dark: true, fx: "stars rainbow", bg: "radial-gradient(circle at 50% 50%, #1e1b4b, #020617 75%)" },
+  { id: "bg-phoenix", cat: "bg", emoji: "🔥", name: "불사조 하늘", price: 250, tier: "immortal", dark: true, fx: "embers", bg: "radial-gradient(ellipse at 50% 110%, #f97316, #b91c1c 35%, #450a0a 65%, #1c0505)" },
+  { id: "bg-heaven", cat: "bg", emoji: "🕊️", name: "천상의 정원", price: 300, tier: "celestial", fx: "rays gems", bg: "radial-gradient(circle at 50% -10%, #fffbe6, #fde68a 35%, #fbcfe8 70%, #e0e7ff)" }
 );
 
 // ── 저장 ──
