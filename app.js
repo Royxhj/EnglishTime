@@ -36751,7 +36751,9 @@ function renderRecArchiveScreen(root, { profileName, actions }) {
 /* ── js/screens/coupons.js ── */
 // 🎟️ 쿠폰: 아이가 별 상점 · 친구 방에서 등록한다.
 // 쿠폰 만들기는 앱에 없다 (아이 폰에서 못 만들게). 부모님이 부탁하면 scripts/make-coupons.js로 만든다.
-// 서버가 없어서 번호 안에 종류 · 양 · 일련번호 · 검사 글자를 넣는다. 다른 기기에서도 등록되고, 한 번 쓰면 끝.
+// 🔢 숫자 4자리 쿠폰: 만든 번호를 아래 표에 (번호 그대로가 아니라 바꾼 값으로) 넣고 배포한다.
+//    한 번 만든 번호는 표에 계속 남아서 다시 나오지 않고, 한 번 쓰면 끝.
+// (예전 9자리 글자 쿠폰도 그대로 받는다: 번호 안에 종류 · 양 · 검사 글자가 들어 있다)
 
 const COUPON_ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 헷갈리는 I · O · 0 · 1은 뺐다
 const COUPON_KINDS = [
@@ -36761,7 +36763,27 @@ const COUPON_KINDS = [
   { id: "tier", emoji: "🏆", name: "등급 올리기", desc: "친구가 바로 다음 등급이 돼요 (전설 → 신화 → 고대 → 초월 …)", amounts: [1], unit: "단계" },
 ];
 const COUPON_WRONG_MAX = 5;
-let couponWrong = { n: 0, until: 0 };
+const COUPON_LOCK_MS = 10 * 60000; // 4자리는 찍어서 맞힐 수 있으니, 5번 틀리면 10분 쉰다 (껐다 켜도 유지)
+
+// scripts/make-coupons.js가 이 표에 한 줄씩 붙인다. 손으로 고치지 않는다.
+// prettier-ignore
+const NUM_COUPONS = {
+  "bh3gay": "star:500", // 2026-11-27
+  "kj6r7": "star:500", // 2026-11-27
+  // NUM_COUPONS_END
+};
+
+function numCouponHash(digits) {
+  let h = 2166136261;
+  for (const ch of `englishword-num:${digits}`) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0;
+  return h;
+}
+const numCouponKey = (digits) => numCouponHash(digits).toString(36);
+// 쓴 쿠폰 기록에 넣는 5글자 (글자 쿠폰과 같은 모양)
+const numCouponSerial = (digits) => {
+  const h = numCouponHash(`serial:${digits}`);
+  return Array.from({ length: 5 }, (_, i) => COUPON_ALPHA[(h >>> (i * 6)) & 31]).join("");
+};
 
 function couponCheck(payload) {
   let h = 2166136261;
@@ -36771,6 +36793,13 @@ function couponCheck(payload) {
 
 // 번호를 풀어서 { kind, amount, serial }을 돌려준다. 틀린 번호면 null.
 function parseCouponCode(text) {
+  const digits = String(text || "").replace(/\s|-/g, "");
+  if (/^[0-9]{4}$/.test(digits)) {
+    const [kindId, amt] = (NUM_COUPONS[numCouponKey(digits)] || "").split(":");
+    const kind = COUPON_KINDS.find((k) => k.id === kindId);
+    if (!kind || !kind.amounts.includes(Number(amt))) return null;
+    return { kind, amount: Number(amt), serial: numCouponSerial(digits) };
+  }
   const code = String(text || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
   if (code.length !== 9 || [...code].some((ch) => !COUPON_ALPHA.includes(ch))) return null;
   const payload = code.slice(0, 6);
@@ -36788,14 +36817,15 @@ function couponUsedBy(serial) {
 
 // 쿠폰 등록. { ok, msg, levelUp }
 function redeemCoupon(profileName, text) {
-  if (Date.now() < couponWrong.until) return { ok: false, msg: "번호를 여러 번 틀렸어요. 1분 뒤에 다시 해 봐요." };
+  const lock = getSettings().couponLock || { n: 0, until: 0 };
+  if (Date.now() < lock.until) return { ok: false, msg: `번호를 여러 번 틀렸어요. ${Math.ceil((lock.until - Date.now()) / 60000)}분 뒤에 다시 해 봐요.` };
   const c = parseCouponCode(text);
   if (!c) {
-    couponWrong.n += 1;
-    if (couponWrong.n >= COUPON_WRONG_MAX) couponWrong = { n: 0, until: Date.now() + 60000 };
-    return { ok: false, msg: "쿠폰 번호가 맞지 않아요. 다시 확인해 봐요." };
+    const n = (lock.n || 0) + 1;
+    updateSettings({ couponLock: n >= COUPON_WRONG_MAX ? { n: 0, until: Date.now() + COUPON_LOCK_MS } : { n, until: 0 } });
+    return { ok: false, msg: n >= COUPON_WRONG_MAX ? "번호를 여러 번 틀렸어요. 10분 뒤에 다시 해 봐요." : `쿠폰 번호가 맞지 않아요. 다시 확인해 봐요. (${COUPON_WRONG_MAX - n}번 남음)` };
   }
-  couponWrong.n = 0;
+  updateSettings({ couponLock: { n: 0, until: 0 } });
   const usedBy = couponUsedBy(c.serial) || (getSettings().couponsUsed || []).includes(c.serial);
   if (usedBy) return { ok: false, msg: typeof usedBy === "string" ? `이미 ${escapeHtml(usedBy)}님이 쓴 쿠폰이에요.` : "이미 쓴 쿠폰이에요." };
   const before = petStatus(profileName);
@@ -36822,10 +36852,11 @@ function couponBoxHtml() {
     <details class="coupon-box" id="couponBox">
       <summary>🎟️ 쿠폰 등록하기</summary>
       <form class="coupon-form" id="couponForm" autocomplete="off">
-        <input class="text-input coupon-input" id="couponInput" maxlength="13" placeholder="ABC-DEF-GHJ" aria-label="쿠폰 번호" autocapitalize="characters" spellcheck="false">
+        <input class="text-input coupon-input" id="couponInput" maxlength="13" placeholder="0000" inputmode="numeric" aria-label="쿠폰 번호" autocapitalize="characters" spellcheck="false">
         <button class="primary-btn" type="submit">등록</button>
       </form>
-      <p class="settings-help" id="couponMsg">부모님께 받은 쿠폰 번호 9자리를 넣어요.</p>
+      <p class="settings-help" id="couponMsg">부모님께 받은 쿠폰 번호 4자리를 넣어요.</p>
+      <button class="link-btn" type="button" id="couponLettersBtn">예전 글자 쿠폰(ABC-DEF-GHJ)이에요</button>
     </details>`;
 }
 
@@ -36834,7 +36865,13 @@ function bindCouponBox(root, profileName, onDone) {
   if (!input) return;
   input.addEventListener("input", () => {
     const raw = input.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 9);
-    input.value = raw.match(/.{1,3}/g)?.join("-") || "";
+    input.value = input.inputMode !== "text" && /^[0-9]*$/.test(raw) ? raw.slice(0, 4) : raw.match(/.{1,3}/g)?.join("-") || "";
+  });
+  root.querySelector("#couponLettersBtn")?.addEventListener("click", (e) => {
+    e.currentTarget.remove();
+    input.inputMode = "text";
+    input.placeholder = "ABC-DEF-GHJ";
+    input.focus();
   });
   root.querySelector("#couponForm").addEventListener("submit", (e) => {
     e.preventDefault();
