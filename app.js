@@ -36744,6 +36744,7 @@ const COUPON_KINDS = [
   { id: "star", emoji: "⭐", name: "별", desc: "별 상점에서 쓰는 별", amounts: [5, 10, 20, 30, 50, 100] },
   { id: "bond", emoji: "❤️", name: "친밀도", desc: "친구와 더 친해져요", amounts: [10, 20, 50, 100, 200] },
   { id: "grow", emoji: "🌱", name: "성장", desc: "친구가 문제를 푼 것처럼 자라요", amounts: [10, 30, 50, 100, 300, 500] },
+  { id: "tier", emoji: "🏆", name: "등급 올리기", desc: "친구가 바로 다음 등급이 돼요 (전설 → 신화 → 고대 → 초월 …)", amounts: [1], unit: "단계" },
 ];
 const COUPON_ISSUED_KEEP = 30;
 const COUPON_WRONG_MAX = 5;
@@ -36795,16 +36796,21 @@ function redeemCoupon(profileName, text) {
   const usedBy = couponUsedBy(c.serial) || (getSettings().couponsUsed || []).includes(c.serial);
   if (usedBy) return { ok: false, msg: typeof usedBy === "string" ? `이미 ${escapeHtml(usedBy)}님이 쓴 쿠폰이에요.` : "이미 쓴 쿠폰이에요." };
   const before = petStatus(profileName);
+  // 🏆 등급 올리기: 바로 다음 등급(전설 → 신화 → 고대 …)이 되는 만큼 성장 점수를 채운다
+  const nextTier = PET_TIERS.find((t) => before.total < t.min);
+  if (c.kind.id === "tier" && !nextTier) return { ok: false, msg: "이미 가장 높은 등급이라 더 올릴 수 없어요. 쿠폰은 그대로 남아 있어요." };
   updateProfile(profileName, (p) => {
     p.coupons = [...p.coupons, c.serial].slice(-300);
     if (c.kind.id === "star") p.bonusStars += c.amount;
     if (c.kind.id === "bond") p.care.bond += c.amount;
     if (c.kind.id === "grow") p.petBoost += c.amount;
+    if (c.kind.id === "tier") p.petBoost += nextTier.min - petGrowth(p);
   });
   updateSettings({ couponsUsed: [...(getSettings().couponsUsed || []), c.serial].slice(-300) });
   const after = petStatus(profileName);
   const levelUp = after.stage.emoji !== before.stage.emoji || after.tier?.id !== before.tier?.id ? after : null;
-  return { ok: true, kind: c.kind, amount: c.amount, levelUp, msg: `${c.kind.emoji} ${c.kind.name} +${c.amount} 받았어요!` };
+  const msg = c.kind.id === "tier" ? `${nextTier.icon} ${nextTier.name} 등급이 됐어요!` : `${c.kind.emoji} ${c.kind.name} +${c.amount} 받았어요!`;
+  return { ok: true, kind: c.kind, amount: c.amount, levelUp, msg };
 }
 
 // ── 아이 화면: 별 상점 · 친구 방의 쿠폰 등록 칸 ──
@@ -36859,9 +36865,9 @@ function couponSettingsHtml() {
       <p class="settings-help">칭찬할 일이 있을 때 쿠폰을 만들어 번호를 알려 주세요. 아이가 <b>⭐ 별 상점</b>이나 <b>🏠 친구 방</b>의 '쿠폰 등록하기'에 넣으면 받아요. 쿠폰 하나는 한 번만 쓸 수 있고, 다른 휴대폰에서도 등록돼요.${parentLockOn() ? "" : " <b>아이들이 직접 만들지 못하게 아래 '부모님 잠금'을 켜 두면 좋아요.</b>"}</p>
       <div class="goal-kinds">${COUPON_KINDS.map((k) => `<button class="chip-btn${k.id === kind.id ? " on" : ""}" data-ckind="${k.id}">${k.emoji} ${k.name}</button>`).join("")}</div>
       <p class="settings-help">${kind.emoji} ${kind.desc}</p>
-      <div class="goal-kinds">${kind.amounts.map((n) => `<button class="chip-btn${n === couponDraft.amount ? " on" : ""}" data-camount="${n}">${n}</button>`).join("")}</div>
+      <div class="goal-kinds">${kind.amounts.map((n) => `<button class="chip-btn${n === couponDraft.amount ? " on" : ""}" data-camount="${n}">${n}${kind.unit || ""}</button>`).join("")}</div>
       <input class="text-input" id="couponNote" maxlength="20" placeholder="메모 (예: 방 청소 칭찬)">
-      <button class="primary-btn" id="couponMakeBtn">🎟️ ${kind.emoji} ${kind.name} ${couponDraft.amount} 쿠폰 만들기</button>
+      <button class="primary-btn" id="couponMakeBtn">🎟️ ${kind.emoji} ${kind.name} ${couponDraft.amount}${kind.unit || ""} 쿠폰 만들기</button>
       ${
         couponDraft.last
           ? `<div class="coupon-ticket"><small>${couponDraft.last.label}</small><b>${couponDraft.last.code}</b><button class="chip-btn" id="couponCopyBtn">📋 번호 복사</button></div>`
@@ -36888,7 +36894,7 @@ function bindCouponSettings(root, refresh) {
     b.addEventListener("click", () => {
       couponDraft.kind = b.dataset.ckind;
       const amounts = COUPON_KINDS.find((k) => k.id === couponDraft.kind).amounts;
-      if (!amounts.includes(couponDraft.amount)) couponDraft.amount = amounts[1];
+      if (!amounts.includes(couponDraft.amount)) couponDraft.amount = amounts[Math.min(1, amounts.length - 1)];
       refresh();
     })
   );
@@ -36902,7 +36908,7 @@ function bindCouponSettings(root, refresh) {
     const code = makeCouponCode(couponDraft.kind, couponDraft.amount);
     if (!code) return;
     const kind = COUPON_KINDS.find((k) => k.id === couponDraft.kind);
-    const label = `${kind.emoji} ${kind.name} ${couponDraft.amount}`;
+    const label = `${kind.emoji} ${kind.name} ${couponDraft.amount}${kind.unit || ""}`;
     const note = cleanText(root.querySelector("#couponNote").value, 20);
     couponDraft.last = { code, label };
     updateSettings({ couponsIssued: [...(getSettings().couponsIssued || []), { code, label, note, date: dateKey() }].slice(-COUPON_ISSUED_KEEP) });
