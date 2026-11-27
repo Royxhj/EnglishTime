@@ -2688,3 +2688,39 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .room-bag-item small { font-size: 12px; }
 .room-bag-item b { font-size: 13px; color: var(--primary); }
 .room-bag-item:disabled { opacity: 0.45; }
+
+/* 💬 오늘의 대화 · 📸 · 👨‍👩‍👧 가족 놀이터 */
+.pet-talk { background: var(--card-bg); border-radius: 18px; box-shadow: var(--shadow); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.pet-talk .section-title { margin: 0; }
+.pet-talk.done { opacity: 0.75; }
+.pet-talk-q { display: flex; gap: 8px; align-items: flex-start; }
+.pet-talk-q p { margin: 0; font-size: 17px; }
+.pet-talk-q small { display: block; color: var(--muted); font-size: 13px; }
+.pet-talk-answers { display: flex; flex-direction: column; gap: 6px; }
+.room-tools { display: flex; gap: 8px; }
+.room-tools .secondary-btn { flex: 1; margin: 0; }
+.park-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.park-card { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 8px; border-radius: 18px; background: var(--card-bg); box-shadow: var(--shadow); text-align: center; min-width: 0; }
+.park-card.me { outline: 3px solid var(--primary); }
+.park-card small { color: var(--muted); font-size: 12px; }
+.park-card .chip-btn { margin-top: 4px; }
+
+/* 📅 출석 도장 · 🎁 주간 상자 (홈) */
+.reward-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+.reward-row { display: flex; align-items: center; gap: 6px; min-height: 34px; flex-wrap: wrap; }
+.reward-row > small { color: var(--muted); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.reward-label { font-weight: 800; font-size: 14px; white-space: nowrap; }
+.attend-stamps { display: flex; gap: 2px; flex: 1; min-width: 0; }
+.attend-stamps i { width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%; border: 2px dashed color-mix(in srgb, var(--primary) 40%, transparent); display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 13px; }
+.attend-stamps i.on { border-style: solid; background: color-mix(in srgb, var(--primary) 15%, var(--card-bg)); }
+.chest-progress { flex: 1; display: flex; align-items: center; gap: 6px; min-width: 90px; }
+.chest-progress .progress-track { flex: 1; height: 8px; }
+.chest-progress small { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.reward-claim { padding: 6px 10px; font-size: 13px; animation: auraPulse 1.4s ease-in-out infinite; white-space: nowrap; }
+
+/* 📊 메뉴 사용 순위 */
+.usage-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; counter-reset: u; }
+.usage-list li { display: grid; grid-template-columns: minmax(0, 1.4fr) 1fr auto; gap: 8px; align-items: center; font-size: 14px; }
+.usage-list li span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.usage-bar { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.usage-bar i { display: block; height: 100%; background: var(--primary); }

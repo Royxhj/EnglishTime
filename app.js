@@ -22727,6 +22727,10 @@ function normalizeProfile(profile) {
   if (!Array.isArray(p.wordLists)) p.wordLists = [];
   if (!Array.isArray(p.missionWeeks)) p.missionWeeks = [];
   p.bonusStars ||= 0;
+  p.attend = { claimed: Math.max(0, Math.floor(Number(p.attend?.claimed) || 0)) };
+  p.chests = Array.isArray(p.chests) ? p.chests.filter((d) => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)).slice(-60) : [];
+  const use = p.menuUse && typeof p.menuUse === "object" && !Array.isArray(p.menuUse) ? p.menuUse : {};
+  p.menuUse = Object.fromEntries(Object.entries(use).filter(([id, n]) => isPinId(id) && Number.isInteger(n) && n > 0).map(([id, n]) => [id, Math.min(n, 99999)]));
   if (!Array.isArray(p.advent)) p.advent = [];
   if (!Array.isArray(p.homeHidden)) p.homeHidden = [];
   if (!Array.isArray(p.homeCollapsed)) p.homeCollapsed = [];
@@ -23497,6 +23501,8 @@ const BADGES = [
   { id: "wordSearch", emoji: "🔍", title: "숨은 단어 탐험가", desc: "단어 찾기 퍼즐 완성하기", test: (p) => Object.keys(p.wordsearch.best).length >= 1 },
   { id: "wordGuess", emoji: "🕵️", title: "명탐정", desc: "단어 추리 5개 모두 맞히기", test: (p) => perfectCount(p.wordguess.best) >= 1 },
   { id: "riddle", emoji: "❓", title: "수수께끼 박사", desc: "영어 수수께끼 만점", test: (p) => perfectCount(p.riddle.best) >= 1 },
+  { id: "attend28", emoji: "📅", title: "출석왕", desc: "출석 도장판 4번 채우기 (28일)", test: (p) => p.attend.claimed >= 4 },
+  { id: "chest4", emoji: "🎁", title: "보물 수집가", desc: "주간 보물 상자 4번 열기", test: (p) => p.chests.length >= 4 },
   { id: "bondBest", emoji: "💙", title: "베스트 프렌드", desc: "캐릭터 친밀도 베스트 프렌드 단계", test: (p) => p.care.bond >= 400 },
   { id: "bondFamily", emoji: "💖", title: "평생 가족", desc: "캐릭터 친밀도 평생 가족 단계", test: (p) => p.care.bond >= 2000 },
   { id: "treasure", emoji: "🧭", title: "보물 사냥꾼", desc: "방향 보물찾기 8개 모두 한 번에 찾기", test: (p) => perfectCount(p.treasure.best) >= 1 },
@@ -24892,6 +24898,7 @@ function renderHomeScreen(root, ctx) {
       <div class="home-search"><input id="homeSearch" type="search" placeholder="🔎 메뉴 찾기 (예: 빙고, 단어, 타자)" aria-label="메뉴 찾기" autocomplete="off"><p class="settings-help" id="homeSearchEmpty" hidden>찾는 메뉴가 없어요. 설정에서 숨긴 메뉴일 수도 있어요.</p></div>
       ${backupReminderHtml()}
       ${isKid ? petCardHtml(profileName) : ""}
+      ${isKid ? rewardsHomeHtml(profileName) : ""}
       ${levelProgressHtml(profileName)}
       ${todayCardHtml(profileName, { daily, dueWrong, wrongTotal, next })}
       ${vacationHomeCardHtml(profileName)}
@@ -25094,6 +25101,8 @@ function renderHomeScreen(root, ctx) {
   bind("pairsBtn", actions.openPairs);
   bind("drawBtn", actions.openDraw);
   bindPetCare(root, profileName);
+  bindRewardsHome(root, profileName);
+  root.querySelectorAll(".tile[id]").forEach((t) => t.addEventListener("click", () => recordMenuUse(profileName, t.id)));
   bind("diagBtn", actions.openDiagnosis);
   bind("rainBtn", actions.openWordRain);
   bindBackupReminder(root);
@@ -35543,6 +35552,12 @@ function renderPetRoomScreen(root, { profileName, actions }) {
         })()}</small>
       </section>
 
+      ${petTalkHtml(profileName)}
+      <div class="room-tools">
+        <button class="secondary-btn" id="photoBtn">📸 사진 찍기</button>
+        ${getFamily().length > 1 ? `<button class="secondary-btn" id="parkBtn">👨‍👩‍👧 가족 놀이터</button>` : ""}
+      </div>
+
       <h2 class="section-title">🎾 오늘 같이 놀기 <small>하루에 한 번씩 · 공짜</small></h2>
       <div class="room-acts">
         ${PET_ACTIVITIES.map((a) => `<button class="room-act${care.acts.includes(a.id) ? " done" : ""}" data-act="${a.id}" ${care.acts.includes(a.id) ? "disabled" : ""}><span>${a.emoji}</span><small>${a.name}</small>${care.acts.includes(a.id) ? "<i>✓</i>" : ""}</button>`).join("")}
@@ -35563,6 +35578,8 @@ function renderPetRoomScreen(root, { profileName, actions }) {
     </div>`;
   root.querySelector("#backBtn").addEventListener("click", actions.back);
   root.querySelector("#shopBtn").addEventListener("click", actions.shop);
+  root.querySelector("#photoBtn").addEventListener("click", () => sharePetPhoto(profileName));
+  root.querySelector("#parkBtn")?.addEventListener("click", actions.park);
   const bubble = (emoji, en, ko) => {
     const b = root.querySelector("#roomBubble");
     if (b) b.innerHTML = `<span>${emoji}</span> ${en}<small>${ko}</small>`;
@@ -35583,6 +35600,7 @@ function renderPetRoomScreen(root, { profileName, actions }) {
     }
     announceBadges(checkNewBadges(profileName));
   };
+  bindPetTalk(root, profileName, (res, emoji, line) => after(res, emoji, line));
   root.querySelectorAll("[data-act]").forEach((b) =>
     b.addEventListener("click", () => {
       const a = PET_ACTIVITIES.find((x) => x.id === b.dataset.act);
@@ -35607,6 +35625,380 @@ function renderPetRoomScreen(root, { profileName, actions }) {
       showToast(`<span class="toast-emoji">${t.emoji}</span><span>가방에 쏙! ${t.name} · <b>${t.en}</b></span>`);
     })
   );
+}
+
+;
+
+/* ── js/screens/petExtras.js ── */
+// 🐾 캐릭터 더하기: 💬 오늘의 대화 · 📸 사진 · 👨‍👩‍👧 가족 놀이터 · 📅 출석 도장판 · 🎁 주간 보물 상자 · 📊 메뉴 사용 기록
+
+// ── 💬 오늘의 대화: 날마다 캐릭터가 영어로 묻고, 아이가 대답을 골라요 (하루 한 번, 친밀도 +5) ──
+const PET_TALK_BOND = 5;
+const PET_TALKS = [
+  ["What's your favorite fruit?", "제일 좋아하는 과일은 뭐야?", [["I like apples.", "사과를 좋아해."], ["I like bananas.", "바나나를 좋아해."], ["I like strawberries.", "딸기를 좋아해."]], ["Yummy! Let's eat some together!", "맛있겠다! 같이 먹자!"]],
+  ["How are you today?", "오늘 기분 어때?", [["I'm great!", "아주 좋아!"], ["I'm a little tired.", "조금 피곤해."], ["I'm happy!", "기뻐!"]], ["Thanks for telling me!", "알려 줘서 고마워!"]],
+  ["What did you eat for breakfast?", "아침으로 뭐 먹었어?", [["I ate rice.", "밥 먹었어."], ["I ate bread.", "빵 먹었어."], ["I ate cereal.", "시리얼 먹었어."]], ["Breakfast gives us energy!", "아침밥은 힘을 줘!"]],
+  ["What's your favorite color?", "제일 좋아하는 색은?", [["I like blue.", "파란색이 좋아."], ["I like pink.", "분홍색이 좋아."], ["I like green.", "초록색이 좋아."]], ["That's a pretty color!", "예쁜 색이다!"]],
+  ["Do you like rainy days?", "비 오는 날 좋아해?", [["Yes, I do.", "응, 좋아해."], ["No, I don't.", "아니, 안 좋아해."], ["Sometimes.", "가끔."]], ["I like jumping in puddles!", "나는 물웅덩이에서 점프하는 게 좋아!"]],
+  ["What do you want to be?", "커서 뭐가 되고 싶어?", [["I want to be a doctor.", "의사가 되고 싶어."], ["I want to be a teacher.", "선생님이 되고 싶어."], ["I want to be a scientist.", "과학자가 되고 싶어."]], ["You can do it! I believe in you!", "넌 할 수 있어! 믿어!"]],
+  ["Which animal do you like?", "어떤 동물 좋아해?", [["I like dogs.", "강아지가 좋아."], ["I like cats.", "고양이가 좋아."], ["I like pandas.", "판다가 좋아."]], ["Me too! Animals are so cute!", "나도! 동물은 정말 귀여워!"]],
+  ["What's your favorite season?", "제일 좋아하는 계절은?", [["I like spring.", "봄이 좋아."], ["I like summer.", "여름이 좋아."], ["I like winter.", "겨울이 좋아."]], ["Every season is special!", "계절마다 특별해!"]],
+  ["What do you do after school?", "학교 끝나면 뭐 해?", [["I go to the academy.", "학원에 가."], ["I play with my friends.", "친구들이랑 놀아."], ["I do my homework.", "숙제를 해."]], ["You're so busy! Good job!", "정말 바쁘구나! 잘하고 있어!"]],
+  ["Can you swim?", "수영할 수 있어?", [["Yes, I can.", "응, 할 수 있어."], ["No, I can't.", "아니, 못 해."], ["A little.", "조금."]], ["Let's go to the pool someday!", "언젠가 수영장에 가자!"]],
+  ["What's your favorite sport?", "제일 좋아하는 운동은?", [["I like soccer.", "축구가 좋아."], ["I like jump rope.", "줄넘기가 좋아."], ["I like swimming.", "수영이 좋아."]], ["Let's play together!", "같이 하자!"]],
+  ["Where do you want to go?", "어디에 가고 싶어?", [["I want to go to the beach.", "바다에 가고 싶어."], ["I want to go to the zoo.", "동물원에 가고 싶어."], ["I want to go to the park.", "공원에 가고 싶어."]], ["Take me with you, please!", "나도 데려가 줘!"]],
+  ["What's your favorite snack?", "제일 좋아하는 간식은?", [["I like chips.", "과자가 좋아."], ["I like ice cream.", "아이스크림이 좋아."], ["I like cookies.", "쿠키가 좋아."]], ["Can I have some too?", "나도 조금 줄래?"]],
+  ["Who is your best friend?", "제일 친한 친구는 누구야?", [["My classmate is.", "우리 반 친구야."], ["My brother is.", "형(동생)이야."], ["You are!", "바로 너야!"]], ["Friends make everything better!", "친구가 있으면 다 좋아져!"]],
+  ["What makes you happy?", "뭐 할 때 행복해?", [["Playing games.", "게임할 때."], ["Eating yummy food.", "맛있는 거 먹을 때."], ["Being with my family.", "가족이랑 있을 때."]], ["That makes me happy too!", "그거 들으니 나도 행복해!"]],
+  ["Are you hungry?", "배고파?", [["Yes, I'm hungry.", "응, 배고파."], ["No, I'm full.", "아니, 배불러."], ["A little bit.", "조금."]], ["Let's eat something yummy!", "맛있는 거 먹자!"]],
+  ["Did you study English today?", "오늘 영어 공부했어?", [["Yes, I did!", "응, 했어!"], ["Not yet.", "아직."], ["I'm studying now!", "지금 하고 있어!"]], ["You're getting better every day!", "날마다 점점 잘하고 있어!"]],
+  ["What's the weather like?", "날씨 어때?", [["It's sunny.", "맑아."], ["It's cloudy.", "흐려."], ["It's cold.", "추워."]], ["Thanks! I'll bring my umbrella just in case.", "고마워! 혹시 몰라 우산 챙길게."]],
+  ["What do you like to draw?", "뭐 그리는 거 좋아해?", [["I like to draw animals.", "동물 그리는 거 좋아해."], ["I like to draw people.", "사람 그리는 거 좋아해."], ["I like to draw cars.", "자동차 그리는 거 좋아해."]], ["Can you draw me someday?", "언젠가 나도 그려 줄래?"]],
+  ["What time do you go to bed?", "몇 시에 자?", [["At nine o'clock.", "9시에."], ["At ten o'clock.", "10시에."], ["Very late!", "아주 늦게!"]], ["Sleep well and grow big!", "푹 자고 쑥쑥 크자!"]],
+  ["Do you have a pet?", "반려동물 있어?", [["Yes, I have a dog.", "응, 강아지가 있어."], ["No, I don't.", "아니, 없어."], ["You are my pet!", "네가 내 반려동물이야!"]], ["I'm happy to be your friend!", "네 친구라서 행복해!"]],
+  ["What's your favorite book?", "제일 좋아하는 책은?", [["I like comic books.", "만화책이 좋아."], ["I like fairy tales.", "동화가 좋아."], ["I like science books.", "과학책이 좋아."]], ["Reading is so much fun!", "책 읽기는 정말 재밌어!"]],
+  ["Can you help me count to five?", "다섯까지 같이 세어 줄래?", [["One, two, three, four, five!", "하나, 둘, 셋, 넷, 다섯!"], ["Sure! Let's count!", "좋아! 세어 보자!"], ["Five, four, three, two, one!", "다섯, 넷, 셋, 둘, 하나!"]], ["Wow, you're good at counting!", "와, 숫자 정말 잘 센다!"]],
+  ["What's your favorite day of the week?", "일주일 중 제일 좋아하는 요일은?", [["I like Friday.", "금요일이 좋아."], ["I like Saturday.", "토요일이 좋아."], ["I like Sunday.", "일요일이 좋아."]], ["Weekends are the best!", "주말이 최고야!"]],
+].map(([q, ko, answers, reply], i) => ({ id: `talk-${i + 1}`, q, ko, answers, reply }));
+
+const dayNumber = () => {
+  const [y, m, d] = dateKey().split("-").map(Number);
+  return Math.floor(Date.UTC(y, m - 1, d) / 86400000);
+};
+const todayPetTalk = () => PET_TALKS[dayNumber() % PET_TALKS.length];
+
+function petTalkHtml(profileName) {
+  const t = todayPetTalk();
+  const done = getPetCare(profileName).acts.includes("talk");
+  return `
+    <section class="pet-talk${done ? " done" : ""}">
+      <h2 class="section-title">💬 오늘의 대화 <small>${done ? "오늘 대화 완료 ✓" : `대답하면 ❤️ +${PET_TALK_BOND}`}</small></h2>
+      <div class="pet-talk-q"><button class="speak-btn" id="talkSay" aria-label="듣기" ${speechSupported ? "" : "disabled"}>🔊</button><p><b>${t.q}</b><small>${t.ko}</small></p></div>
+      <div class="pet-talk-answers">${t.answers.map(([en, ko], k) => `<button class="chip-btn" data-talk="${k}" ${done ? "disabled" : ""}>${en}<small> ${ko}</small></button>`).join("")}</div>
+    </section>`;
+}
+
+function bindPetTalk(root, profileName, after) {
+  const t = todayPetTalk();
+  root.querySelector("#talkSay")?.addEventListener("click", () => speak(t.q, { rate: 0.9 }));
+  root.querySelectorAll("[data-talk]").forEach((b) =>
+    b.addEventListener("click", async () => {
+      const [en, ko] = t.answers[Number(b.dataset.talk)];
+      const res = updateProfile(profileName, (p) => {
+        if (p.care.day !== dateKey()) Object.assign(p.care, { day: dateKey(), pets: 0, snacks: 0, acts: [], fed: 0 });
+        if (p.care.acts.includes("talk")) return { ok: false };
+        p.care.acts.push("talk");
+        const before = bondLevelIndex(p.care.bond);
+        p.care.bond += PET_TALK_BOND;
+        return { ok: true, levelUp: bondLevelIndex(p.care.bond) > before };
+      });
+      if (!res.ok) return;
+      root.querySelectorAll("[data-talk]").forEach((x) => (x.disabled = true));
+      await speakAsync(en, { rate: 0.9 });
+      after(res, "💬", t.reply, `🙋 ${en} <small>${ko}</small>`);
+    })
+  );
+}
+
+// ── 📸 캐릭터 사진: 꾸민 모습 그대로 그림 파일로 저장하거나 공유해요 ──
+const EMOJI_FONT = `"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+const TIER_GLOW = { mythic: "#9775fa", ancient: "#f59f00", transcend: "#f783ac", immortal: "#fa5252", celestial: "#74c0fc", origin: "#7048e8" };
+
+function petPhotoCanvas(profileName) {
+  const S = 720;
+  const canvas = document.createElement("canvas");
+  canvas.width = S;
+  canvas.height = S;
+  const ctx = canvas.getContext("2d");
+  const pet = petStatus(profileName);
+  const { equip } = shopStatus(profileName);
+  const bgItem = shopItem(equip.bg);
+  const colors = (bgItem?.bg.match(/#[0-9a-f]{3,6}/gi) || ["#fff3c4", "#ffffff"]).slice(0, 5);
+  const grad = ctx.createLinearGradient(0, 0, S, S);
+  colors.forEach((c, i) => grad.addColorStop(colors.length === 1 ? 0 : i / (colors.length - 1), c));
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, S, S);
+  const glow = pet.tier && TIER_GLOW[pet.tier.id];
+  if (glow) {
+    const g = ctx.createRadialGradient(360, 360, 20, 360, 360, 260);
+    g.addColorStop(0, glow + "cc");
+    g.addColorStop(1, glow + "00");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, S, S);
+  }
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const draw = (emoji, x, y, size) => {
+    if (!emoji) return;
+    ctx.font = `${Math.round(size)}px ${EMOJI_FONT}`;
+    ctx.fillText(emoji, x, y);
+  };
+  const em = 290 * (pet.stage.scale || 1);
+  const cx = 340;
+  const cy = 380 + (290 - em) / 2;
+  const top = cy - em / 2;
+  const bottom = cy + em / 2;
+  const it = (cat) => shopItem(equip[cat])?.emoji;
+  draw(it("fx"), 150, 150, 110);
+  draw(pet.stage.emoji, cx, cy, em);
+  draw(it("hat"), cx, top - 0.42 * em + 0.275 * em, 0.55 * em);
+  draw(it("face"), cx, top + 0.44 * em, 0.4 * em);
+  draw(it("neck"), cx, bottom - 0.21 * em, 0.34 * em);
+  draw(it("hand"), cx + em / 2, bottom - 0.28 * em, 0.4 * em);
+  draw(it("pal"), cx + em / 2 + 110, bottom - 60, 120);
+  // 아래 이름표
+  ctx.fillStyle = "rgba(255,255,255,0.85)";
+  ctx.fillRect(0, S - 120, S, 120);
+  ctx.fillStyle = "#333";
+  ctx.font = `bold 40px "Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif`;
+  ctx.fillText(`${pet.tier ? pet.tier.icon + " " : ""}${pet.stage.name}`, S / 2, S - 78);
+  const lv = BOND_LEVELS[bondLevelIndex(getPetCare(profileName).bond)];
+  ctx.font = `28px "Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif`;
+  ctx.fillStyle = "#666";
+  ctx.fillText(`${lv.icon} ${lv.name} · 문제 ${pet.total.toLocaleString()}개 · ${dateKey()}`, S / 2, S - 34);
+  return canvas;
+}
+
+async function sharePetPhoto(profileName) {
+  const canvas = petPhotoCanvas(profileName);
+  const blob = await new Promise((r) => canvas.toBlob(r, "image/png"));
+  if (!blob) return showToast(`<span class="toast-emoji">😢</span><span>사진을 만들지 못했어요</span>`);
+  const name = `my-english-pet-${dateKey()}.png`;
+  const file = typeof File === "function" ? new File([blob], name, { type: "image/png" }) : null;
+  if (file && navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: "내 영어 친구" });
+      return;
+    } catch (e) {
+      if (e?.name === "AbortError") return;
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  showToast(`<span class="toast-emoji">📸</span><span>사진을 저장했어요</span>`);
+}
+
+// ── 👨‍👩‍👧 가족 놀이터: 가족 캐릭터를 한자리에 모으고, 내 가방 간식을 선물해요 ──
+function petGiftTreat(from, to, id) {
+  const t = petTreat(id);
+  const sent = updateProfile(from, (p) => {
+    if (p.care.day !== dateKey()) Object.assign(p.care, { day: dateKey(), pets: 0, snacks: 0, acts: [], fed: 0 });
+    if (!t || !(p.care.bag[id] > 0) || p.care.fed >= TREAT_DAILY_MAX) return false;
+    p.care.bag[id] -= 1;
+    if (!p.care.bag[id]) delete p.care.bag[id];
+    p.care.fed += 1;
+    p.care.bond += Math.ceil(t.bond / 2);
+    return true;
+  });
+  if (!sent) return false;
+  updateProfile(to, (p) => {
+    p.care.bond += t.bond;
+  });
+  return true;
+}
+
+function renderPetParkScreen(root, { profileName, actions }) {
+  const family = getFamily();
+  const care = getPetCare(profileName);
+  const bag = Object.entries(care.bag).filter(([id, n]) => petTreat(id) && n > 0);
+  let giftTo = null;
+  const draw = () => {
+    root.innerHTML = `
+      <div class="screen screen-petroom">
+        <button class="back-btn" id="backBtn">← 친구 방</button>
+        <h1 class="title">👨‍👩‍👧 가족 놀이터</h1>
+        <p class="subtitle">가족 캐릭터가 모두 모였어요! 내 가방의 간식을 선물하면 두 친구 모두 친밀도가 올라요</p>
+        <div class="park-grid">
+          ${family
+            .map((m) => {
+              const s = petStatus(m.name);
+              const lv = BOND_LEVELS[bondLevelIndex(getPetCare(m.name).bond)];
+              const theme = petBackgroundStyle(m.name);
+              const me = m.name === profileName;
+              return `<div class="park-card${me ? " me" : ""}${theme.cls}"${theme.style}>
+                <span class="pet-aura-wrap${s.aura}">${dressedPetHtml(m.name, s.stage.emoji, false, s.stage.scale)}</span>
+                <b>${m.emoji} ${escapeHtml(m.name)}${me ? " (나)" : ""}</b>
+                <small>${s.tier ? `${s.tier.icon} ` : ""}${s.stage.name}</small>
+                <small>${lv.icon} ${lv.name} · ❤️ ${getPetCare(m.name).bond}</small>
+                ${me ? "" : `<button class="chip-btn" data-gift="${escapeHtml(m.name)}" ${bag.length && care.fed < TREAT_DAILY_MAX ? "" : "disabled"}>🎁 선물하기</button>`}
+              </div>`;
+            })
+            .join("")}
+        </div>
+        ${
+          giftTo
+            ? `<section class="bond-card"><b>🎁 ${escapeHtml(giftTo)}의 친구에게 무엇을 줄까요?</b><div class="room-bag">${bag
+                .map(([id, n]) => { const t = petTreat(id); return `<button class="room-bag-item" data-treat="${id}"><span>${t.emoji}</span><small>${t.name}</small><b>×${n}</b></button>`; })
+                .join("")}</div></section>`
+            : ""
+        }
+        ${bag.length ? "" : `<p class="settings-help">가방이 비어 있어요. 친구 방 가게에서 간식을 사 오면 선물할 수 있어요.</p>`}
+      </div>`;
+    root.querySelector("#backBtn").addEventListener("click", actions.back);
+    root.querySelectorAll("[data-gift]").forEach((b) =>
+      b.addEventListener("click", () => {
+        giftTo = b.dataset.gift;
+        draw();
+      })
+    );
+    root.querySelectorAll("[data-treat]").forEach((b) =>
+      b.addEventListener("click", () => {
+        const t = petTreat(b.dataset.treat);
+        if (!petGiftTreat(profileName, giftTo, t.id)) return;
+        playSound("correct");
+        burstConfetti(40);
+        speak(`Here is a ${t.en} for you!`, { rate: 0.9 });
+        showToast(`<span class="toast-emoji">${t.emoji}</span><span>${escapeHtml(giftTo)}의 친구에게 ${t.name}을(를) 선물했어요! <b>Here is a ${t.en} for you!</b></span>`);
+        announceBadges(checkNewBadges(profileName));
+        actions.refresh();
+      })
+    );
+  };
+  draw();
+}
+
+// ── 📅 출석 도장판 · 🎁 주간 보물 상자 ──
+const ATTEND_SET = 7;
+const ATTEND_STARS = 10;
+const CHEST_DAYS = 5;
+// 주마다 돌아가며 정해진 선물 (운에 맡기는 뽑기가 아니라, 무엇이 나올지 미리 보여 준다)
+const CHEST_REWARDS = [
+  { stars: 20, treat: "cake" },
+  { stars: 15, treat: "teddy" },
+  { stars: 25, treat: "icecream" },
+  { stars: 15, treat: "gift" },
+  { stars: 20, treat: "pizza" },
+  { stars: 30, treat: "party" },
+];
+
+function attendStatus(profileName) {
+  const p = getProfileData(profileName);
+  const days = Object.values(p.activity).filter((n) => n > 0).length;
+  const sets = Math.floor(days / ATTEND_SET);
+  return { days, inSet: days % ATTEND_SET, claimable: Math.max(0, sets - p.attend.claimed), claimed: p.attend.claimed };
+}
+
+function chestStatus(profileName) {
+  const p = getProfileData(profileName);
+  const week = weekDateKeys()[0];
+  const days = getWeeklyHistory(profileName, 1)[0].days;
+  const reward = CHEST_REWARDS[Math.floor(dayNumber() / 7) % CHEST_REWARDS.length];
+  return { week, days, reward, open: days >= CHEST_DAYS, claimed: p.chests.includes(week) };
+}
+
+function claimAttend(profileName) {
+  return updateProfile(profileName, (p) => {
+    const days = Object.values(p.activity).filter((n) => n > 0).length;
+    const n = Math.floor(days / ATTEND_SET) - p.attend.claimed;
+    if (n <= 0) return 0;
+    p.attend.claimed += n;
+    p.bonusStars += n * ATTEND_STARS;
+    return n * ATTEND_STARS;
+  });
+}
+
+function claimChest(profileName) {
+  const c = chestStatus(profileName);
+  if (!c.open || c.claimed) return null;
+  updateProfile(profileName, (p) => {
+    p.chests = [...p.chests, c.week].slice(-60);
+    p.bonusStars += c.reward.stars;
+    p.care.bag[c.reward.treat] = (p.care.bag[c.reward.treat] || 0) + 1;
+  });
+  return c.reward;
+}
+
+function rewardsHomeHtml(profileName) {
+  const a = attendStatus(profileName);
+  const c = chestStatus(profileName);
+  const t = petTreat(c.reward.treat);
+  return `
+    <section class="reward-card">
+      <div class="reward-row">
+        <span class="reward-label">📅 출석</span>
+        <span class="attend-stamps">${Array.from({ length: ATTEND_SET }, (_, i) => `<i class="${a.claimable || i < a.inSet ? "on" : ""}">${a.claimable || i < a.inSet ? "🐾" : ""}</i>`).join("")}</span>
+        ${a.claimable ? `<button class="chip-btn reward-claim" id="attendClaim">⭐ ${a.claimable * ATTEND_STARS} 받기</button>` : `<small>${ATTEND_SET - a.inSet}일 더 → ⭐${ATTEND_STARS}</small>`}
+      </div>
+      <div class="reward-row">
+        <span class="reward-label">🎁 주간 상자</span>
+        <span class="chest-progress"><span class="progress-track"><span class="progress-fill" style="width:${Math.min(100, Math.round((c.days / CHEST_DAYS) * 100))}%"></span></span><small>${Math.min(c.days, CHEST_DAYS)} / ${CHEST_DAYS}일</small></span>
+        ${c.claimed ? `<small>열었어요 ✓</small>` : c.open ? `<button class="chip-btn reward-claim" id="chestClaim">🎁 열기</button>` : `<small>⭐${c.reward.stars} + ${t.emoji}</small>`}
+      </div>
+    </section>`;
+}
+
+function bindRewardsHome(root, profileName) {
+  root.querySelector("#attendClaim")?.addEventListener("click", () => {
+    const stars = claimAttend(profileName);
+    if (!stars) return;
+    playSound("correct");
+    burstConfetti(50);
+    showToast(`<span class="toast-emoji">📅</span><span>출석 도장 완성! ⭐ ${stars}개를 받았어요</span>`);
+    set({});
+  });
+  root.querySelector("#chestClaim")?.addEventListener("click", () => {
+    const r = claimChest(profileName);
+    if (!r) return;
+    const t = petTreat(r.treat);
+    playSound("correct");
+    burstConfetti(80);
+    showToast(`<span class="toast-emoji">🎁</span><span>보물 상자를 열었어요! ⭐ ${r.stars}개와 ${t.emoji} ${t.name}(가방에 쏙)</span>`);
+    announceBadges(checkNewBadges(profileName));
+    set({});
+  });
+}
+
+// ── 📊 메뉴 사용 기록: 홈에서 누른 메뉴를 센다 ──
+function recordMenuUse(profileName, id) {
+  if (!isPinId(id)) return;
+  updateProfile(profileName, (p) => {
+    p.menuUse[id] = Math.min(99999, (p.menuUse[id] || 0) + 1);
+  });
+}
+
+function renderMenuUsageHtml(profileName) {
+  const use = getProfileData(profileName).menuUse;
+  const tiles = [...HOME_TILE_REGISTRY.entries()];
+  if (!tiles.length) return "";
+  const total = Object.values(use).reduce((a, b) => a + b, 0);
+  const ranked = tiles.map(([id, t]) => ({ id, ...t, n: use[id] || 0 })).sort((a, b) => b.n - a.n);
+  const top = ranked.filter((r) => r.n > 0).slice(0, 10);
+  const hidden = new Set(getHomeHidden(profileName));
+  const unused = ranked.filter((r) => !r.n && !hidden.has(r.id));
+  const max = top[0]?.n || 1;
+  return `
+    <section class="settings-card">
+      <h2 class="section-title">📊 많이 쓰는 메뉴 <small>(${escapeHtml(profileName)}님 · 홈에서 누른 횟수)</small></h2>
+      ${
+        top.length
+          ? `<ol class="usage-list">${top.map((r) => `<li><span>${r.emoji} ${r.title}</span><span class="usage-bar"><i style="width:${Math.round((r.n / max) * 100)}%"></i></span><b>${r.n}</b></li>`).join("")}</ol>`
+          : `<p class="settings-help">아직 기록이 없어요. 홈에서 메뉴를 누를 때마다 세어요.</p>`
+      }
+      <p class="settings-help">한 번도 안 쓴 메뉴 <b>${unused.length}</b>개${total < 30 ? " · 메뉴를 30번 이상 쓴 뒤에 정리하면 좋아요" : ""}</p>
+      ${total >= 30 && unused.length ? `<button class="secondary-btn" id="hideUnusedBtn">🙈 한 번도 안 쓴 메뉴 ${unused.length}개 숨기기</button>` : ""}
+    </section>`;
+}
+
+function bindMenuUsage(root, profileName, refresh) {
+  root.querySelector("#hideUnusedBtn")?.addEventListener("click", () => {
+    const use = getProfileData(profileName).menuUse;
+    const unused = [...HOME_TILE_REGISTRY.keys()].filter((id) => !use[id]);
+    showConfirmModal({
+      message: `한 번도 안 쓴 메뉴 ${unused.length}개를 홈에서 숨길까요? 아래 '홈 메뉴 보이기'에서 언제든 다시 보이게 할 수 있어요.`,
+      confirmText: "숨기기",
+      cancelText: "취소",
+      onConfirm: () => {
+        setHomeHidden(profileName, [...getHomeHidden(profileName), ...unused]);
+        refresh();
+      },
+    });
+  });
 }
 
 ;
@@ -35847,6 +36239,7 @@ function renderSettingsScreen(root, { profileName, actions }) {
         <div id="installGuide"></div>
       </section>
 
+      ${renderMenuUsageHtml(profileName)}
       ${renderMenuVisibilitySettingsHtml(profileName)}
 
       ${parentLockSettingsHtml()}
@@ -35876,6 +36269,7 @@ function renderSettingsScreen(root, { profileName, actions }) {
   bindTextSizeControl(root);
   bindParentLockSettings(root, () => set({}));
   bindMenuVisibilitySettings(root, profileName, () => set({}));
+  bindMenuUsage(root, profileName, () => set({}));
   mountInstallGuide(root.querySelector("#installGuide"));
   root.querySelector("#backBtn").addEventListener("click", actions.back);
   root.querySelector("#editMemberBtn").addEventListener("click", actions.editMember);
@@ -38769,6 +39163,7 @@ function parentScreen(state) {
     case "pbookList": case "dailyWrite": case "fishingList": case "coloringList": case "basket": case "balloon":
     case "boardSetup": case "clock": case "blocks": case "storeGame": case "tableTalk": case "newsList":
     case "map": case "pos": case "blend": case "animal": case "sceneList": case "petRoom": return "home";
+    case "petPark": return "petRoom";
     case "scene": return "sceneList";
     case "board": return "boardSetup";
     case "pbookSet": return "pbookList";
@@ -39299,7 +39694,8 @@ function render() {
         write: (tplId) => set({ diaryDraft: { tplId, picks: findDiaryTemplate(tplId).lines.map(() => null) }, screen: "diaryWrite" }),
         back: goHome,
       }),
-    petRoom: () => renderPetRoomScreen(root, { profileName: state.profileName, actions: { back: goHome, shop: () => set({ screen: "shop" }), refresh: () => set({}) } }),
+    petRoom: () => renderPetRoomScreen(root, { profileName: state.profileName, actions: { back: goHome, shop: () => set({ screen: "shop" }), park: () => set({ screen: "petPark" }), refresh: () => set({}) } }),
+    petPark: () => renderPetParkScreen(root, { profileName: state.profileName, actions: { back: () => set({ screen: "petRoom" }), refresh: () => set({}) } }),
     map: () => renderMapScreen(root, { game: state.map, actions: mapActions }),
     pos: () => renderPosScreen(root, { game: state.pos, actions: posActions }),
     blend: () => renderBlendScreen(root, { game: state.blend, actions: blendActions }),
