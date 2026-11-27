@@ -22727,7 +22727,18 @@ function normalizeProfile(profile) {
   if (!Array.isArray(p.wordLists)) p.wordLists = [];
   if (!Array.isArray(p.missionWeeks)) p.missionWeeks = [];
   p.bonusStars ||= 0;
-  p.petBoost = Math.min(100000, Math.max(0, Math.floor(Number(p.petBoost) || 0))); // 🌱 성장 쿠폰
+  // 🐾 친구마다 따로 자란다: petXp[친구] = 그 친구가 쌓은 성장, petSince = 지금 친구로 바꿨을 때의 푼 문제 수
+  //    (예전에는 푼 문제 수 + petBoost를 모든 친구가 같이 썼다 → 지금 친구에게 옮긴다)
+  const xpIn = p.petXp && typeof p.petXp === "object" && !Array.isArray(p.petXp) ? p.petXp : null;
+  const answered = Math.max(0, Math.floor(Number(p.totalAnswered) || 0));
+  if (!xpIn) {
+    p.petXp = { [p.petKind || "none"]: answered + Math.max(0, Math.floor(Number(p.petBoost) || 0)) };
+    p.petSince = answered;
+  } else {
+    p.petXp = Object.fromEntries(Object.entries(xpIn).filter(([k, v]) => /^[a-z]{2,10}$/.test(k) && Number.isFinite(Number(v))).map(([k, v]) => [k, Math.min(1000000, Math.max(0, Math.floor(Number(v))))]).slice(0, 60));
+    p.petSince = Math.min(answered, Math.max(0, Math.floor(Number(p.petSince) || 0)));
+  }
+  delete p.petBoost;
   p.coupons = Array.isArray(p.coupons) ? p.coupons.filter((c) => typeof c === "string" && /^[A-Z2-9]{5}$/.test(c)).slice(-300) : [];
   p.attend = { claimed: Math.max(0, Math.floor(Number(p.attend?.claimed) || 0)) };
   p.chests = Array.isArray(p.chests) ? p.chests.filter((d) => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)).slice(-60) : [];
@@ -22765,6 +22776,9 @@ function normalizeProfile(profile) {
     bag: Object.fromEntries(Object.entries(bag).filter(([id, n]) => /^[a-z]{2,12}$/.test(id) && Number.isInteger(n) && n > 0).map(([id, n]) => [id, Math.min(n, 999)])),
   };
   if (p.petKind !== undefined && !(typeof p.petKind === "string" && /^[a-z]{2,10}$/.test(p.petKind))) delete p.petKind;
+  // 🧪 테스트 쿠폰: 별 무한대 · 지금 친구 하나만 초월
+  if (p.testStars !== true) delete p.testStars;
+  delete p.transcendPet;
   if (p.diag && !(typeof p.diag === "object" && levelById(p.diag.levelId) && /^\d{4}-\d{2}-\d{2}$/.test(p.diag.date))) delete p.diag;
   for (const section of ["grammar", "reading", "chunks", "basics", "irregular", "verbPattern", "drill", "speaking", "listening", "writing", "idiom", "affix", "exam", "crossword", "roleplay", "email", "picture", "memory", "spelling", "weekly", "topic", "numbers", "sounds", "story", "speed", "wordchain", "bingo", "aloud", "wordsearch", "wordguess", "riddle", "sentdict", "typing", "wordlist", "monster", "wordrain", "xmas", "pairs", "chant", "culture", "drawgame", "school", "house", "biz", "fishing", "coloring", "basket", "balloon", "parentTalk", "konglish", "linking", "dailyWrite", "board", "clock", "blocks", "storeGame", "tableTalk", "treasure", "position", "blend", "animal20", "scene"]) {
     // 백업 파일에서 온 엉뚱한 값(글자 · 배열 · 숫자 아닌 점수)은 버린다
@@ -23058,11 +23072,11 @@ function petCareAction(profileName, kind, { petMax, snackMax }) {
       c.bond += 2;
       return { ok: true };
     }
-    const stars = Math.floor(profile.totalAnswered / STAR_EVERY) + profile.bonusStars - profile.shop.spent;
+    const stars = profile.testStars ? Infinity : Math.floor(profile.totalAnswered / STAR_EVERY) + profile.bonusStars - profile.shop.spent;
     if (c.snacks >= snackMax || stars < 1) return { ok: false };
     c.snacks += 1;
     c.bond += 5;
-    profile.shop.spent += 1;
+    if (!profile.testStars) profile.shop.spent += 1;
     return { ok: true };
   });
 }
@@ -23070,7 +23084,18 @@ function petCareAction(profileName, kind, { petMax, snackMax }) {
 // 🐾 캐릭터 친구 종류
 function setPetKind(profileName, kindId) {
   updateProfile(profileName, (profile) => {
+    // 친구마다 등급을 따로: 지금 친구의 성장을 저장하고, 새 친구는 자기 성장(처음이면 알)부터
+    const oldKey = profile.petKind || "none";
+    if (oldKey === kindId) return;
+    const grown = petGrowth(profile);
+    profile.petXp[oldKey] = grown;
+    // 처음 친구를 고르는 거면(아직 안 고름) 지금까지 키운 걸 그대로 가져간다
+    if (oldKey === "none") {
+      if (!profile.petXp[kindId]) profile.petXp[kindId] = grown;
+      delete profile.petXp.none;
+    }
     profile.petKind = kindId;
+    profile.petSince = profile.totalAnswered || 0;
   });
 }
 
@@ -23315,7 +23340,7 @@ function buyShopItem(profileName, itemId) {
   if (!item || !shopItemUnlocked(profileName, item) || shopStatus(profileName).stars < item.price) return false;
   updateProfile(profileName, (profile) => {
     if (profile.shop.owned.includes(itemId)) return;
-    profile.shop.spent += item.price;
+    if (!profile.testStars) profile.shop.spent += item.price;
     profile.shop.owned.push(itemId);
     profile.shop.equip[item.cat] = itemId;
   });
@@ -28441,8 +28466,13 @@ const PET_TIERS = [
 const STICKERS = "🌟🍎🐶🐱🚗🎈🍦🦋🌈🐠🍓🚀🐻🌻🎁🦁🍩🐢⚽🎨🐧🍉🚂🐰🌙🦖🍪🎸🐳👑".match(/\p{Extended_Pictographic}/gu);
 const STICKER_EVERY = 15;
 
-// 캐릭터가 자라는 점수: 푼 문제 수 + 🌱 성장 쿠폰
-const petGrowth = (p) => (p.totalAnswered || 0) + (p.petBoost || 0);
+// 캐릭터가 자라는 점수: 친구마다 따로 (저장해 둔 성장 + 이 친구로 바꾼 뒤 푼 문제 수)
+const petGrowth = (p) => (p.petXp?.[p.petKind || "none"] || 0) + Math.max(0, (p.totalAnswered || 0) - (p.petSince ?? (p.totalAnswered || 0)));
+// 지금 친구에게만 성장 더하기 (🌱 · 🏆 쿠폰)
+const addPetXp = (p, n) => {
+  const key = p.petKind || "none";
+  p.petXp = { ...(p.petXp || {}), [key]: (p.petXp?.[key] || 0) + n };
+};
 
 function petStatus(profileName) {
   const p = getProfileData(profileName);
@@ -28457,9 +28487,11 @@ function petStatus(profileName) {
   // 마지막 단계에 닿으면 이름 앞에 등급을 붙이고(신화 유니콘), 다음 목표는 다음 등급
   if (tier && tier.id !== "legend") stage = { ...stage, name: `${tier.name} ${stage.name.replace(/^전설의 /, "")}` };
   if (!next && nextTier) next = { min: nextTier.min, emoji: nextTier.icon, name: `${nextTier.name} 등급`, tier: nextTier };
-  const stickers = Math.min(STICKERS.length, Math.floor(total / STICKER_EVERY));
+  // 스티커는 친구가 아니라 내가 푼 문제 수로 (친구를 바꿔도 그대로)
+  const answered = p.totalAnswered || 0;
+  const stickers = Math.min(STICKERS.length, Math.floor(answered / STICKER_EVERY));
   const prevMin = next?.tier ? tier.min : stage.min;
-  return { total, kind, stages, chosen: !!p.petKind, stage, next, prevMin, tier, aura: tier && tier.id !== "legend" ? ` pet-tier tier-${tier.id}` : "", left: next ? next.min - total : 0, stickers, toNextSticker: STICKER_EVERY - (total % STICKER_EVERY) };
+  return { total, kind, stages, chosen: !!p.petKind, stage, next, prevMin, tier, aura: tier && tier.id !== "legend" ? ` pet-tier tier-${tier.id}` : "", left: next ? next.min - total : 0, stickers, toNextSticker: STICKER_EVERY - (answered % STICKER_EVERY) };
 }
 
 function petCardHtml(profileName) {
@@ -28483,7 +28515,15 @@ function petCardHtml(profileName) {
 
 function renderStickerScreen(root, { profileName, back, choosePet }) {
   const s = petStatus(profileName);
-  const stageIndex = s.stages.findIndex((x) => x.min === s.stage.min);
+  const p = getProfileData(profileName);
+  // 친구마다 따로 자란다: 고르지 않은 친구는 저장해 둔 성장(처음이면 알)
+  const kindLook = (k) => {
+    const g = k.id === s.kind.id ? s.total : p.petXp?.[k.id] || 0;
+    const stages = petStages(k.id);
+    const i = stages.reduce((a, x, j) => (g >= x.min ? j : a), 0);
+    const tier = [...PET_TIERS].reverse().find((t) => g >= t.min);
+    return { emoji: k.stages[i][0], scale: k.stages[i][2], tier };
+  };
   root.innerHTML = `
     <div class="screen screen-stickers">
       <button class="back-btn" id="backBtn">← 홈</button>
@@ -28491,12 +28531,15 @@ function renderStickerScreen(root, { profileName, back, choosePet }) {
       <p class="subtitle">문제를 ${STICKER_EVERY}개 풀 때마다 스티커가 하나씩 생겨요 · ${s.stickers} / ${STICKERS.length}</p>
       <section class="pet-big${petBackgroundStyle(profileName).cls}"${petBackgroundStyle(profileName).style}>
         <span class="pet-aura-wrap${s.aura}">${dressedPetHtml(profileName, s.stage.emoji, true, s.stage.scale)}</span>
-        <p><b>${s.tier ? `${s.tier.icon} ` : ""}${s.stage.name}</b> · 지금까지 ${s.total}문제</p>
+        <p><b>${s.tier ? `${s.tier.icon} ` : ""}${s.stage.name}</b> · 이 친구 성장 ${s.total.toLocaleString()}</p>
         <p class="settings-help">${s.next?.tier ? `${s.left}문제 더 풀면 ${s.next.emoji} ${s.next.name}이 돼요` : s.next ? `${s.left}문제 더 풀면 ${s.next.emoji} ${s.next.name}(으)로 자라요` : "가장 높은 태초 등급이에요!"} · 다음 스티커까지 ${s.toNextSticker}문제</p>
       </section>
-      <h2 class="section-title">🐾 친구 고르기 <small>자란 만큼 그대로 바뀌어요</small></h2>
+      <h2 class="section-title">🐾 친구 고르기 <small>친구마다 따로 자라요 · 새 친구는 알부터, 키운 친구는 그대로</small></h2>
       <div class="pet-kinds">
-        ${PET_KINDS.map((k) => `<button class="pet-kind${k.id === s.kind.id ? " active" : ""}" data-kind="${k.id}" aria-pressed="${k.id === s.kind.id}"><span class="pet-kind-emoji"${k.stages[stageIndex][2] ? ` style="transform:scale(${k.stages[stageIndex][2]})"` : ""}>${k.stages[stageIndex][0]}</span><small>${k.title}</small></button>`).join("")}
+        ${PET_KINDS.map((k) => {
+          const look = kindLook(k);
+          return `<button class="pet-kind${k.id === s.kind.id ? " active" : ""}" data-kind="${k.id}" aria-pressed="${k.id === s.kind.id}"><span class="pet-kind-emoji"${look.scale ? ` style="transform:scale(${look.scale})"` : ""}>${look.emoji}</span><small>${look.tier ? `${look.tier.icon} ` : ""}${k.title}</small></button>`;
+        }).join("")}
       </div>
       <h2 class="section-title">📒 스티커</h2>
       <div class="sticker-grid">
@@ -29475,7 +29518,7 @@ function shopItem(id) {
 function shopStatus(profileName) {
   const p = getProfileData(profileName);
   const earned = Math.floor(p.totalAnswered / STAR_EVERY) + p.bonusStars;
-  return { earned, stars: Math.max(0, earned - p.shop.spent), owned: p.shop.owned, equip: p.shop.equip, toNext: STAR_EVERY - (p.totalAnswered % STAR_EVERY) };
+  return { earned, stars: p.testStars ? TEST_STARS : Math.max(0, earned - p.shop.spent), owned: p.shop.owned, equip: p.shop.equip, toNext: STAR_EVERY - (p.totalAnswered % STAR_EVERY) };
 }
 
 // 꾸민 캐릭터: 머리 · 얼굴 · 목 · 손 아이템 + 캐릭터 + 함께 다니는 친구 + 반짝 효과
@@ -35654,7 +35697,7 @@ function petBuyTreat(profileName, id) {
   const t = petTreat(id);
   if (!t || shopStatus(profileName).stars < t.price) return false;
   updateProfile(profileName, (p) => {
-    p.shop.spent += t.price;
+    if (!p.testStars) p.shop.spent += t.price;
     p.care.bag[id] = (p.care.bag[id] || 0) + 1;
   });
   return true;
@@ -36783,7 +36826,11 @@ const COUPON_KINDS = [
   { id: "bond", emoji: "❤️", name: "친밀도", desc: "친구와 더 친해져요", amounts: [10, 20, 50, 100, 200] },
   { id: "grow", emoji: "🌱", name: "성장", desc: "친구가 문제를 푼 것처럼 자라요", amounts: [10, 30, 50, 100, 300, 500] },
   { id: "tier", emoji: "🏆", name: "등급 올리기", desc: "친구가 바로 다음 등급이 돼요 (전설 → 신화 → 고대 → 초월 …)", amounts: [1, 99], unit: "단계" }, // 99 = 한 번에 최종 진화(태초)
+  // 🧪 부모님 테스트용 (숫자 쿠폰만): 몇 번이든 다시 쓸 수 있고, 한 번 더 넣으면 꺼진다
+  //   1 = ⭐ 별 무한대 (사도 줄지 않음, 한 번 더 넣으면 꺼짐) · 2 = 🌈 지금 친구를 초월로 (그 친구만)
+  { id: "test", emoji: "🧪", name: "테스트", desc: "1 = 별 무한대 · 2 = 지금 친구를 초월로", amounts: [1, 2], reusable: true },
 ];
+const TEST_STARS = 99999; // 별 무한대일 때 보이는 별 수
 const COUPON_WRONG_MAX = 5;
 const COUPON_LOCK_MS = 10 * 60000; // 4자리는 찍어서 맞힐 수 있으니, 5번 틀리면 10분 쉰다 (껐다 켜도 유지)
 
@@ -36800,6 +36847,8 @@ const NUM_COUPONS = {
   "cp91in": "star:500", // 2026-11-27
   "2ruvpd": "tier:99", // 2026-11-27
   "1oqed7": "tier:99", // 2026-11-27
+  "rn8rkp": "test:1", // 2026-11-27
+  "dgadre": "test:2", // 2026-11-27
   // NUM_COUPONS_END
 };
 
@@ -36856,6 +36905,7 @@ function redeemCoupon(profileName, text) {
     return { ok: false, msg: n >= COUPON_WRONG_MAX ? "번호를 여러 번 틀렸어요. 10분 뒤에 다시 해 봐요." : `쿠폰 번호가 맞지 않아요. 다시 확인해 봐요. (${COUPON_WRONG_MAX - n}번 남음)` };
   }
   updateSettings({ couponLock: { n: 0, until: 0 } });
+  if (c.kind.reusable) return redeemTestCoupon(profileName, c.amount);
   const usedBy = couponUsedBy(c.serial) || (getSettings().couponsUsed || []).includes(c.serial);
   if (usedBy) return { ok: false, msg: typeof usedBy === "string" ? `이미 ${escapeHtml(usedBy)}님이 쓴 쿠폰이에요.` : "이미 쓴 쿠폰이에요." };
   const before = petStatus(profileName);
@@ -36867,14 +36917,38 @@ function redeemCoupon(profileName, text) {
     p.coupons = [...p.coupons, c.serial].slice(-300);
     if (c.kind.id === "star") p.bonusStars += c.amount;
     if (c.kind.id === "bond") p.care.bond += c.amount;
-    if (c.kind.id === "grow") p.petBoost += c.amount;
-    if (c.kind.id === "tier") p.petBoost += nextTier.min - petGrowth(p);
+    if (c.kind.id === "grow") addPetXp(p, c.amount);
+    if (c.kind.id === "tier") addPetXp(p, nextTier.min - petGrowth(p));
   });
   updateSettings({ couponsUsed: [...(getSettings().couponsUsed || []), c.serial].slice(-300) });
   const after = petStatus(profileName);
   const levelUp = after.stage.emoji !== before.stage.emoji || after.tier?.id !== before.tier?.id ? after : null;
   const msg = c.kind.id === "tier" ? `${c.amount === 99 ? "👑 최종 진화! " : ""}${nextTier.icon} ${nextTier.name} 등급이 됐어요!` : `${c.kind.emoji} ${c.kind.name} +${c.amount} 받았어요!`;
   return { ok: true, kind: c.kind, amount: c.amount, levelUp, msg };
+}
+
+// 🧪 테스트 쿠폰: 쓴 기록을 남기지 않아 계속 쓸 수 있고, 한 번 더 넣으면 꺼진다
+function redeemTestCoupon(profileName, amount) {
+  const before = petStatus(profileName);
+  let msg = "";
+  updateProfile(profileName, (p) => {
+    if (amount === 1) {
+      if (p.testStars) delete p.testStars;
+      else p.testStars = true;
+      msg = p.testStars ? "⭐ 별 무한대! 마음껏 써 봐요. (한 번 더 넣으면 꺼져요)" : "⭐ 별 무한대를 껐어요.";
+      return;
+    }
+    const goal = PET_TIERS.find((t) => t.id === "transcend").min;
+    if (petGrowth(p) >= goal) {
+      msg = "이미 초월 등급 이상이에요. 다른 친구로 바꾸고 넣어 봐요.";
+      return;
+    }
+    addPetXp(p, goal - petGrowth(p));
+    msg = "🌈 지금 친구가 초월 등급이 됐어요! 이 친구만 초월이고, 다른 친구로 바꾸면 그 친구는 알부터 시작해요.";
+  });
+  const after = petStatus(profileName);
+  const levelUp = after.total > before.total && (after.stage.emoji !== before.stage.emoji || after.tier?.id !== before.tier?.id) ? after : null;
+  return { ok: true, kind: COUPON_KINDS.find((k) => k.id === "test"), amount, levelUp, msg };
 }
 
 // ── 아이 화면: 별 상점 · 친구 방의 쿠폰 등록 칸 ──
