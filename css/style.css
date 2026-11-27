@@ -2774,3 +2774,47 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .try-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .try-text small { color: var(--muted); font-size: 12px; }
 .try-buy { width: auto; margin: 0; padding: 10px 14px; font-size: 15px; white-space: nowrap; }
+
+/* ── 🎆 올해 돌아보기 ── */
+.yr-home { background: linear-gradient(135deg, #1b1f4b, #5b3e96); }
+.goal-home { background: linear-gradient(135deg, #e8590c, #d6336c); }
+.goal-home-text { flex: 1; min-width: 0; }
+.goal-home .progress-track { background: rgba(255, 255, 255, 0.3); margin-top: 6px; }
+.goal-home .progress-fill { background: #fff; }
+.yr-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 360px; border: none; border-radius: 24px; padding: 24px 18px; font: inherit; color: #fff; text-align: center; cursor: pointer; background: linear-gradient(160deg, #1b1f4b, #5b3e96); box-shadow: var(--shadow); animation: yrIn 0.35s ease; }
+@keyframes yrIn { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
+.yr-emoji { font-size: 64px; line-height: 1.1; }
+.yr-emoji .pet-big, .yr-emoji .pet-aura-wrap { display: inline-block; }
+.yr-title { font-size: 20px; font-weight: 800; opacity: 0.92; }
+.yr-big { font-size: clamp(30px, 9vw, 46px); font-weight: 900; color: #ffd43b; line-height: 1.15; overflow-wrap: anywhere; }
+.yr-text { font-size: 16px; line-height: 1.6; opacity: 0.95; }
+.yr-text small { opacity: 0.8; }
+.yr-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; font-size: 28px; }
+.yr-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+.yr-summary div { display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.12); border-radius: 14px; padding: 10px 4px; }
+.yr-summary b { font-size: 22px; color: #ffd43b; }
+.yr-summary small { font-size: 12.5px; opacity: 0.9; }
+.yr-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.yr-nav .chip-btn { min-width: 52px; min-height: 44px; text-align: center; }
+.yr-dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.yr-dots i { width: 9px; height: 9px; border-radius: 50%; background: color-mix(in srgb, var(--text) 25%, transparent); }
+.yr-dots i.on { background: #5b3e96; width: 22px; border-radius: 6px; }
+
+/* ── 🎯 새해 목표 ── */
+.goal-kinds { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.goal-kinds .chip-btn { min-height: 44px; }
+.goal-big { font-size: 22px; font-weight: 800; margin: 4px 0 10px; overflow-wrap: anywhere; }
+.goal-done { font-weight: 800; color: #e8590c; }
+.goal-now .progress-track { height: 14px; }
+
+/* ── 📼 녹음 보관함 ── */
+.month-sentence { display: flex; flex-direction: column; gap: 2px; background: color-mix(in srgb, var(--primary) 10%, var(--card-bg)); border-radius: 14px; padding: 10px 12px; }
+.month-sentence b { font-size: 18px; }
+.month-sentence small { color: var(--muted); }
+.month-list { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 10px 0; }
+.rec-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.rec-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent); }
+.rec-label { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.rec-label b { font-size: 15px; overflow-wrap: anywhere; }
+.rec-label small { color: var(--muted); font-size: 12.5px; }
+.rec-item .chip-btn { min-width: 44px; min-height: 44px; text-align: center; }

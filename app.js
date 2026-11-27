@@ -22731,6 +22731,22 @@ function normalizeProfile(profile) {
   p.chests = Array.isArray(p.chests) ? p.chests.filter((d) => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)).slice(-60) : [];
   const use = p.menuUse && typeof p.menuUse === "object" && !Array.isArray(p.menuUse) ? p.menuUse : {};
   p.menuUse = Object.fromEntries(Object.entries(use).filter(([id, n]) => isPinId(id) && Number.isInteger(n) && n > 0).map(([id, n]) => [id, Math.min(n, 99999)]));
+  // 해마다 세기: yearBase[연도] = 그해 첫 문제 직전의 누적 문제 수, yearDays[연도] = 그해 공부한 날 수
+  const yobj = (v) => (v && typeof v === "object" && !Array.isArray(v) ? v : null);
+  const cleanYears = (v) => Object.fromEntries(Object.entries(v).filter(([y, n]) => /^\d{4}$/.test(y) && Number.isFinite(n) && n >= 0).map(([y, n]) => [y, Math.floor(n)]));
+  p.yearBase = yobj(p.yearBase) ? cleanYears(p.yearBase) : {};
+  if (!("2026" in p.yearBase)) p.yearBase["2026"] = 0; // 앱을 2026년에 시작했다
+  if (!yobj(p.yearDays)) {
+    p.yearDays = {};
+    for (const [k, n] of Object.entries(p.activity)) if (n > 0) p.yearDays[k.slice(0, 4)] = (p.yearDays[k.slice(0, 4)] || 0) + 1;
+  } else p.yearDays = cleanYears(p.yearDays);
+  if (!(Number.isFinite(p.studyDays) && p.studyDays >= 0)) p.studyDays = Object.values(p.yearDays).reduce((a, b) => a + b, 0);
+  p.studyDays = Math.floor(p.studyDays);
+  const yg = yobj(p.yearGoal);
+  if (yg && Number.isInteger(yg.year) && yg.year >= 2026 && yg.year < 2100 && ["answers", "days", "words", "reads", "custom"].includes(yg.kind) && Number.isInteger(yg.target) && yg.target > 0 && yg.target <= 100000) {
+    p.yearGoal = { year: yg.year, kind: yg.kind, target: yg.target, base: Number.isFinite(yg.base) && yg.base >= 0 ? Math.floor(yg.base) : null, done: !!yg.done, text: String(yg.text ?? "").replace(/[<>&"'`]/g, "").trim().slice(0, 30) };
+    if (p.yearGoal.kind === "custom" && !p.yearGoal.text) delete p.yearGoal;
+  } else delete p.yearGoal;
   if (!Array.isArray(p.advent)) p.advent = [];
   if (!Array.isArray(p.homeHidden)) p.homeHidden = [];
   if (!Array.isArray(p.homeCollapsed)) p.homeCollapsed = [];
@@ -23104,6 +23120,12 @@ function markPerfectMonths(profile) {
 function recordActivity(profileName) {
   updateProfile(profileName, (profile) => {
     const today = dateKey();
+    const year = today.slice(0, 4);
+    if (!(year in profile.yearBase)) profile.yearBase[year] = profile.totalAnswered;
+    if (!(profile.activity[today] > 0)) {
+      profile.studyDays += 1;
+      profile.yearDays[year] = (profile.yearDays[year] || 0) + 1;
+    }
     profile.activity[today] = (profile.activity[today] || 0) + 1;
     profile.totalAnswered += 1;
     profile.bestDay = Math.max(profile.bestDay, profile.activity[today]);
@@ -23525,6 +23547,7 @@ const BADGES = [
   { id: "town", emoji: "🏘️", title: "우리 동네 박사", desc: "우리 동네 장소 6곳에서 별 2개 이상", test: (p) => HOUSE_ROOMS.filter((r) => r.group === "town").every((r) => ["listen", "look"].some((m) => { const b = p.house.best[`${r.id}:${m}`]; return b && b.correct / b.total >= 0.8; })) },
   { id: "house", emoji: "🏠", title: "우리 집 박사", desc: "우리 집 물건 방 7곳에서 별 2개 이상", test: (p) => HOUSE_ROOMS.filter((r) => r.group === "home").every((r) => ["listen", "look"].some((m) => { const b = p.house.best[`${r.id}:${m}`]; return b && b.correct / b.total >= 0.8; })) },
   { id: "school8", emoji: "🏫", title: "교과 표현 박사", desc: "교과 핵심 표현 8주제 퀴즈 통과", test: (p) => Object.values(p.school.best).filter((b) => b.correct / b.total >= 0.66).length >= 8 },
+  { id: "yearGoal", emoji: "🎯", title: "목표 달성", desc: "새해 목표 이루기", test: (p) => !!p.yearGoal?.done },
   { id: "vacation", emoji: "⛄", title: "계획 박사", desc: "방학 계획표 세우기", test: (p) => !!p.vacation },
   { id: "advent10", emoji: "🎄", title: "크리스마스 요정", desc: "어드벤트 달력 도장 10개", test: (p) => p.advent.length >= 10 },
   { id: "petLove", emoji: "💕", title: "단짝 친구", desc: "캐릭터 친밀도 50 넘기기", test: (p) => p.care.bond >= 50 },
@@ -24915,6 +24938,8 @@ function renderHomeScreen(root, ctx) {
       ${todayCardHtml(profileName, { daily, dueWrong, wrongTotal, next })}
       ${vacationHomeCardHtml(profileName)}
       ${adventHomeCardHtml(profileName)}
+      ${yearReviewHomeCardHtml()}
+      ${yearGoalHomeCardHtml(profileName)}
       ${todayPhraseHtml(profileName)}
 
 
@@ -24936,6 +24961,8 @@ function renderHomeScreen(root, ctx) {
           ${homeTile({ id: "irregularBtn", emoji: "🔁", title: "불규칙 동사", meta: `${sectionCount(profileName, "irregular", IRREGULAR_SETS)} / ${IRREGULAR_SETS.length} 단계` })}
           ${show.advanced ? homeTile({ id: "verbPatternBtn", emoji: "🔀", title: "to부정사 · 동명사", meta: `${sectionCount(profileName, "verbPattern", VERB_PATTERN_GROUPS)} / ${VERB_PATTERN_GROUPS.length} 묶음` }) : ""}
           ${isKid ? homeTile({ id: "schoolBtn", emoji: "🏫", title: "교과 핵심 표현", meta: `${sectionCount(profileName, "school", SCHOOL_TALKS)} / ${SCHOOL_TALKS.length} 주제` }) : ""}
+          ${homeTile({ id: "yearReviewBtn", emoji: "🎆", title: "올해 돌아보기", meta: `${reviewYear()}년 내 기록` })}
+          ${homeTile({ id: "yearGoalBtn", emoji: "🎯", title: "새해 목표", meta: yearGoalOf(profileName) ? `${yearGoalOf(profileName).pct}% 이룸` : `${yearGoalYear()}년 목표 정하기` })}
           ${homeTile({ id: "vacationBtn", emoji: "⛄", title: "방학 계획표", meta: getProfileData(profileName).vacation ? escapeHtml(getProfileData(profileName).vacation.title) : "계획 세우기" })}
           ${homeTile({ id: "chantBtn", emoji: "🎵", title: "챈트", meta: `${sectionCount(profileName, "chant", CHANTS)} / ${CHANTS.length}곡` })}
           ${homeTile({ id: "cultureBtn", emoji: "🌍", title: "세계 문화", meta: `카드 ${sectionCount(profileName, "culture", CULTURE_CARDS)} / ${CULTURE_CARDS.length}` })}
@@ -24955,6 +24982,7 @@ function renderHomeScreen(root, ctx) {
           ${show.advanced ? homeTile({ id: "linkingBtn", emoji: "🗣️", title: "연음 · 발음", meta: "Check it out → 체끼라웃" }) : ""}
           ${show.advanced ? homeTile({ id: "bizBtn", emoji: "💼", title: "업무 영어 표현", meta: "회의 · 이메일 · 발표" }) : ""}
           ${show.practice ? homeTile({ id: "practiceBtn", emoji: "💼", title: "실전 연습", meta: "롤플레이 · 이메일" }) : ""}
+          ${recSupported ? homeTile({ id: "recArchiveBtn", emoji: "📼", title: "녹음 보관함", meta: "이달의 목소리" }) : ""}
           ${homeTile({ id: "speakingBtn", emoji: "🎙️", title: "따라 말하기", meta: `${sectionCount(profileName, "speaking", TALK_GROUPS)} / ${TALK_GROUPS.length} 묶음` })}
           ${homeTile({ id: "listeningBtn", emoji: "🎧", title: "듣기 평가", meta: `${LISTENING_SETS.filter((s) => getSectionBest(profileName, "listening", s.levelId)).length} / ${LISTENING_SETS.length} 단계` })}
           ${homeTile({ id: "writingBtn", emoji: "✍️", title: "영작 연습", meta: "뜻 보고 문장 만들기" })}
@@ -25079,6 +25107,11 @@ function renderHomeScreen(root, ctx) {
   bind("wordListsBtn", actions.openWordLists);
   bind("roadmapBtn", actions.openRoadmap);
   bind("adventBtn", actions.openAdvent);
+  bind("yearReviewBtn", actions.openYearReview);
+  bind("yearReviewCardBtn", actions.openYearReview);
+  bind("yearGoalBtn", actions.openYearGoal);
+  bind("yearGoalCardBtn", actions.openYearGoal);
+  bind("recArchiveBtn", actions.openRecArchive);
   bind("schoolBtn", actions.openSchool);
   bind("houseBtn", actions.openHouse);
   bind("bizBtn", actions.openBiz);
@@ -30707,7 +30740,9 @@ async function toggleRecording(key, btn, root) {
     const old = recordings.get(key);
     if (old) URL.revokeObjectURL(old);
     recordings.delete(key);
-    recordings.set(key, URL.createObjectURL(new Blob(chunks, { type: rec.mimeType || "audio/mp4" })));
+    const blob = new Blob(chunks, { type: rec.mimeType || "audio/mp4" });
+    recordings.set(key, URL.createObjectURL(blob));
+    if (typeof archiveRecording === "function") archiveRecording(currentProfile(), key, blob);
     while (recordings.size > REC_KEEP) {
       const [firstKey, firstUrl] = recordings.entries().next().value;
       URL.revokeObjectURL(firstUrl);
@@ -32741,6 +32776,9 @@ const HOME_TILE_ALIASES = {
   diagBtn: "test 진단 레벨",
   schoolBtn: "school 교과서 학교 교과",
   vacationBtn: "vacation 방학 계획",
+  yearReviewBtn: "year review 연말 결산 한 해 올해 기록",
+  yearGoalBtn: "goal new year 새해 목표 계획 다짐",
+  recArchiveBtn: "record voice 녹음 목소리 발음 보관",
   parentTalkBtn: "parent child kids 아이 육아 엄마 아빠 부모 집에서",
   konglishBtn: "konglish 콩글리시 틀린 영어 핸드폰",
   linkingBtn: "linking pronunciation 연음 발음 gonna wanna",
@@ -35843,15 +35881,14 @@ function petPhotoCanvas(profileName) {
   return canvas;
 }
 
-async function sharePetPhoto(profileName) {
-  const canvas = petPhotoCanvas(profileName);
+// 그림(canvas)을 공유하거나, 공유가 안 되면 파일로 저장한다
+async function shareCanvasImage(canvas, name, title) {
   const blob = await new Promise((r) => canvas.toBlob(r, "image/png"));
   if (!blob) return showToast(`<span class="toast-emoji">😢</span><span>사진을 만들지 못했어요</span>`);
-  const name = `my-english-pet-${dateKey()}.png`;
   const file = typeof File === "function" ? new File([blob], name, { type: "image/png" }) : null;
   if (file && navigator.canShare?.({ files: [file] })) {
     try {
-      await navigator.share({ files: [file], title: "내 영어 친구" });
+      await navigator.share({ files: [file], title });
       return;
     } catch (e) {
       if (e?.name === "AbortError") return;
@@ -35866,6 +35903,10 @@ async function sharePetPhoto(profileName) {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 4000);
   showToast(`<span class="toast-emoji">📸</span><span>사진을 저장했어요</span>`);
+}
+
+function sharePetPhoto(profileName) {
+  return shareCanvasImage(petPhotoCanvas(profileName), `my-english-pet-${dateKey()}.png`, "내 영어 친구");
 }
 
 // ── 👨‍👩‍👧 가족 놀이터: 가족 캐릭터를 한자리에 모으고, 내 가방 간식을 선물해요 ──
@@ -36083,6 +36124,603 @@ function bindMenuUsage(root, profileName, refresh) {
       },
     });
   });
+}
+
+;
+
+/* ── js/screens/yearly.js ── */
+// 🎆 올해 돌아보기 · 🎯 새해 목표 · 🎙️ 녹음 보관함
+
+const isKidName = (profileName) => {
+  const level = getPreferredLevel(profileName);
+  return !level || level.startsWith("elementary");
+};
+
+// ── 🎆 올해 돌아보기 ──
+// 1월에는 지난해를, 나머지 달에는 올해를 돌아본다
+function reviewYear(now = new Date()) {
+  return now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+}
+
+// 12월 15일 ~ 1월 31일에는 홈에 카드를 띄운다
+function reviewSeason(now = new Date()) {
+  return (now.getMonth() === 11 && now.getDate() >= 15) || now.getMonth() === 0;
+}
+
+function yearAnswers(p, year) {
+  const start = p.yearBase[String(year)];
+  if (start === undefined) return 0;
+  const end = p.yearBase[String(year + 1)] ?? p.totalAnswered;
+  return Math.max(0, end - start);
+}
+
+function yearStats(profileName, year) {
+  const p = getProfileData(profileName);
+  const y = String(year);
+  const answers = yearAnswers(p, year);
+  const days = p.yearDays[y] || 0;
+  const badges = Object.entries(p.badges)
+    .filter(([, d]) => typeof d === "string" && d.startsWith(y))
+    .map(([id]) => BADGES.find((b) => b.id === id))
+    .filter(Boolean);
+  const use = p.menuUse;
+  const topMenus = [...HOME_TILE_REGISTRY.entries()]
+    .map(([id, t]) => ({ ...t, n: use[id] || 0 }))
+    .filter((t) => t.n > 0)
+    .sort((a, b) => b.n - a.n)
+    .slice(0, 3);
+  return {
+    year,
+    answers,
+    days,
+    perDay: days ? Math.round(answers / days) : 0,
+    bestStreak: p.bestStreak,
+    bestDay: p.bestDay,
+    perfectMonths: p.perfectMonths.filter((m) => m.startsWith(y)).map((m) => Number(m.slice(5))),
+    badges,
+    vocab: getVocabStats(profileName),
+    reads: Object.values(p.readingRead).filter((d) => typeof d === "string" && d.startsWith(y)).length,
+    diary: p.diary.filter((e) => e.d.startsWith(y)).length,
+    topMenus,
+    pet: isKidName(profileName) ? petStatus(profileName) : null,
+    bond: p.care.bond,
+    items: p.shop.owned.length,
+  };
+}
+
+function reviewCards(profileName, s) {
+  const cards = [];
+  const name = escapeHtml(profileName);
+  cards.push({
+    emoji: "🎆",
+    title: `${name}의 ${s.year}년`,
+    big: "",
+    text: `올해 영어 공부를 돌아봐요!<br><small>화면을 누르거나 ▶를 눌러 넘겨요</small>`,
+  });
+  cards.push({
+    emoji: "✏️",
+    title: "올해 푼 문제",
+    big: `${s.answers.toLocaleString()}개`,
+    text: s.days ? `${s.days}일 동안 공부했고, 하루에 평균 <b>${s.perDay}문제</b>씩 풀었어요` : "아직 기록이 없어요. 내년엔 같이 시작해요!",
+  });
+  cards.push({
+    emoji: "🔥",
+    title: "꾸준함",
+    big: `${s.bestStreak}일 연속`,
+    text: `가장 길게 이어서 공부한 기록이에요${s.bestDay ? `<br>하루에 가장 많이 푼 날은 <b>${s.bestDay}문제</b>!` : ""}${s.perfectMonths.length ? `<br>🏆 하루도 안 빠진 달: <b>${s.perfectMonths.map((m) => `${m}월`).join(", ")}</b>` : ""}`,
+  });
+  cards.push({
+    emoji: "📇",
+    title: "내 머릿속 단어",
+    big: `${s.vocab.mastered}개`,
+    text: `단어 카드로 외운 단어예요${s.vocab.learned > s.vocab.mastered ? ` · 공부 중인 단어 ${s.vocab.learned - s.vocab.mastered}개` : ""}${s.reads ? `<br>📖 읽은 글 <b>${s.reads}편</b>` : ""}${s.diary ? ` · 📒 영어 일기 <b>${s.diary}편</b>` : ""}`,
+  });
+  if (s.badges.length) {
+    cards.push({
+      emoji: "🏅",
+      title: "올해 받은 배지",
+      big: `${s.badges.length}개`,
+      text: `<span class="yr-badges">${s.badges.slice(0, 24).map((b) => `<span title="${b.title}">${b.emoji}</span>`).join("")}</span>`,
+    });
+  }
+  if (s.topMenus.length) {
+    cards.push({
+      emoji: "❤️",
+      title: "제일 많이 한 것",
+      big: `${s.topMenus[0].emoji} ${s.topMenus[0].title}`,
+      text: s.topMenus.slice(1).map((t, i) => `${i + 2}위 ${t.emoji} ${t.title}`).join("<br>") || "또 하고 싶은 메뉴를 찾아봐요!",
+    });
+  }
+  if (s.pet) {
+    const lv = BOND_LEVELS[bondLevelIndex(s.bond)];
+    cards.push({
+      emoji: "",
+      pet: true,
+      title: "함께 자란 내 친구",
+      big: `${s.pet.tier ? `${s.pet.tier.icon} ` : ""}${s.pet.stage.name}`,
+      text: `${lv.icon} 친밀도 <b>${lv.name}</b> · 꾸미기 아이템 <b>${s.items}개</b>`,
+    });
+  }
+  cards.push({
+    emoji: "🎉",
+    title: "정말 잘했어요!",
+    big: "",
+    summary: true,
+    text: "내년에도 같이 해요!",
+  });
+  return cards;
+}
+
+function yearSummaryHtml(s) {
+  return `
+    <div class="yr-summary">
+      <div><b>${s.answers.toLocaleString()}</b><small>✏️ 푼 문제</small></div>
+      <div><b>${s.days}</b><small>📅 공부한 날</small></div>
+      <div><b>${s.bestStreak}</b><small>🔥 최고 연속</small></div>
+      <div><b>${s.vocab.mastered}</b><small>📇 외운 단어</small></div>
+      <div><b>${s.badges.length}</b><small>🏅 배지</small></div>
+      <div><b>${s.reads + s.diary}</b><small>📖 읽고 쓴 글</small></div>
+    </div>`;
+}
+
+function yearPhotoCanvas(profileName, s) {
+  const W = 720;
+  const H = 960;
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, "#1b1f4b");
+  grad.addColorStop(1, "#5b3e96");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const KO = `"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif`;
+  ctx.font = `90px ${EMOJI_FONT}`;
+  ctx.fillText(s.pet ? s.pet.stage.emoji : "🎆", W / 2, 120);
+  ctx.fillStyle = "#fff";
+  ctx.font = `bold 52px ${KO}`;
+  ctx.fillText(`${profileName}의 ${s.year}년 영어`, W / 2, 230);
+  const rows = [
+    ["✏️", "푼 문제", `${s.answers.toLocaleString()}개`],
+    ["📅", "공부한 날", `${s.days}일`],
+    ["🔥", "최고 연속", `${s.bestStreak}일`],
+    ["📇", "외운 단어", `${s.vocab.mastered}개`],
+    ["🏅", "받은 배지", `${s.badges.length}개`],
+  ];
+  if (s.pet) rows.push(["🐾", "내 친구", s.pet.stage.name.slice(0, 12)]);
+  rows.forEach(([em, label, val], i) => {
+    const y = 330 + i * 92;
+    ctx.fillStyle = "rgba(255,255,255,0.12)";
+    ctx.fillRect(70, y - 38, W - 140, 76);
+    ctx.fillStyle = "#fff";
+    ctx.font = `40px ${EMOJI_FONT}`;
+    ctx.textAlign = "left";
+    ctx.fillText(em, 96, y);
+    ctx.fillStyle = "#e3dcff";
+    ctx.font = `32px ${KO}`;
+    ctx.fillText(label, 160, y);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#fff";
+    ctx.font = `bold 38px ${KO}`;
+    ctx.fillText(val, W - 96, y);
+    ctx.textAlign = "center";
+  });
+  ctx.fillStyle = "#ffd43b";
+  ctx.font = `bold 36px ${KO}`;
+  ctx.fillText(`${s.year + 1}년에도 화이팅!`, W / 2, H - 80);
+  return canvas;
+}
+
+function renderYearReviewScreen(root, { profileName, actions }) {
+  const s = yearStats(profileName, reviewYear());
+  const cards = reviewCards(profileName, s);
+  let i = 0;
+  const draw = () => {
+    const c = cards[i];
+    root.innerHTML = `
+      <div class="screen screen-year">
+        <button class="back-btn" id="backBtn">← 홈</button>
+        <h1 class="title">🎆 ${s.year}년 ${reviewSeason() ? "돌아보기" : "지금까지"}</h1>
+        <button class="yr-card" id="yrCard" aria-label="다음 장">
+          <span class="yr-emoji">${c.pet ? `<span class="pet-aura-wrap${s.pet.aura}">${dressedPetHtml(profileName, s.pet.stage.emoji, true, s.pet.stage.scale)}</span>` : c.emoji}</span>
+          <span class="yr-title">${c.title}</span>
+          ${c.big ? `<span class="yr-big">${c.big}</span>` : ""}
+          ${c.summary ? yearSummaryHtml(s) : ""}
+          <span class="yr-text">${c.text}</span>
+        </button>
+        <div class="yr-nav">
+          <button class="chip-btn" id="yrPrev" ${i === 0 ? "disabled" : ""} aria-label="이전">◀</button>
+          <span class="yr-dots">${cards.map((_, k) => `<i class="${k === i ? "on" : ""}"></i>`).join("")}</span>
+          <button class="chip-btn" id="yrNext" ${i === cards.length - 1 ? "disabled" : ""} aria-label="다음">▶</button>
+        </div>
+        ${
+          i === cards.length - 1
+            ? `<button class="primary-btn" id="yrPhoto">📸 사진으로 저장 · 보내기</button>
+               <button class="secondary-btn" id="yrGoal">🎯 ${yearGoalYear()}년 목표 정하러 가기</button>`
+            : ""
+        }
+      </div>`;
+    root.querySelector("#backBtn").addEventListener("click", actions.back);
+    const go = (d) => {
+      i = Math.max(0, Math.min(cards.length - 1, i + d));
+      draw();
+    };
+    root.querySelector("#yrCard").addEventListener("click", () => i < cards.length - 1 && go(1));
+    root.querySelector("#yrPrev").addEventListener("click", () => go(-1));
+    root.querySelector("#yrNext").addEventListener("click", () => go(1));
+    root.querySelector("#yrPhoto")?.addEventListener("click", () => shareCanvasImage(yearPhotoCanvas(profileName, s), `my-english-${s.year}.png`, `${s.year}년 영어 돌아보기`));
+    root.querySelector("#yrGoal")?.addEventListener("click", actions.goal);
+  };
+  draw();
+}
+
+function yearReviewHomeCardHtml() {
+  if (!reviewSeason()) return "";
+  const y = reviewYear();
+  return `
+    <button class="advent-home yr-home" id="yearReviewCardBtn">
+      <span class="advent-home-emoji">🎆</span>
+      <span><b>${y}년 돌아보기</b><small>올해 푼 문제 · 외운 단어 · 받은 배지를 한눈에</small></span>
+    </button>`;
+}
+
+// ── 🎯 새해 목표 ──
+// 11 · 12월에 정하면 다음 해 목표, 그 밖에는 올해 목표
+function yearGoalYear(now = new Date()) {
+  return now.getMonth() >= 10 ? now.getFullYear() + 1 : now.getFullYear();
+}
+
+const YEAR_GOAL_KINDS = [
+  { id: "answers", emoji: "✏️", label: "문제 풀기", unit: "문제", options: [1000, 2000, 3000, 5000], value: (p) => p.totalAnswered },
+  { id: "days", emoji: "📅", label: "공부한 날", unit: "일", options: [100, 150, 200, 300], value: (p) => p.studyDays },
+  { id: "words", emoji: "📇", label: "단어 외우기", unit: "개", options: [100, 200, 300, 500], value: (p) => Object.values(p.vocab).filter((v) => v.box >= VOCAB_MASTERED_BOX).length },
+  { id: "reads", emoji: "📖", label: "읽기 지문", unit: "편", options: [20, 40, 60, 100], value: (p) => Object.keys(p.readingRead).length },
+  { id: "custom", emoji: "✍️", label: "내가 정한 목표", unit: "", options: [1], value: () => 0 },
+];
+const YEAR_GOAL_STARS = 30;
+const yearGoalKind = (id) => YEAR_GOAL_KINDS.find((k) => k.id === id);
+
+// 목표가 시작된 해가 되면 그때 숫자를 출발점으로 잡는다
+function yearGoalOf(profileName) {
+  const p = getProfileData(profileName);
+  const g = p.yearGoal;
+  const now = new Date().getFullYear();
+  if (!g || g.year < now || g.year > now + 1) return null;
+  const kind = yearGoalKind(g.kind);
+  if (g.year === now && g.base === null && kind.id !== "custom") {
+    const base = kind.value(p);
+    updateProfile(profileName, (q) => {
+      if (q.yearGoal) q.yearGoal.base = base;
+    });
+    g.base = base;
+  }
+  const started = g.year === now;
+  const progress = kind.id === "custom" ? (g.done ? 1 : 0) : started ? Math.max(0, kind.value(p) - g.base) : 0;
+  return { ...g, kind, started, progress, pct: Math.min(100, Math.round((progress / g.target) * 100)), reached: progress >= g.target };
+}
+
+function setYearGoal(profileName, kindId, target, text) {
+  const year = yearGoalYear();
+  updateProfile(profileName, (p) => {
+    const kind = yearGoalKind(kindId);
+    const same = p.yearGoal && p.yearGoal.year === year && p.yearGoal.kind === kindId;
+    p.yearGoal = {
+      year,
+      kind: kindId,
+      target: kindId === "custom" ? 1 : target,
+      base: same ? p.yearGoal.base : year === new Date().getFullYear() && kindId !== "custom" ? kind.value(p) : null,
+      done: false,
+      text: kindId === "custom" ? cleanText(text, 30) : "",
+    };
+  });
+}
+
+function claimYearGoal(profileName) {
+  const g = yearGoalOf(profileName);
+  if (!g || g.done || !(g.reached || g.kind.id === "custom") || !g.started) return false;
+  updateProfile(profileName, (p) => {
+    p.yearGoal.done = true;
+    p.bonusStars += YEAR_GOAL_STARS;
+  });
+  return true;
+}
+
+function yearGoalLabel(g) {
+  return g.kind.id === "custom" ? escapeHtml(g.text) : `${g.kind.label} ${g.target.toLocaleString()}${g.kind.unit}`;
+}
+
+function yearGoalHomeCardHtml(profileName) {
+  const g = yearGoalOf(profileName);
+  const m = new Date().getMonth();
+  if (!g) {
+    if (!(m >= 10 || m === 0)) return "";
+    return `
+      <button class="advent-home goal-home" id="yearGoalCardBtn">
+        <span class="advent-home-emoji">🎯</span>
+        <span><b>${yearGoalYear()}년 새해 목표 정하기</b><small>목표를 이루면 ⭐ ${YEAR_GOAL_STARS}개와 배지를 받아요</small></span>
+      </button>`;
+  }
+  const sub = g.done ? "🎉 목표를 이뤘어요!" : !g.started ? `1월 1일부터 세기 시작해요` : g.kind.id === "custom" ? "이루면 눌러서 보상 받기" : g.reached ? "🎁 다 이뤘어요! 눌러서 보상 받기" : `${g.progress.toLocaleString()} / ${g.target.toLocaleString()}${g.kind.unit}`;
+  return `
+    <button class="advent-home goal-home" id="yearGoalCardBtn">
+      <span class="advent-home-emoji">${g.kind.emoji}</span>
+      <span class="goal-home-text"><b>🎯 ${g.year}년 목표: ${yearGoalLabel(g)}</b><small>${sub}</small>${g.kind.id !== "custom" && g.started ? `<span class="progress-track"><span class="progress-fill" style="width:${g.pct}%"></span></span>` : ""}</span>
+    </button>`;
+}
+
+function renderYearGoalScreen(root, { profileName, actions }) {
+  const g = yearGoalOf(profileName);
+  const year = yearGoalYear();
+  let editing = !g;
+  let kindId = g?.kind.id || "answers";
+  let target = g && g.kind.id !== "custom" ? g.target : yearGoalKind(kindId).options[1];
+  const draw = () => {
+    const cur = yearGoalOf(profileName);
+    const kind = yearGoalKind(kindId);
+    root.innerHTML = `
+      <div class="screen screen-goal-year">
+        <button class="back-btn" id="backBtn">← 홈</button>
+        <h1 class="title">🎯 ${editing ? year : cur.year}년 목표</h1>
+        ${
+          cur && !editing
+            ? `<section class="settings-card goal-now">
+                <p class="goal-big">${cur.kind.emoji} ${yearGoalLabel(cur)}</p>
+                ${
+                  cur.kind.id === "custom"
+                    ? ""
+                    : `<span class="progress-track"><span class="progress-fill" style="width:${cur.pct}%"></span></span>
+                       <p class="settings-help">${cur.started ? `지금 <b>${cur.progress.toLocaleString()}</b> / ${cur.target.toLocaleString()}${cur.kind.unit} (${cur.pct}%)` : `${cur.year}년 1월 1일부터 세기 시작해요`}</p>`
+                }
+                ${
+                  cur.done
+                    ? `<p class="goal-done">🎉 목표를 이뤘어요! ⭐ ${YEAR_GOAL_STARS}개를 받았어요</p>`
+                    : cur.started && (cur.reached || cur.kind.id === "custom")
+                      ? `<button class="primary-btn" id="claimBtn">${cur.kind.id === "custom" ? "🎉 목표를 이뤘어요!" : "🎁 보상 받기"} (⭐ ${YEAR_GOAL_STARS})</button>`
+                      : ""
+                }
+                ${cur.done && cur.year === year ? "" : `<button class="secondary-btn" id="editBtn">${cur.year !== year ? `🎯 ${year}년 새 목표 정하기` : "✏️ 목표 바꾸기"}</button>`}
+              </section>`
+            : `<p class="subtitle">${year}년에 이루고 싶은 목표를 하나 골라요.<br>목표를 이루면 ⭐ ${YEAR_GOAL_STARS}개와 🎯 배지를 받아요!</p>
+               <section class="settings-card">
+                 <h2 class="section-title">무엇을 할까요?</h2>
+                 <div class="goal-kinds">${YEAR_GOAL_KINDS.map((k) => `<button class="chip-btn${k.id === kindId ? " on" : ""}" data-kind="${k.id}">${k.emoji} ${k.label}</button>`).join("")}</div>
+                 ${
+                   kind.id === "custom"
+                     ? `<input class="text-input" id="goalText" maxlength="30" placeholder="예: 영어 학원 시험 100점 받기" value="${cur?.kind.id === "custom" ? cur.text : ""}">
+                        <p class="settings-help">이뤘을 때 목표 화면에서 직접 눌러요.</p>`
+                     : `<h2 class="section-title">얼마나?</h2>
+                        <div class="goal-kinds">${kind.options.map((n) => `<button class="chip-btn${n === target ? " on" : ""}" data-target="${n}">${n.toLocaleString()}${kind.unit}</button>`).join("")}</div>
+                        <p class="settings-help">${kind.id === "answers" ? "하루에 " + Math.ceil(target / 300) + "문제쯤 풀면 돼요." : kind.id === "days" ? "일주일에 " + Math.ceil((target / 365) * 7) + "일쯤 공부하면 돼요." : kind.id === "words" ? "📇 단어장 카드에서 3번 넘게 맞힌 단어를 세요." : "📖 읽기 · 📰 뉴스 지문을 세요."}</p>`
+                 }
+                 <button class="primary-btn" id="saveBtn">🎯 이 목표로 정하기</button>
+                 ${cur ? `<button class="secondary-btn" id="cancelBtn">취소</button>` : ""}
+               </section>`
+        }
+      </div>`;
+    root.querySelector("#backBtn").addEventListener("click", actions.back);
+    root.querySelectorAll("[data-kind]").forEach((b) =>
+      b.addEventListener("click", () => {
+        kindId = b.dataset.kind;
+        target = yearGoalKind(kindId).options[Math.min(1, yearGoalKind(kindId).options.length - 1)];
+        draw();
+      })
+    );
+    root.querySelectorAll("[data-target]").forEach((b) =>
+      b.addEventListener("click", () => {
+        target = Number(b.dataset.target);
+        draw();
+      })
+    );
+    root.querySelector("#saveBtn")?.addEventListener("click", () => {
+      const text = root.querySelector("#goalText")?.value || "";
+      if (kindId === "custom" && !cleanText(text, 30)) {
+        root.querySelector("#goalText").focus();
+        return;
+      }
+      const old = yearGoalOf(profileName);
+      const save = () => {
+        setYearGoal(profileName, kindId, target, text);
+        editing = false;
+        announceBadges(checkNewBadges(profileName));
+        draw();
+      };
+      if (old && old.started && old.kind.id !== kindId && old.progress > 0) {
+        showConfirmModal({ message: `목표 종류를 바꾸면 지금까지 센 ${old.progress.toLocaleString()}${old.kind.unit}은 처음부터 다시 세요. 바꿀까요?`, confirmText: "바꾸기", cancelText: "취소", onConfirm: save });
+      } else save();
+    });
+    root.querySelector("#cancelBtn")?.addEventListener("click", () => {
+      editing = false;
+      draw();
+    });
+    root.querySelector("#editBtn")?.addEventListener("click", () => {
+      editing = true;
+      draw();
+    });
+    root.querySelector("#claimBtn")?.addEventListener("click", () => {
+      const go = () => {
+        if (!claimYearGoal(profileName)) return;
+        burstConfetti();
+        playSound("badge");
+        showToast(`<span class="toast-emoji">🎯</span><span><b>목표 달성!</b> ⭐ ${YEAR_GOAL_STARS}개를 받았어요</span>`);
+        announceBadges(checkNewBadges(profileName));
+        draw();
+      };
+      if (yearGoalOf(profileName).kind.id === "custom") showConfirmModal({ message: "정말 목표를 이뤘나요? 가족과 같이 확인해요!", confirmText: "네, 이뤘어요", cancelText: "아직이요", onConfirm: go });
+      else go();
+    });
+  };
+  draw();
+}
+
+// ── 🎙️ 녹음 보관함: 녹음을 이 기기(IndexedDB)에 모아 두고 나중에 다시 듣는다 ──
+const REC_DB_NAME = "englishword-rec";
+const REC_AUTO_KEEP = 40; // ⭐ 안 한 녹음은 사람마다 최근 40개만
+const MONTHLY_SENTENCE = { en: "Hello! I love learning English with my family.", ko: "안녕! 나는 가족과 영어 공부하는 게 정말 좋아." };
+let recDbPromise = null;
+let recArchivedHook = null;
+
+function recDb() {
+  if (!window.indexedDB) return Promise.reject(new Error("no-idb"));
+  recDbPromise ||= new Promise((resolve, reject) => {
+    const req = indexedDB.open(REC_DB_NAME, 1);
+    req.onupgradeneeded = () => {
+      const store = req.result.createObjectStore("recs", { keyPath: "id", autoIncrement: true });
+      store.createIndex("profile", "profile");
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => {
+      recDbPromise = null;
+      reject(req.error);
+    };
+  });
+  return recDbPromise;
+}
+
+function recTx(mode, fn) {
+  return recDb().then(
+    (db) =>
+      new Promise((resolve, reject) => {
+        const tx = db.transaction("recs", mode);
+        const out = fn(tx.objectStore("recs"));
+        tx.oncomplete = () => resolve(out?.result ?? out);
+        tx.onerror = () => reject(tx.error);
+      })
+  );
+}
+
+function listArchivedRecs(profileName) {
+  return recTx("readonly", (store) => store.index("profile").getAll(profileName)).then((rows) => (rows || []).sort((a, b) => b.time - a.time));
+}
+
+function recLabel(key) {
+  const body = key.slice(2);
+  if (key.startsWith("t:")) return TABLE_TALK.find((c) => c.id === body)?.say || body;
+  if (key.startsWith("m:")) return MONTHLY_SENTENCE.en;
+  return body;
+}
+
+// 녹음을 마치면 extras.js가 부른다. 같은 문장은 가장 최근 것만, ⭐ 안 한 것은 최근 REC_AUTO_KEEP개만 남긴다.
+async function archiveRecording(profileName, key, blob) {
+  if (!profileName || !blob?.size) return;
+  try {
+    const rows = await listArchivedRecs(profileName);
+    const monthly = key.startsWith("m:") ? key.slice(2) : null;
+    const drop = rows.filter((r) => r.key === key && !(r.keep && !monthly)).map((r) => r.id);
+    const loose = rows.filter((r) => !r.keep && !r.monthly && !drop.includes(r.id));
+    if (!monthly) drop.push(...loose.slice(REC_AUTO_KEEP - 1).map((r) => r.id));
+    await recTx("readwrite", (store) => {
+      drop.forEach((id) => store.delete(id));
+      store.add({ profile: profileName, key, label: recLabel(key).slice(0, 120), date: dateKey(), time: Date.now(), blob, monthly, keep: !!monthly });
+    });
+    navigator.storage?.persist?.().catch(() => {});
+    recArchivedHook?.();
+  } catch {
+    // 보관함을 못 써도 녹음 · 듣기는 그대로 된다
+  }
+}
+
+function renderRecArchiveScreen(root, { profileName, actions }) {
+  let rows = null;
+  let failed = false;
+  let playing = null;
+  const urls = new Map();
+  const urlOf = (r) => {
+    if (!urls.has(r.id)) urls.set(r.id, URL.createObjectURL(r.blob));
+    return urls.get(r.id);
+  };
+  const load = () =>
+    listArchivedRecs(profileName)
+      .then((r) => (rows = r))
+      .catch(() => (failed = true))
+      .then(draw);
+  recArchivedHook = () => root.querySelector(".screen-recs") && load();
+  const monthLabel = (m) => `${m.slice(0, 4)}년 ${Number(m.slice(5))}월`;
+  const thisMonth = dateKey().slice(0, 7);
+  const rowHtml = (r) => `
+    <li class="rec-item">
+      <button class="speak-btn" data-play="${r.id}" aria-label="듣기">▶</button>
+      <span class="rec-label"><b>${escapeHtml(r.label)}</b><small>${r.date}</small></span>
+      <button class="chip-btn${r.keep ? " on" : ""}" data-keep="${r.id}" aria-label="오래 보관" title="⭐ 하면 자동으로 지워지지 않아요">${r.keep ? "⭐" : "☆"}</button>
+      <button class="chip-btn" data-del="${r.id}" aria-label="지우기">🗑</button>
+    </li>`;
+  function draw() {
+    const monthly = (rows || []).filter((r) => r.monthly).sort((a, b) => (a.monthly < b.monthly ? -1 : 1));
+    const others = (rows || []).filter((r) => !r.monthly);
+    const doneThisMonth = monthly.some((r) => r.monthly === thisMonth);
+    root.innerHTML = `
+      <div class="screen screen-recs">
+        <button class="back-btn" id="backBtn">← 홈</button>
+        <h1 class="title">🎙️ 녹음 보관함</h1>
+        <p class="subtitle">⏺로 녹음한 내 목소리가 여기에 모여요.<br><small>이 휴대폰에만 저장돼요 (백업 파일에는 안 들어가요)</small></p>
+        ${
+          !recSupported || failed
+            ? `<p class="settings-help">이 기기에서는 녹음 보관함을 쓸 수 없어요.</p>`
+            : `
+        <section class="settings-card month-voice">
+          <h2 class="section-title">🌙 이달의 목소리</h2>
+          <p class="settings-help">한 달에 한 번, 같은 문장을 녹음해요. 몇 달 뒤에 들어 보면 얼마나 늘었는지 알 수 있어요!</p>
+          <p class="month-sentence"><b>${MONTHLY_SENTENCE.en}</b><small>${MONTHLY_SENTENCE.ko}</small></p>
+          <div class="rec-row">
+            <button class="chip-btn" id="monthListen" ${speechSupported ? "" : "disabled"}>🔊 먼저 듣기</button>
+            <button class="chip-btn rec-btn" data-rec="m:${thisMonth}" data-label="⏺ ${doneThisMonth ? "이번 달 다시 녹음" : "이번 달 녹음하기"}">⏺ ${doneThisMonth ? "이번 달 다시 녹음" : "이번 달 녹음하기"}</button>
+          </div>
+          ${
+            monthly.length
+              ? `<ol class="month-list">${monthly.map((r) => `<li><button class="chip-btn" data-play="${r.id}">▶ ${monthLabel(r.monthly)}</button></li>`).join("")}</ol>
+                 ${monthly.length >= 2 ? `<button class="secondary-btn" id="compareBtn">🆚 첫 녹음 → 최근 녹음 이어 듣기</button>` : ""}`
+              : `<p class="settings-help">아직 없어요. 첫 녹음을 남겨 봐요!</p>`
+          }
+        </section>
+        <section class="settings-card">
+          <h2 class="section-title">🗂️ 최근 녹음 <small>${others.length}개</small></h2>
+          ${
+            rows === null
+              ? `<p class="settings-help">불러오는 중…</p>`
+              : others.length
+                ? `<p class="settings-help">☆을 눌러 ⭐로 바꾸면 오래 보관해요. 나머지는 최근 ${REC_AUTO_KEEP}개만 남아요.</p><ul class="rec-list">${others.map(rowHtml).join("")}</ul>`
+                : `<p class="settings-help">따라 말하기 · 읽기 · 단어장 같은 곳에서 ⏺ 버튼으로 녹음하면 여기에 모여요.</p>`
+          }
+        </section>`
+        }
+      </div>`;
+    root.querySelector("#backBtn").addEventListener("click", actions.back);
+    if (!recSupported || failed) return;
+    bindRecorders(root);
+    root.querySelector("#monthListen")?.addEventListener("click", () => speak(MONTHLY_SENTENCE.en));
+    const find = (id) => rows.find((r) => r.id === Number(id));
+    const play = (r, then) => {
+      stopSpeaking();
+      playing?.pause();
+      playing = new Audio(urlOf(r));
+      playing.onended = then || null;
+      playing.play().catch(() => {});
+    };
+    root.querySelectorAll("[data-play]").forEach((b) => b.addEventListener("click", () => play(find(b.dataset.play))));
+    root.querySelector("#compareBtn")?.addEventListener("click", () => play(monthly[0], () => setTimeout(() => play(monthly[monthly.length - 1]), 600)));
+    root.querySelectorAll("[data-keep]").forEach((b) =>
+      b.addEventListener("click", () => {
+        const r = find(b.dataset.keep);
+        r.keep = !r.keep;
+        recTx("readwrite", (store) => store.put(r)).then(draw, draw);
+      })
+    );
+    root.querySelectorAll("[data-del]").forEach((b) =>
+      b.addEventListener("click", () => {
+        const r = find(b.dataset.del);
+        showConfirmModal({
+          message: `"${escapeHtml(r.label.slice(0, 40))}" 녹음을 지울까요? 지우면 되돌릴 수 없어요.`,
+          confirmText: "지우기",
+          cancelText: "취소",
+          onConfirm: () => recTx("readwrite", (store) => store.delete(r.id)).then(load, load),
+        });
+      })
+    );
+  }
+  draw();
+  load();
 }
 
 ;
@@ -39246,7 +39884,8 @@ function parentScreen(state) {
     case "schoolList": case "vacation": case "houseList": case "bizList":
     case "pbookList": case "dailyWrite": case "fishingList": case "coloringList": case "basket": case "balloon":
     case "boardSetup": case "clock": case "blocks": case "storeGame": case "tableTalk": case "newsList":
-    case "map": case "pos": case "blend": case "animal": case "sceneList": case "petRoom": return "home";
+    case "map": case "pos": case "blend": case "animal": case "sceneList": case "petRoom":
+    case "yearReview": case "yearGoal": case "recArchive": return "home";
     case "petPark": return "petRoom";
     case "scene": return "sceneList";
     case "board": return "boardSetup";
@@ -39326,7 +39965,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation", "houseList", "bizList", "dailyWrite", "fishingList", "coloringList", "boardSetup", "tableTalk", "newsList", "sceneList", "petRoom",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation", "houseList", "bizList", "dailyWrite", "fishingList", "coloringList", "boardSetup", "tableTalk", "newsList", "sceneList", "petRoom", "yearReview", "yearGoal", "recArchive",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -39535,6 +40174,9 @@ function render() {
           openNews: () => set({ screen: "newsList" }),
           openBalloon: () => set({ balloon: newBalloonGame(kidLevelOf(state.profileName)), screen: "balloon" }),
           openVacation: () => set({ vacationEdit: false, screen: "vacation" }),
+          openYearReview: () => set({ screen: "yearReview" }),
+          openYearGoal: () => set({ screen: "yearGoal" }),
+          openRecArchive: () => set({ screen: "recArchive" }),
           openAdvent: () => set({ adventDay: adventInfo().openUpTo || null, screen: "advent" }),
           openPairs: () => set({ screen: "pairsList" }),
           openDraw: () => set({ screen: "drawSetup" }),
@@ -39779,6 +40421,9 @@ function render() {
         back: goHome,
       }),
     petRoom: () => renderPetRoomScreen(root, { profileName: state.profileName, actions: { back: goHome, shop: () => set({ screen: "shop" }), park: () => set({ screen: "petPark" }), refresh: () => set({}) } }),
+    yearReview: () => renderYearReviewScreen(root, { profileName: state.profileName, actions: { back: goHome, goal: () => set({ screen: "yearGoal" }) } }),
+    yearGoal: () => renderYearGoalScreen(root, { profileName: state.profileName, actions: { back: goHome } }),
+    recArchive: () => renderRecArchiveScreen(root, { profileName: state.profileName, actions: { back: goHome } }),
     petPark: () => renderPetParkScreen(root, { profileName: state.profileName, actions: { back: () => set({ screen: "petRoom" }), refresh: () => set({}) } }),
     map: () => renderMapScreen(root, { game: state.map, actions: mapActions }),
     pos: () => renderPosScreen(root, { game: state.pos, actions: posActions }),
