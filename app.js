@@ -36741,7 +36741,7 @@ function renderRecArchiveScreen(root, { profileName, actions }) {
 
 const COUPON_ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 헷갈리는 I · O · 0 · 1은 뺐다
 const COUPON_KINDS = [
-  { id: "star", emoji: "⭐", name: "별", desc: "별 상점에서 쓰는 별", amounts: [5, 10, 20, 30, 50, 100] },
+  { id: "star", emoji: "⭐", name: "별", desc: "별 상점에서 쓰는 별", amounts: [5, 10, 20, 30, 50, 100, 200, 500] }, // 뒤에만 붙인다 (앞 번호가 바뀌면 이미 만든 쿠폰이 달라짐)
   { id: "bond", emoji: "❤️", name: "친밀도", desc: "친구와 더 친해져요", amounts: [10, 20, 50, 100, 200] },
   { id: "grow", emoji: "🌱", name: "성장", desc: "친구가 문제를 푼 것처럼 자라요", amounts: [10, 30, 50, 100, 300, 500] },
   { id: "tier", emoji: "🏆", name: "등급 올리기", desc: "친구가 바로 다음 등급이 돼요 (전설 → 신화 → 고대 → 초월 …)", amounts: [1], unit: "단계" },
