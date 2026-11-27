@@ -2730,3 +2730,47 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 /* 👆 작은 버튼을 손가락 크기(40px 이상)로 */
 .chip-btn-cal { min-height: 36px; }
 .pet-care-btns .chip-btn, .reward-claim { min-height: 40px; }
+
+/* 🏠 홈 줄이기: 캐릭터 카드 하나에 돌보기 · 출석 · 상자를 모으고, 작은 글씨 키우기 */
+.pet-card { flex-direction: column; align-items: stretch; gap: 10px; }
+.pet-row { display: flex; align-items: center; gap: 12px; }
+.pet-row .pet-btns { flex-direction: column; }
+.pet-card .reward-card { background: color-mix(in srgb, var(--card-bg) 70%, transparent); box-shadow: none; padding: 6px 10px; border-radius: 14px; gap: 4px; }
+.pet-bubble-ask { width: 100%; text-align: left; border: 2px solid var(--primary); cursor: pointer; font: inherit; font-weight: 700; color: var(--text); animation: auraPulse 2.4s ease-in-out infinite; }
+.backup-card { flex-direction: row; align-items: center; flex-wrap: wrap; }
+.backup-card p { flex: 1; min-width: 150px; }
+.backup-btns { display: flex; gap: 6px; }
+.backup-card .chip-btn { min-height: 40px; }
+.backup-now { background: var(--primary); color: #fff; border-color: var(--primary); }
+.phrase-tag { display: block; font-size: 12px; font-weight: 800; color: var(--muted); }
+.home-title { font-size: clamp(19px, 5.4vw, 22px); }
+.tile-meta { font-size: 12.5px; }
+.screen-home.searching .pin-quick { display: none; }
+
+/* ⚙️ 홈 메뉴 보이기: 묶음별로 접기 */
+.menu-group { border-top: 1px solid var(--border); padding: 8px 0; }
+.menu-group summary { cursor: pointer; font-weight: 800; padding: 4px 0; }
+.menu-group summary small { color: var(--muted); font-weight: 600; }
+.menu-group .menu-pick { margin-top: 8px; }
+
+/* ❓ 보상 안내 */
+.reward-guide { background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); padding: 10px 14px; }
+.reward-guide summary { cursor: pointer; font-weight: 800; }
+.reward-guide ul { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.reward-guide b { white-space: nowrap; }
+
+/* 👗 별 상점 미리 입어 보기 */
+.shop-item.cant { opacity: 0.6; }
+.shop-item.trying { outline: 3px dashed var(--primary); opacity: 1; }
+.shop-preview.previewing { position: sticky; top: 8px; z-index: 5; padding: 8px; box-shadow: 0 0 0 3px var(--primary), var(--shadow); }
+.shop-preview.previewing .pet-avatar.big .pet-body { font-size: 64px; }
+.shop-preview.previewing .pet-avatar.big { padding-top: 24px; }
+.shop-preview.previewing .pet-avatar.big .pet-pal, .shop-preview.previewing .pet-avatar.big .pet-fx { font-size: 32px; }
+.shop-preview.previewing .shop-stars { display: none; }
+.screen-shop.has-try-bar { padding-bottom: 90px; }
+.try-bar { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(72px + env(safe-area-inset-bottom)); width: min(608px, calc(100% - 24px)); box-sizing: border-box; z-index: 60; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 18px; background: var(--card-bg); box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18); border: 2px solid var(--primary); animation: trySlide 0.2s ease; }
+@keyframes trySlide { from { transform: translate(-50%, 16px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+.try-emoji { font-size: 32px; line-height: 1; }
+.try-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.try-text small { color: var(--muted); font-size: 12px; }
+.try-buy { width: auto; margin: 0; padding: 10px 14px; font-size: 15px; white-space: nowrap; }

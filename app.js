@@ -24713,6 +24713,8 @@ function sectionCount(profileName, section, sets) {
 
 // 설정의 '홈 메뉴 보이기'에서 쓰려고 홈에 나온 타일을 기억해 둔다
 const HOME_TILE_REGISTRY = new Map();
+// 설정에서 묶음별로 보여 주려고 메뉴마다 어느 묶음에 있는지 기억해 둔다
+const HOME_TILE_GROUP = new Map();
 
 function homeTile({ id, emoji, title, meta, warn, disabled }) {
   HOME_TILE_REGISTRY.set(id, { emoji, title });
@@ -24902,20 +24904,19 @@ function renderHomeScreen(root, ctx) {
       </div>
 
       <div class="home-search"><input id="homeSearch" type="search" placeholder="🔎 메뉴 찾기 (예: 빙고, 단어, 타자)" aria-label="메뉴 찾기" autocomplete="off"><p class="settings-help" id="homeSearchEmpty" hidden>찾는 메뉴가 없어요. 설정에서 숨긴 메뉴일 수도 있어요.</p></div>
+      <section class="group pin-group" id="pinGroup">
+        <h2 class="group-title">⭐ 내 메뉴</h2>
+        <div class="tile-grid" id="pinGrid"></div>
+        <p class="pin-tip">💡 자주 하는 메뉴를 <b>꾹 누르면</b> 여기 맨 위에 고정돼요. 다시 꾹 누르면 풀려요.</p>
+      </section>
       ${backupReminderHtml()}
       ${isKid ? petCardHtml(profileName) : ""}
-      ${isKid ? rewardsHomeHtml(profileName) : ""}
       ${levelProgressHtml(profileName)}
       ${todayCardHtml(profileName, { daily, dueWrong, wrongTotal, next })}
       ${vacationHomeCardHtml(profileName)}
       ${adventHomeCardHtml(profileName)}
       ${todayPhraseHtml(profileName)}
 
-      <section class="group pin-group" id="pinGroup">
-        <h2 class="group-title">⭐ 내 메뉴</h2>
-        <div class="tile-grid" id="pinGrid"></div>
-        <p class="pin-tip">💡 자주 하는 메뉴를 <b>꾹 누르면</b> 여기에 고정돼요. 다시 꾹 누르면 풀려요.</p>
-      </section>
 
       <section class="group">
         <h2 class="group-title">📚 배우기</h2>
@@ -25115,11 +25116,45 @@ function renderHomeScreen(root, ctx) {
   bind("typingBtn", actions.openTyping);
   bind("monsterBtn", actions.startMonster);
   bindTodayPhrase(root, profileName);
+  root.querySelectorAll("section.group").forEach((g) => {
+    const title = g.querySelector(".group-title")?.textContent.trim();
+    if (g.id !== "pinGroup") g.querySelectorAll(".tile[id]").forEach((t) => HOME_TILE_GROUP.set(t.id, title));
+  });
   setupHomePins(root, profileName);
+  fillQuickMenus(root, profileName);
   setupHomeTools(root, profileName);
   if (missionNew) {
     burstConfetti(60);
     showToast(`<span class="toast-emoji">🎯</span><span>이번 주 가족 미션 성공! ⭐ ${MISSION_STARS}개를 받았어요</span>`);
+  }
+}
+
+// ⭐ 내 메뉴가 비어 있으면 자주 쓰는 메뉴(두 번 이상 누른 것) 4개를 대신 보여 준다. 누르면 원래 메뉴를 누른 것과 같다
+function fillQuickMenus(root, profileName) {
+  const group = root.querySelector("#pinGroup");
+  const grid = root.querySelector("#pinGrid");
+  if (!group || !grid || grid.children.length) return;
+  const use = getProfileData(profileName).menuUse;
+  const total = Object.values(use).reduce((a, b) => a + b, 0);
+  const ids = Object.entries(use)
+    .filter(([id, n]) => n >= 2 && root.querySelector(`#${id}.tile`))
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([id]) => id);
+  if (!ids.length) {
+    // 처음 쓰는 동안만 '꾹 누르기' 안내를 보여 준다
+    if (total >= 10) group.hidden = true;
+    return;
+  }
+  group.classList.remove("pin-empty");
+  group.classList.add("pin-quick");
+  group.querySelector(".group-title").textContent = "🔥 자주 쓰는 메뉴";
+  for (const id of ids) {
+    const copy = root.querySelector(`#${id}.tile`).cloneNode(true);
+    copy.removeAttribute("id");
+    copy.dataset.quick = id;
+    copy.addEventListener("click", () => root.querySelector(`#${id}.tile`)?.click());
+    grid.append(copy);
   }
 }
 
@@ -28394,17 +28429,16 @@ function petCardHtml(profileName) {
   const theme = petBackgroundStyle(profileName);
   return `
     <section class="pet-card${theme.cls}"${theme.style}>
-      <button class="pet-pick-btn${s.aura}" id="petPickBtn" aria-label="친구 바꾸기">${dressedPetHtml(profileName, s.stage.emoji, false, s.stage.scale)}</button>
-      <div class="pet-text">
-        <b>내 친구: ${s.tier ? `${s.tier.icon} ` : ""}${s.stage.name}</b>
-        <small>${s.chosen ? "" : "🐾 캐릭터를 눌러 좋아하는 동물로 바꿔 봐요! · "}${s.next?.tier ? `문제 ${s.left}개 더 풀면 ${s.next.emoji} ${s.next.name}이 돼요!` : s.next ? `문제 ${s.left}개 더 풀면 ${s.next.emoji}로 자라요!` : "🌌 가장 높은 태초 등급이에요! 🎉"}</small>
-        <span class="progress-track"><span class="progress-fill" style="width:${pct}%"></span></span>
-      </div>
-      <div class="pet-btns">
-        <button class="pet-sticker-btn" id="shopBtn" aria-label="별 상점, 별 ${shopStatus(profileName).stars}개">⭐ <b>${shopStatus(profileName).stars}</b></button>
-        <button class="pet-sticker-btn" id="stickerBtn" aria-label="스티커북">📒 <b>${s.stickers}</b></button>
+      <div class="pet-row">
+        <button class="pet-pick-btn${s.aura}" id="petPickBtn" aria-label="친구 바꾸기">${dressedPetHtml(profileName, s.stage.emoji, false, s.stage.scale)}</button>
+        <div class="pet-text">
+          <b>내 친구: ${s.tier ? `${s.tier.icon} ` : ""}${s.stage.name}</b>
+          <small>${s.chosen ? "" : "🐾 캐릭터를 눌러 좋아하는 동물로 바꿔 봐요! · "}${s.next?.tier ? `문제 ${s.left}개 더 풀면 ${s.next.emoji} ${s.next.name}이 돼요!` : s.next ? `문제 ${s.left}개 더 풀면 ${s.next.emoji}로 자라요!` : "🌌 가장 높은 태초 등급이에요! 🎉"}</small>
+          <span class="progress-track"><span class="progress-fill" style="width:${pct}%"></span></span>
+        </div>
       </div>
       ${petCareHtml(profileName)}
+      ${rewardsHomeHtml(profileName)}
     </section>`;
 }
 
@@ -29406,8 +29440,8 @@ function shopStatus(profileName) {
 }
 
 // 꾸민 캐릭터: 머리 · 얼굴 · 목 · 손 아이템 + 캐릭터 + 함께 다니는 친구 + 반짝 효과
-function dressedPetHtml(profileName, petEmoji, big, scale = 1) {
-  const { equip } = shopStatus(profileName);
+function dressedPetHtml(profileName, petEmoji, big, scale = 1, override = null) {
+  const equip = { ...shopStatus(profileName).equip, ...override };
   const on = (cat, cls) => {
     const it = shopItem(equip[cat]);
     return it ? `<span class="${cls}" aria-hidden="true">${it.emoji}</span>` : "";
@@ -29415,46 +29449,71 @@ function dressedPetHtml(profileName, petEmoji, big, scale = 1) {
   return `<span class="pet-avatar${big ? " big" : ""}">${on("fx", "pet-fx")}<span class="pet-body"${scale !== 1 ? ` style="transform:scale(${scale});transform-origin:bottom center"` : ""}>${on("hat", "pet-hat")}<span class="pet-emoji" aria-hidden="true">${petEmoji}</span>${on("face", "pet-face")}${on("neck", "pet-neck")}${on("hand", "pet-hand")}</span>${on("pal", "pet-pal")}</span>`;
 }
 
-function petBackgroundStyle(profileName) {
-  const bg = shopItem(shopStatus(profileName).equip.bg);
+function petBackgroundStyle(profileName, override = null) {
+  const bg = shopItem({ ...shopStatus(profileName).equip, ...override }.bg);
   return bg ? { cls: " pet-themed", style: ` style="background:${bg.bg}"` } : { cls: "", style: "" };
 }
 
 function renderShopScreen(root, { profileName, actions }) {
   const s = shopStatus(profileName);
   const pet = petStatus(profileName);
-  const theme = petBackgroundStyle(profileName);
-  root.innerHTML = `
-    <div class="screen screen-shop">
+  let preview = null; // 사기 전에 미리 입어 보는 아이템
+  const itemHtml = (it) => {
+    const owned = s.owned.includes(it.id);
+    const on = s.equip[it.cat] === it.id;
+    const open = shopItemUnlocked(profileName, it);
+    const label = on ? "벗기" : owned ? "꾸미기" : !open ? shopLockLabel(it) : it.price ? `⭐ ${it.price}` : "🎁 받기";
+    const cant = !owned && (!open || s.stars < it.price);
+    return `<button class="shop-item${on ? " on" : ""}${owned ? " owned" : ""}${cant ? " cant" : ""}${preview === it.id ? " trying" : ""}" data-item="${it.id}">
+      <span class="shop-emoji"${it.bg ? ` style="background:${it.bg}"` : ""}>${it.emoji}</span>
+      <b>${it.name}</b>
+      <small>${label}</small>
+    </button>`;
+  };
+  const tryBarHtml = (pv) => {
+    const open = shopItemUnlocked(profileName, pv);
+    const why = !open ? `🔒 ${shopLockLabel(pv)}이 되면 열려요` : s.stars < pv.price ? `⭐ ${pv.price - s.stars}개 더 모으면 살 수 있어요` : "입어 본 모습이에요";
+    return `<div class="try-bar" role="dialog" aria-label="미리 보기">
+      <span class="try-emoji">${pv.emoji}</span>
+      <span class="try-text"><b>${pv.name}</b><small>${why}</small></span>
+      <button class="primary-btn try-buy" id="tryBuy" ${open && s.stars >= pv.price ? "" : "disabled"}>${pv.price ? `⭐ ${pv.price} 사기` : "🎁 받기"}</button>
+      <button class="chip-btn" id="tryClose" aria-label="미리 보기 닫기">✕</button>
+    </div>`;
+  };
+  const draw = () => {
+    const pv = preview && shopItem(preview);
+    const override = pv ? { [pv.cat]: pv.id } : null;
+    const theme = petBackgroundStyle(profileName, override);
+    const scrollY = window.scrollY;
+    root.innerHTML = `
+    <div class="screen screen-shop${pv ? " has-try-bar" : ""}">
       <button class="back-btn" id="backBtn">← 홈</button>
       <h1 class="title">⭐ 별 상점</h1>
-      <p class="subtitle">문제를 ${STAR_EVERY}개 풀 때마다 ⭐ 1개 · 다음 별까지 ${s.toNext}문제</p>
-      <section class="pet-big${theme.cls}"${theme.style}>
-        <span class="pet-aura-wrap${pet.aura}">${dressedPetHtml(profileName, pet.stage.emoji, true, pet.stage.scale)}</span>
+      <p class="subtitle">문제를 ${STAR_EVERY}개 풀 때마다 ⭐ 1개 · 다음 별까지 ${s.toNext}문제<br>👆 아이템을 누르면 사기 전에 먼저 입어 볼 수 있어요</p>
+      <section class="pet-big shop-preview${theme.cls}${pv ? " previewing" : ""}"${theme.style}>
+        <span class="pet-aura-wrap${pet.aura}">${dressedPetHtml(profileName, pet.stage.emoji, true, pet.stage.scale, override)}</span>
         <p class="shop-stars">⭐ <b>${s.stars}</b>개 있어요</p>
       </section>
-      ${SHOP_CATS.map(
-        (cat) => `
-        <h2 class="section-title">${cat.title}</h2>
-        <div class="shop-grid">
-          ${SHOP_ITEMS.filter((it) => it.cat === cat.id)
-            .map((it) => {
-              const owned = s.owned.includes(it.id);
-              const on = s.equip[cat.id] === it.id;
-              const unlocked = shopItemUnlocked(profileName, it);
-              const label = on ? "벗기" : owned ? "꾸미기" : !unlocked ? shopLockLabel(it) : it.price ? `⭐ ${it.price}` : "🎁 받기";
-              return `<button class="shop-item${on ? " on" : ""}${owned ? " owned" : ""}" data-item="${it.id}" ${!owned && (!unlocked || s.stars < it.price) ? "disabled" : ""}>
-                <span class="shop-emoji"${it.bg ? ` style="background:${it.bg}"` : ""}>${it.emoji}</span>
-                <b>${it.name}</b>
-                <small>${label}</small>
-              </button>`;
-            })
-            .join("")}
-        </div>`
-      ).join("")}
+      ${SHOP_CATS.map((cat) => `<h2 class="section-title">${cat.title}</h2><div class="shop-grid">${SHOP_ITEMS.filter((it) => it.cat === cat.id).map(itemHtml).join("")}</div>`).join("")}
+      ${pv ? tryBarHtml(pv) : ""}
     </div>`;
-  root.querySelector("#backBtn").addEventListener("click", actions.back);
-  root.querySelectorAll("[data-item]").forEach((b) => b.addEventListener("click", () => actions.tap(b.dataset.item)));
+    window.scrollTo(0, scrollY);
+    root.querySelector("#backBtn").addEventListener("click", actions.back);
+    root.querySelectorAll("[data-item]").forEach((b) =>
+      b.addEventListener("click", () => {
+        const id = b.dataset.item;
+        if (s.owned.includes(id)) return actions.tap(id);
+        preview = preview === id ? null : id;
+        draw();
+      })
+    );
+    root.querySelector("#tryBuy")?.addEventListener("click", () => actions.tap(preview));
+    root.querySelector("#tryClose")?.addEventListener("click", () => {
+      preview = null;
+      draw();
+    });
+  };
+  draw();
 }
 
 ;
@@ -31067,10 +31126,9 @@ function todayPhraseHtml(profileName) {
   const p = todayPhrase(profileName);
   return `
     <section class="phrase-card">
-      <p class="phrase-label">💬 오늘의 영어 한마디</p>
       <div class="phrase-main">
         <span class="phrase-emoji">${p.emoji}</span>
-        <div><b class="phrase-en">${p.en}</b><small>${p.ko}</small></div>
+        <div><small class="phrase-tag">💬 오늘의 한마디</small><b class="phrase-en">${p.en}</b><small>${p.ko}</small></div>
         <button class="speak-btn" id="phraseSayBtn" aria-label="표현 듣기" ${speechSupported ? "" : "disabled"}>🔊</button>
       </div>
       <details class="phrase-ex"><summary>이렇게 써요</summary><p><button class="speak-btn" id="phraseExBtn" aria-label="예문 듣기" ${speechSupported ? "" : "disabled"}>🔊</button> ${p.ex.en}<small>${p.ex.ko}</small></p></details>
@@ -31815,8 +31873,8 @@ function backupReminderHtml() {
   if (!r) return "";
   return `
     <section class="backup-card">
-      <p><b>💾 기록을 백업해 두세요</b><small>${r.never ? `${r.studyDays}일 동안 공부한 기록이 이 기기에만 있어요. 휴대폰을 바꾸거나 데이터를 지우면 사라져요.` : `마지막 백업이 ${r.ago}일 전이에요.`}</small></p>
-      <div class="backup-btns"><button class="primary-btn" id="backupNowBtn">💾 지금 백업</button><button class="secondary-btn" id="backupLaterBtn">나중에</button></div>
+      <p><b>💾 백업할 때예요</b><small>${r.never ? `${r.studyDays}일 기록이 이 휴대폰에만 있어요` : `마지막 백업 ${r.ago}일 전`}</small></p>
+      <div class="backup-btns"><button class="chip-btn backup-now" id="backupNowBtn">💾 백업</button><button class="chip-btn" id="backupLaterBtn">나중에</button></div>
     </section>`;
 }
 
@@ -31968,11 +32026,13 @@ function petCareHtml(profileName) {
   const mood = petMood(profileName);
   return `
     <div class="pet-care">
-      <p class="pet-bubble" id="petBubble"><span>${mood.emoji}</span> ${mood.en}<small>${mood.ko}</small></p>
+      ${care.acts.includes("talk") ? `<p class="pet-bubble" id="petBubble"><span>${mood.emoji}</span> ${mood.en}<small>${mood.ko}</small></p>` : `<button class="pet-bubble pet-bubble-ask" id="petTalkAsk"><span>💬</span> ${todayPetTalk().q}<small>${todayPetTalk().ko} · 눌러서 대답하기 →</small></button>`}
       <div class="pet-care-btns">
         <button class="chip-btn" id="petPetBtn" ${care.pets >= CARE_PET_MAX ? "disabled" : ""}>✋ 쓰다듬기 <small>${CARE_PET_MAX - care.pets}</small></button>
         <button class="chip-btn" id="petSnackBtn" ${care.snacks >= CARE_SNACK_MAX || shopStatus(profileName).stars < 1 ? "disabled" : ""}>🍎 간식 <small>⭐1</small></button>
         <button class="chip-btn" id="petRoomBtn">🏠 친구 방</button>
+        <button class="chip-btn" id="shopBtn" aria-label="별 상점, 별 ${shopStatus(profileName).stars}개">⭐ ${shopStatus(profileName).stars}</button>
+        <button class="chip-btn" id="stickerBtn" aria-label="스티커북">📒 ${petStatus(profileName).stickers}</button>
         <span class="pet-bond" title="친밀도">${BOND_LEVELS[bondLevelIndex(care.bond)].icon} ${care.bond}</span>
       </div>
     </div>`;
@@ -31992,6 +32052,7 @@ function bindPetCare(root, profileName) {
   root.querySelector("#petPetBtn")?.addEventListener("click", () => react("pet"));
   root.querySelector("#petSnackBtn")?.addEventListener("click", () => react("snack"));
   root.querySelector("#petRoomBtn")?.addEventListener("click", () => set({ screen: "petRoom" }));
+  root.querySelector("#petTalkAsk")?.addEventListener("click", () => set({ screen: "petRoom" }));
 }
 
 // ── 🔗 짝꿍 단어 잇기: 왼쪽과 오른쪽에서 짝을 찾아 누른다 ──
@@ -32711,9 +32772,13 @@ function renderMenuVisibilitySettingsHtml(profileName) {
     <section class="settings-card">
       <h2 class="section-title">👀 홈 메뉴 보이기 <small>(${escapeHtml(profileName)}님 홈)</small></h2>
       <p class="settings-help">안 쓰는 메뉴를 눌러 숨기면 홈이 짧아져요. 다시 누르면 보여요. 숨긴 메뉴 <b>${hidden.size}</b>개</p>
-      <div class="level-pick menu-pick">
-        ${tiles.map(([id, t]) => `<button class="pick-chip${hidden.has(id) ? " off" : " active"}" data-menu="${id}" aria-pressed="${!hidden.has(id)}">${t.emoji} ${t.title}</button>`).join("")}
-      </div>
+      ${[...new Set(tiles.map(([id]) => HOME_TILE_GROUP.get(id) || "기타"))]
+        .map((g) => {
+          const list = tiles.filter(([id]) => (HOME_TILE_GROUP.get(id) || "기타") === g);
+          const off = list.filter(([id]) => hidden.has(id)).length;
+          return `<details class="menu-group"><summary>${g} <small>${list.length}개${off ? ` · 숨김 ${off}` : ""}</small></summary><div class="level-pick menu-pick">${list.map(([id, t]) => `<button class="pick-chip${hidden.has(id) ? " off" : " active"}" data-menu="${id}" aria-pressed="${!hidden.has(id)}">${t.emoji} ${t.title}</button>`).join("")}</div></details>`;
+        })
+        .join("")}
       ${hidden.size ? `<button class="link-btn" id="menuShowAllBtn">모두 다시 보이기</button>` : ""}
     </section>`;
 }
@@ -35558,6 +35623,19 @@ function renderPetRoomScreen(root, { profileName, actions }) {
         })()}</small>
       </section>
 
+      <details class="reward-guide">
+        <summary>❓ 보상 한눈에 보기</summary>
+        <ul>
+          <li><b>⭐ 별</b> 문제 5개마다 1개 · 출석 도장 · 주간 상자 · 가족 미션으로 더 받아요 → 꾸미기 아이템과 간식을 사요</li>
+          <li><b>📒 스티커</b> 문제 15개마다 1장씩 스티커북에 모여요</li>
+          <li><b>🐣 캐릭터 단계</b> 푼 문제 수로 7단계까지 자라요 (1,500문제 = 전설)</li>
+          <li><b>✨ 등급</b> 전설 다음에도 신화 → 고대 → 초월 → 불멸 → 천상 → 태초</li>
+          <li><b>❤️ 친밀도</b> 쓰다듬기 · 놀이 · 대화 · 간식으로 올라요 → 6단계, 단계마다 선물 아이템</li>
+          <li><b>📅 출석 도장</b> 공부한 날 7일마다 ⭐10</li>
+          <li><b>🎁 주간 상자</b> 한 주에 5일 공부하면 ⭐와 간식</li>
+          <li><b>🏅 배지</b> 여러 가지를 해내면 받아요 (기록 화면에서 모두 보기)</li>
+        </ul>
+      </details>
       ${petTalkHtml(profileName)}
       <div class="room-tools">
         <button class="secondary-btn" id="photoBtn">📸 사진 찍기</button>
@@ -35925,7 +36003,7 @@ function rewardsHomeHtml(profileName) {
   const c = chestStatus(profileName);
   const t = petTreat(c.reward.treat);
   return `
-    <section class="reward-card">
+    <div class="reward-card">
       <div class="reward-row">
         <span class="reward-label">📅 출석</span>
         <span class="attend-stamps">${Array.from({ length: ATTEND_SET }, (_, i) => `<i class="${a.claimable || i < a.inSet ? "on" : ""}">${a.claimable || i < a.inSet ? "🐾" : ""}</i>`).join("")}</span>
@@ -35936,7 +36014,7 @@ function rewardsHomeHtml(profileName) {
         <span class="chest-progress"><span class="progress-track"><span class="progress-fill" style="width:${Math.min(100, Math.round((c.days / CHEST_DAYS) * 100))}%"></span></span><small>${Math.min(c.days, CHEST_DAYS)} / ${CHEST_DAYS}일</small></span>
         ${c.claimed ? `<small>열었어요 ✓</small>` : c.open ? `<button class="chip-btn reward-claim" id="chestClaim">🎁 열기</button>` : `<small>⭐${c.reward.stars} + ${t.emoji}</small>`}
       </div>
-    </section>`;
+    </div>`;
 }
 
 function bindRewardsHome(root, profileName) {
