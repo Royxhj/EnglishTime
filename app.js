@@ -31851,8 +31851,9 @@ function renderParentLockScreen(root, { onUnlock, onCancel }) {
     root.querySelector("#forgotForm")?.addEventListener("submit", (e) => {
       e.preventDefault();
       if (Number(root.querySelector("#forgotInput").value) === forgot.a * forgot.b) {
-        updateSettings({ pinHash: "" });
-        showToast(`<span class="toast-emoji">🔓</span><span>잠금을 풀었어요. 설정에서 새 비밀번호를 정할 수 있어요.</span>`);
+        // 아이가 곱셈을 풀어 잠금을 풀 수도 있으니, 이 길로 풀면 7일 동안 쿠폰을 못 만든다
+        updateSettings({ pinHash: "", couponHoldUntil: Date.now() + COUPON_HOLD_MS });
+        showToast(`<span class="toast-emoji">🔓</span><span>잠금을 풀었어요. 설정에서 새 비밀번호를 정할 수 있어요. (쿠폰 만들기는 7일 뒤에 다시 열려요)</span>`);
         onUnlock();
       } else {
         playSound("wrong");
@@ -31865,16 +31866,27 @@ function renderParentLockScreen(root, { onUnlock, onCancel }) {
 
 // 설정 화면의 잠금 칸
 function parentLockSettingsHtml() {
+  const on = parentLockOn();
   return `
     <section class="settings-card">
       <h2 class="section-title">🔒 부모님 잠금</h2>
-      <p class="settings-help">설정 · 가족 수정 · 우리 집 단어장 고치기를 4자리 비밀번호로 잠가요. 한 번 풀면 5분 동안 열려 있어요. ${parentLockOn() ? "<b>지금 잠금이 켜져 있어요.</b>" : ""}</p>
+      <p class="settings-help">설정 · 가족 수정 · 우리 집 단어장 고치기를 4자리 비밀번호로 잠가요. 한 번 풀면 5분 동안 열려 있어요. 쿠폰 만들기는 잠금을 켜야 쓸 수 있어요. ${on ? "<b>지금 잠금이 켜져 있어요.</b> 바꾸거나 끌 때는 지금 비밀번호가 필요해요." : ""}</p>
       <div class="settings-actions">
+        ${on ? `<input class="text-input pin-input" id="pinOld" type="password" inputmode="numeric" maxlength="4" placeholder="지금 비밀번호" autocomplete="current-password">` : ""}
         <input class="text-input pin-input" id="pinNew" type="password" inputmode="numeric" maxlength="4" placeholder="새 비밀번호 4자리" autocomplete="new-password">
-        <button class="secondary-btn" id="pinSaveBtn">${parentLockOn() ? "비밀번호 바꾸기" : "잠금 켜기"}</button>
-        ${parentLockOn() ? `<button class="secondary-btn" id="pinOffBtn">잠금 끄기</button>` : ""}
+        <button class="secondary-btn" id="pinSaveBtn">${on ? "비밀번호 바꾸기" : "잠금 켜기"}</button>
+        ${on ? `<button class="secondary-btn" id="pinOffBtn">잠금 끄기</button>` : ""}
       </div>
     </section>`;
+}
+
+// 잠금이 켜져 있으면 지금 비밀번호가 맞아야 한다 (5분 열림 사이에 아이가 바꾸지 못하게)
+function pinOldOk(root) {
+  if (!parentLockOn()) return true;
+  if (pinHash(root.querySelector("#pinOld")?.value.trim() || "") === getSettings().pinHash) return true;
+  playSound("wrong");
+  showToast(`<span class="toast-emoji">✋</span><span>지금 비밀번호가 맞지 않아요</span>`);
+  return false;
 }
 
 function bindParentLockSettings(root, refresh) {
@@ -31884,12 +31896,14 @@ function bindParentLockSettings(root, refresh) {
       showToast(`<span class="toast-emoji">✋</span><span>숫자 4자리를 넣어 주세요</span>`);
       return;
     }
+    if (!pinOldOk(root)) return;
     updateSettings({ pinHash: pinHash(pin) });
     parentUnlockedUntil = Date.now() + PARENT_UNLOCK_MS;
     showToast(`<span class="toast-emoji">🔒</span><span>부모님 잠금을 켰어요. 비밀번호를 꼭 기억해 두세요!</span>`);
     refresh();
   });
   root.querySelector("#pinOffBtn")?.addEventListener("click", () => {
+    if (!pinOldOk(root)) return;
     updateSettings({ pinHash: "" });
     showToast(`<span class="toast-emoji">🔓</span><span>잠금을 껐어요</span>`);
     refresh();
@@ -36748,6 +36762,8 @@ const COUPON_KINDS = [
 ];
 const COUPON_ISSUED_KEEP = 30;
 const COUPON_WRONG_MAX = 5;
+const COUPON_HOLD_MS = 7 * 86400000; // '비밀번호를 잊었어요'로 잠금을 풀면 이만큼 쿠폰을 못 만든다
+const COUPON_SHOW_MS = 3 * 60000; // 방금 만든 번호는 3분 동안만 보여 준다
 let couponWrong = { n: 0, until: 0 };
 
 function couponCheck(payload) {
@@ -36854,19 +36870,35 @@ function bindCouponBox(root, profileName, onDone) {
 }
 
 // ── 부모님 화면: 설정의 쿠폰 만들기 ──
-let couponDraft = { kind: "star", amount: 10, last: null };
+let couponDraft = { kind: "star", amount: 10, last: null, revealUntil: 0 };
+let couponPinWrong = { n: 0, until: 0 };
+// 쓰지 않은 번호는 가운데를 가려서, 아이가 목록을 보고 몰래 등록하지 못하게 한다
+const maskCoupon = (code) => `${code.slice(0, 3)}-•••-${code.slice(-1)}`;
 
 function couponSettingsHtml() {
   const kind = COUPON_KINDS.find((k) => k.id === couponDraft.kind);
   const issued = getSettings().couponsIssued || [];
+  const hold = getSettings().couponHoldUntil || 0;
+  if (!parentLockOn() || Date.now() < hold)
+    return `
+    <section class="settings-card" id="couponCard">
+      <h2 class="section-title">🎟️ 쿠폰 만들기 <small>(부모님용)</small></h2>
+      <p class="settings-help">${
+        Date.now() < hold
+          ? `'비밀번호를 잊었어요'로 잠금을 풀어서, 아이가 몰래 만들지 못하게 <b>${new Date(hold).toLocaleDateString("ko-KR")}</b>부터 다시 쿠폰을 만들 수 있어요.`
+          : "쿠폰은 <b>아래 '부모님 잠금'을 켜야</b> 만들 수 있어요. 만들 때마다 부모님 비밀번호를 물어봐서 아이들이 직접 만들 수 없어요."
+      }</p>
+    </section>`;
+  if (couponDraft.last && Date.now() - couponDraft.last.at > COUPON_SHOW_MS) couponDraft.last = null;
   return `
     <section class="settings-card" id="couponCard">
       <h2 class="section-title">🎟️ 쿠폰 만들기 <small>(부모님용)</small></h2>
-      <p class="settings-help">칭찬할 일이 있을 때 쿠폰을 만들어 번호를 알려 주세요. 아이가 <b>⭐ 별 상점</b>이나 <b>🏠 친구 방</b>의 '쿠폰 등록하기'에 넣으면 받아요. 쿠폰 하나는 한 번만 쓸 수 있고, 다른 휴대폰에서도 등록돼요.${parentLockOn() ? "" : " <b>아이들이 직접 만들지 못하게 아래 '부모님 잠금'을 켜 두면 좋아요.</b>"}</p>
+      <p class="settings-help">칭찬할 일이 있을 때 쿠폰을 만들어 번호를 알려 주세요. 아이가 <b>⭐ 별 상점</b>이나 <b>🏠 친구 방</b>의 '쿠폰 등록하기'에 넣으면 받아요. 쿠폰 하나는 한 번만 쓸 수 있고, 다른 휴대폰에서도 등록돼요. 만들 때마다 부모님 비밀번호가 필요해요.</p>
       <div class="goal-kinds">${COUPON_KINDS.map((k) => `<button class="chip-btn${k.id === kind.id ? " on" : ""}" data-ckind="${k.id}">${k.emoji} ${k.name}</button>`).join("")}</div>
       <p class="settings-help">${kind.emoji} ${kind.desc}</p>
       <div class="goal-kinds">${kind.amounts.map((n) => `<button class="chip-btn${n === couponDraft.amount ? " on" : ""}" data-camount="${n}">${n}${kind.unit || ""}</button>`).join("")}</div>
       <input class="text-input" id="couponNote" maxlength="20" placeholder="메모 (예: 방 청소 칭찬)">
+      <input class="text-input pin-input" id="couponPin" type="password" inputmode="numeric" maxlength="4" placeholder="부모님 비밀번호 4자리" autocomplete="off">
       <button class="primary-btn" id="couponMakeBtn">🎟️ ${kind.emoji} ${kind.name} ${couponDraft.amount}${kind.unit || ""} 쿠폰 만들기</button>
       ${
         couponDraft.last
@@ -36875,13 +36907,13 @@ function couponSettingsHtml() {
       }
       ${
         issued.length
-          ? `<details class="coupon-issued"><summary>만든 쿠폰 ${issued.length}개</summary><ul>${issued
+          ? `<details class="coupon-issued"${Date.now() < couponDraft.revealUntil ? " open" : ""}><summary>만든 쿠폰 ${issued.length}개</summary><p class="settings-help">안 쓴 번호는 가려져 있어요. 위에 비밀번호를 넣고 <button class="chip-btn" id="couponRevealBtn">🔍 번호 보기</button>를 누르면 3분 동안 보여요.</p><ul>${issued
               .slice()
               .reverse()
               .map((c) => {
                 const p = parseCouponCode(c.code);
                 const used = p && couponUsedBy(p.serial);
-                return `<li><b>${c.code}</b><span>${c.label}${c.note ? ` · ${escapeHtml(c.note)}` : ""}<small>${c.date} · ${used ? `✅ ${escapeHtml(used)} 사용` : "아직 안 씀"}</small></span></li>`;
+                return `<li><b>${used || Date.now() < couponDraft.revealUntil ? c.code : maskCoupon(c.code)}</b><span>${c.label}${c.note ? ` · ${escapeHtml(c.note)}` : ""}<small>${c.date} · ${used ? `✅ ${escapeHtml(used)} 사용` : "아직 안 씀"}</small></span></li>`;
               })
               .join("")}</ul></details>`
           : ""
@@ -36889,7 +36921,32 @@ function couponSettingsHtml() {
     </section>`;
 }
 
+// 쿠폰을 만들거나 번호를 볼 때마다 부모님 비밀번호를 확인한다 (3번 틀리면 5분 쉼)
+function couponPinOk(root) {
+  if (Date.now() < couponPinWrong.until) {
+    showToast(`<span class="toast-emoji">⏳</span><span>비밀번호를 여러 번 틀렸어요. 5분 뒤에 다시 해 주세요.</span>`);
+    return false;
+  }
+  const pinInput = root.querySelector("#couponPin");
+  if (!parentLockOn() || pinHash(pinInput.value.trim()) !== getSettings().pinHash) {
+    couponPinWrong.n += 1;
+    if (couponPinWrong.n >= 3) couponPinWrong = { n: 0, until: Date.now() + 5 * 60000 };
+    pinInput.value = "";
+    playSound("wrong");
+    showToast(`<span class="toast-emoji">🔒</span><span>부모님 비밀번호가 맞지 않아요</span>`);
+    return false;
+  }
+  couponPinWrong.n = 0;
+  return true;
+}
+
 function bindCouponSettings(root, refresh) {
+  root.querySelector("#couponRevealBtn")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (!couponPinOk(root)) return;
+    couponDraft.revealUntil = Date.now() + COUPON_SHOW_MS;
+    refresh();
+  });
   root.querySelectorAll("[data-ckind]").forEach((b) =>
     b.addEventListener("click", () => {
       couponDraft.kind = b.dataset.ckind;
@@ -36905,12 +36962,13 @@ function bindCouponSettings(root, refresh) {
     })
   );
   root.querySelector("#couponMakeBtn")?.addEventListener("click", () => {
+    if (!couponPinOk(root)) return;
     const code = makeCouponCode(couponDraft.kind, couponDraft.amount);
     if (!code) return;
     const kind = COUPON_KINDS.find((k) => k.id === couponDraft.kind);
     const label = `${kind.emoji} ${kind.name} ${couponDraft.amount}${kind.unit || ""}`;
     const note = cleanText(root.querySelector("#couponNote").value, 20);
-    couponDraft.last = { code, label };
+    couponDraft.last = { code, label, at: Date.now() };
     updateSettings({ couponsIssued: [...(getSettings().couponsIssued || []), { code, label, note, date: dateKey() }].slice(-COUPON_ISSUED_KEEP) });
     refresh();
   });
