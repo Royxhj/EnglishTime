@@ -25064,6 +25064,7 @@ function renderHomeScreen(root, ctx) {
   bind("stickerBtn", actions.openStickers);
   bind("petPickBtn", actions.openStickers);
   bind("shopBtn", actions.openShop);
+  bind("couponBtn", actions.openCoupon);
   bind("calendarBtn", actions.openCalendar);
   bind("chainBtn", actions.openChain);
   bind("bingoBtn", actions.openBingo);
@@ -32087,6 +32088,7 @@ function petCareHtml(profileName) {
         <button class="chip-btn" id="petSnackBtn" ${care.snacks >= CARE_SNACK_MAX || shopStatus(profileName).stars < 1 ? "disabled" : ""}>🍎 간식 <small>⭐1</small></button>
         <button class="chip-btn" id="petRoomBtn">🏠 친구 방</button>
         <button class="chip-btn" id="shopBtn" aria-label="별 상점, 별 ${shopStatus(profileName).stars}개">⭐ ${shopStatus(profileName).stars}</button>
+        <button class="chip-btn" id="couponBtn">🎟️ 쿠폰</button>
         <button class="chip-btn" id="stickerBtn" aria-label="스티커북">📒 ${petStatus(profileName).stickers}</button>
         <span class="pet-bond" title="친밀도">${BOND_LEVELS[bondLevelIndex(care.bond)].icon} ${care.bond}</span>
       </div>
@@ -36852,9 +36854,9 @@ function redeemCoupon(profileName, text) {
 }
 
 // ── 아이 화면: 별 상점 · 친구 방의 쿠폰 등록 칸 ──
-function couponBoxHtml() {
+function couponBoxHtml(open = false) {
   return `
-    <details class="coupon-box" id="couponBox">
+    <details class="coupon-box" id="couponBox"${open ? " open" : ""}>
       <summary>🎟️ 쿠폰 등록하기</summary>
       <form class="coupon-form" id="couponForm" autocomplete="off">
         <input class="text-input coupon-input" id="couponInput" maxlength="13" placeholder="0000" inputmode="numeric" aria-label="쿠폰 번호" autocapitalize="characters" spellcheck="false">
@@ -36896,6 +36898,22 @@ function bindCouponBox(root, profileName, onDone) {
     announceBadges(checkNewBadges(profileName));
     onDone();
   });
+}
+
+// 🎟️ 쿠폰 등록 화면 (홈 캐릭터 카드의 '🎟️ 쿠폰' 버튼)
+function renderCouponScreen(root, { profileName, actions }) {
+  const s = petStatus(profileName);
+  root.innerHTML = `
+    <div class="screen screen-coupon">
+      <button class="back-btn" id="backBtn">← 홈</button>
+      <h1 class="title">🎟️ 쿠폰 등록</h1>
+      <p class="subtitle">부모님께 받은 쿠폰 번호 4자리를 넣어요</p>
+      ${couponBoxHtml(true)}
+      <p class="settings-help">지금 내 친구: ${s.tier ? `${s.tier.icon} ` : ""}${s.stage.name} · ⭐ ${shopStatus(profileName).stars}개</p>
+    </div>`;
+  root.querySelector("#backBtn").addEventListener("click", actions.back);
+  bindCouponBox(root, profileName, () => setTimeout(() => renderCouponScreen(root, { profileName, actions }), 600));
+  root.querySelector("#couponInput")?.focus();
 }
 
 ;
@@ -40060,7 +40078,7 @@ function parentScreen(state) {
     case "pbookList": case "dailyWrite": case "fishingList": case "coloringList": case "basket": case "balloon":
     case "boardSetup": case "clock": case "blocks": case "storeGame": case "tableTalk": case "newsList":
     case "map": case "pos": case "blend": case "animal": case "sceneList": case "petRoom":
-    case "yearReview": case "yearGoal": case "recArchive": return "home";
+    case "yearReview": case "yearGoal": case "recArchive": case "coupon": return "home";
     case "petPark": return "petRoom";
     case "scene": return "sceneList";
     case "board": return "boardSetup";
@@ -40140,7 +40158,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation", "houseList", "bizList", "dailyWrite", "fishingList", "coloringList", "boardSetup", "tableTalk", "newsList", "sceneList", "petRoom", "yearReview", "yearGoal", "recArchive",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation", "houseList", "bizList", "dailyWrite", "fishingList", "coloringList", "boardSetup", "tableTalk", "newsList", "sceneList", "petRoom", "yearReview", "yearGoal", "recArchive", "coupon",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -40316,6 +40334,7 @@ function render() {
           startMemory,
           openSpelling: () => set({ screen: "spellingList" }),
           openShop: () => set({ screen: "shop" }),
+          openCoupon: () => set({ screen: "coupon" }),
           openStories: () => set({ screen: "storyList" }),
           openTopics: () => set({ screen: "topicList" }),
           openNumbers: () => set({ screen: "numbersList" }),
@@ -40599,6 +40618,7 @@ function render() {
     yearReview: () => renderYearReviewScreen(root, { profileName: state.profileName, actions: { back: goHome, goal: () => set({ screen: "yearGoal" }) } }),
     yearGoal: () => renderYearGoalScreen(root, { profileName: state.profileName, actions: { back: goHome } }),
     recArchive: () => renderRecArchiveScreen(root, { profileName: state.profileName, actions: { back: goHome } }),
+    coupon: () => renderCouponScreen(root, { profileName: state.profileName, actions: { back: goHome } }),
     petPark: () => renderPetParkScreen(root, { profileName: state.profileName, actions: { back: () => set({ screen: "petRoom" }), refresh: () => set({}) } }),
     map: () => renderMapScreen(root, { game: state.map, actions: mapActions }),
     pos: () => renderPosScreen(root, { game: state.pos, actions: posActions }),
