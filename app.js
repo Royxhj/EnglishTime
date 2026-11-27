@@ -36760,7 +36760,7 @@ const COUPON_KINDS = [
   { id: "star", emoji: "⭐", name: "별", desc: "별 상점에서 쓰는 별", amounts: [5, 10, 20, 30, 50, 100, 200, 500] }, // 뒤에만 붙인다 (앞 번호가 바뀌면 이미 만든 쿠폰이 달라짐)
   { id: "bond", emoji: "❤️", name: "친밀도", desc: "친구와 더 친해져요", amounts: [10, 20, 50, 100, 200] },
   { id: "grow", emoji: "🌱", name: "성장", desc: "친구가 문제를 푼 것처럼 자라요", amounts: [10, 30, 50, 100, 300, 500] },
-  { id: "tier", emoji: "🏆", name: "등급 올리기", desc: "친구가 바로 다음 등급이 돼요 (전설 → 신화 → 고대 → 초월 …)", amounts: [1], unit: "단계" },
+  { id: "tier", emoji: "🏆", name: "등급 올리기", desc: "친구가 바로 다음 등급이 돼요 (전설 → 신화 → 고대 → 초월 …)", amounts: [1, 99], unit: "단계" }, // 99 = 한 번에 최종 진화(태초)
 ];
 const COUPON_WRONG_MAX = 5;
 const COUPON_LOCK_MS = 10 * 60000; // 4자리는 찍어서 맞힐 수 있으니, 5번 틀리면 10분 쉰다 (껐다 켜도 유지)
@@ -36770,6 +36770,10 @@ const COUPON_LOCK_MS = 10 * 60000; // 4자리는 찍어서 맞힐 수 있으니,
 const NUM_COUPONS = {
   "bh3gay": "star:500", // 2026-11-27
   "kj6r7": "star:500", // 2026-11-27
+  "1vvhs1x": "star:500", // 2026-11-27
+  "1342242": "star:500", // 2026-11-27
+  "bjq20w": "tier:99", // 2026-11-27
+  "e0vqza": "tier:99", // 2026-11-27
   // NUM_COUPONS_END
 };
 
@@ -36830,7 +36834,8 @@ function redeemCoupon(profileName, text) {
   if (usedBy) return { ok: false, msg: typeof usedBy === "string" ? `이미 ${escapeHtml(usedBy)}님이 쓴 쿠폰이에요.` : "이미 쓴 쿠폰이에요." };
   const before = petStatus(profileName);
   // 🏆 등급 올리기: 바로 다음 등급(전설 → 신화 → 고대 …)이 되는 만큼 성장 점수를 채운다
-  const nextTier = PET_TIERS.find((t) => before.total < t.min);
+  // 99 = 👑 최종 진화: 한 번에 가장 높은 등급(태초)까지
+  const nextTier = !PET_TIERS.some((t) => before.total < t.min) ? null : c.kind.id === "tier" && c.amount === 99 ? PET_TIERS[PET_TIERS.length - 1] : PET_TIERS.find((t) => before.total < t.min);
   if (c.kind.id === "tier" && !nextTier) return { ok: false, msg: "이미 가장 높은 등급이라 더 올릴 수 없어요. 쿠폰은 그대로 남아 있어요." };
   updateProfile(profileName, (p) => {
     p.coupons = [...p.coupons, c.serial].slice(-300);
@@ -36842,7 +36847,7 @@ function redeemCoupon(profileName, text) {
   updateSettings({ couponsUsed: [...(getSettings().couponsUsed || []), c.serial].slice(-300) });
   const after = petStatus(profileName);
   const levelUp = after.stage.emoji !== before.stage.emoji || after.tier?.id !== before.tier?.id ? after : null;
-  const msg = c.kind.id === "tier" ? `${nextTier.icon} ${nextTier.name} 등급이 됐어요!` : `${c.kind.emoji} ${c.kind.name} +${c.amount} 받았어요!`;
+  const msg = c.kind.id === "tier" ? `${c.amount === 99 ? "👑 최종 진화! " : ""}${nextTier.icon} ${nextTier.name} 등급이 됐어요!` : `${c.kind.emoji} ${c.kind.name} +${c.amount} 받았어요!`;
   return { ok: true, kind: c.kind, amount: c.amount, levelUp, msg };
 }
 
