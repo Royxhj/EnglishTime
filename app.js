@@ -22727,6 +22727,8 @@ function normalizeProfile(profile) {
   if (!Array.isArray(p.wordLists)) p.wordLists = [];
   if (!Array.isArray(p.missionWeeks)) p.missionWeeks = [];
   p.bonusStars ||= 0;
+  p.petBoost = Math.min(100000, Math.max(0, Math.floor(Number(p.petBoost) || 0))); // 🌱 성장 쿠폰
+  p.coupons = Array.isArray(p.coupons) ? p.coupons.filter((c) => typeof c === "string" && /^[A-Z2-9]{5}$/.test(c)).slice(-300) : [];
   p.attend = { claimed: Math.max(0, Math.floor(Number(p.attend?.claimed) || 0)) };
   p.chests = Array.isArray(p.chests) ? p.chests.filter((d) => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)).slice(-60) : [];
   const use = p.menuUse && typeof p.menuUse === "object" && !Array.isArray(p.menuUse) ? p.menuUse : {};
@@ -23481,9 +23483,9 @@ const BADGES = [
   { id: "first", emoji: "🌱", title: "첫걸음", desc: "첫 문제 풀기", test: (p) => p.totalAnswered >= 1 },
   { id: "answered100", emoji: "💯", title: "백 문제", desc: "문제 100개 풀기", test: (p) => p.totalAnswered >= 100 },
   { id: "answered500", emoji: "🏔️", title: "오백 문제", desc: "문제 500개 풀기", test: (p) => p.totalAnswered >= 500 },
-  { id: "tierMythic", emoji: "🔮", title: "신화 친구", desc: "캐릭터 신화 등급 (문제 2,500개)", test: (p) => p.totalAnswered >= 2500 },
-  { id: "tierTranscend", emoji: "🌈", title: "초월 친구", desc: "캐릭터 초월 등급 (문제 6,000개)", test: (p) => p.totalAnswered >= 6000 },
-  { id: "tierOrigin", emoji: "🌌", title: "태초 친구", desc: "캐릭터 태초 등급 (문제 20,000개)", test: (p) => p.totalAnswered >= 20000 },
+  { id: "tierMythic", emoji: "🔮", title: "신화 친구", desc: "캐릭터 신화 등급 (문제 2,500개)", test: (p) => petGrowth(p) >= 2500 },
+  { id: "tierTranscend", emoji: "🌈", title: "초월 친구", desc: "캐릭터 초월 등급 (문제 6,000개)", test: (p) => petGrowth(p) >= 6000 },
+  { id: "tierOrigin", emoji: "🌌", title: "태초 친구", desc: "캐릭터 태초 등급 (문제 20,000개)", test: (p) => petGrowth(p) >= 20000 },
   { id: "day50", emoji: "⚡", title: "열공의 날", desc: "하루에 50문제 풀기", test: (p) => p.bestDay >= 50 },
   { id: "streak3", emoji: "🔥", title: "3일 연속", desc: "3일 연속 공부하기", test: (p) => p.bestStreak >= 3 },
   { id: "streak7", emoji: "🔥", title: "일주일 연속", desc: "7일 연속 공부하기", test: (p) => p.bestStreak >= 7 },
@@ -28438,9 +28440,12 @@ const PET_TIERS = [
 const STICKERS = "🌟🍎🐶🐱🚗🎈🍦🦋🌈🐠🍓🚀🐻🌻🎁🦁🍩🐢⚽🎨🐧🍉🚂🐰🌙🦖🍪🎸🐳👑".match(/\p{Extended_Pictographic}/gu);
 const STICKER_EVERY = 15;
 
+// 캐릭터가 자라는 점수: 푼 문제 수 + 🌱 성장 쿠폰
+const petGrowth = (p) => (p.totalAnswered || 0) + (p.petBoost || 0);
+
 function petStatus(profileName) {
   const p = getProfileData(profileName);
-  const total = p.totalAnswered || 0;
+  const total = petGrowth(p);
   const kind = petKindById(p.petKind);
   const stages = petStages(kind.id);
   let stage = stages[0];
@@ -29447,7 +29452,7 @@ const SHOP_ITEMS = [
 function shopItemUnlocked(profileName, item) {
   const p = getProfileData(profileName);
   if (item.advent) return p.advent.length >= item.advent;
-  if (item.tier) return p.totalAnswered >= (PET_TIERS.find((t) => t.id === item.tier)?.min ?? Infinity);
+  if (item.tier) return petGrowth(p) >= (PET_TIERS.find((t) => t.id === item.tier)?.min ?? Infinity);
   if (item.bond) return bondLevelIndex(p.care.bond) >= item.bond;
   return !item.perfect || p.perfectMonths.length >= item.perfect;
 }
@@ -29527,11 +29532,13 @@ function renderShopScreen(root, { profileName, actions }) {
         <span class="pet-aura-wrap${pet.aura}">${dressedPetHtml(profileName, pet.stage.emoji, true, pet.stage.scale, override)}</span>
         <p class="shop-stars">⭐ <b>${s.stars}</b>개 있어요</p>
       </section>
+      ${couponBoxHtml()}
       ${SHOP_CATS.map((cat) => `<h2 class="section-title">${cat.title}</h2><div class="shop-grid">${SHOP_ITEMS.filter((it) => it.cat === cat.id).map(itemHtml).join("")}</div>`).join("")}
       ${pv ? tryBarHtml(pv) : ""}
     </div>`;
     window.scrollTo(0, scrollY);
     root.querySelector("#backBtn").addEventListener("click", actions.back);
+    bindCouponBox(root, profileName, () => renderShopScreen(root, { profileName, actions }));
     root.querySelectorAll("[data-item]").forEach((b) =>
       b.addEventListener("click", () => {
         const id = b.dataset.item;
@@ -35671,9 +35678,11 @@ function renderPetRoomScreen(root, { profileName, actions }) {
           <li><b>❤️ 친밀도</b> 쓰다듬기 · 놀이 · 대화 · 간식으로 올라요 → 6단계, 단계마다 선물 아이템</li>
           <li><b>📅 출석 도장</b> 공부한 날 7일마다 ⭐10</li>
           <li><b>🎁 주간 상자</b> 한 주에 5일 공부하면 ⭐와 간식</li>
+          <li><b>🎟️ 쿠폰</b> 부모님께 받은 쿠폰을 아래 '쿠폰 등록하기'에 넣으면 ⭐ 별 · ❤️ 친밀도 · 🌱 성장을 받아요</li>
           <li><b>🏅 배지</b> 여러 가지를 해내면 받아요 (기록 화면에서 모두 보기)</li>
         </ul>
       </details>
+      ${couponBoxHtml()}
       ${petTalkHtml(profileName)}
       <div class="room-tools">
         <button class="secondary-btn" id="photoBtn">📸 사진 찍기</button>
@@ -35699,6 +35708,7 @@ function renderPetRoomScreen(root, { profileName, actions }) {
       <button class="secondary-btn" id="shopBtn">👗 별 상점에서 꾸미기</button>
     </div>`;
   root.querySelector("#backBtn").addEventListener("click", actions.back);
+  bindCouponBox(root, profileName, actions.refresh);
   root.querySelector("#shopBtn").addEventListener("click", actions.shop);
   root.querySelector("#photoBtn").addEventListener("click", () => sharePetPhoto(profileName));
   root.querySelector("#parkBtn")?.addEventListener("click", actions.park);
@@ -36725,6 +36735,191 @@ function renderRecArchiveScreen(root, { profileName, actions }) {
 
 ;
 
+/* ── js/screens/coupons.js ── */
+// 🎟️ 쿠폰: 부모님이 설정에서 만들고, 아이가 별 상점 · 친구 방에서 등록한다.
+// 서버가 없어서 번호 안에 종류 · 양 · 일련번호 · 검사 글자를 넣는다. 다른 기기에서도 등록되고, 한 번 쓰면 끝.
+
+const COUPON_ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 헷갈리는 I · O · 0 · 1은 뺐다
+const COUPON_KINDS = [
+  { id: "star", emoji: "⭐", name: "별", desc: "별 상점에서 쓰는 별", amounts: [5, 10, 20, 30, 50, 100] },
+  { id: "bond", emoji: "❤️", name: "친밀도", desc: "친구와 더 친해져요", amounts: [10, 20, 50, 100, 200] },
+  { id: "grow", emoji: "🌱", name: "성장", desc: "친구가 문제를 푼 것처럼 자라요", amounts: [10, 30, 50, 100, 300, 500] },
+];
+const COUPON_ISSUED_KEEP = 30;
+const COUPON_WRONG_MAX = 5;
+let couponWrong = { n: 0, until: 0 };
+
+function couponCheck(payload) {
+  let h = 2166136261;
+  for (const ch of `englishword-coupon:${payload}`) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0;
+  return Array.from({ length: 3 }, (_, i) => COUPON_ALPHA[(h >>> (i * 5)) & 31]).join("");
+}
+
+function makeCouponCode(kindId, amount) {
+  const k = COUPON_KINDS.findIndex((x) => x.id === kindId);
+  const a = COUPON_KINDS[k]?.amounts.indexOf(amount);
+  if (k < 0 || a < 0) return null;
+  const rand = crypto.getRandomValues(new Uint8Array(5));
+  const payload = COUPON_ALPHA[k * 8 + a] + Array.from(rand, (b) => COUPON_ALPHA[b & 31]).join("");
+  const code = payload + couponCheck(payload);
+  return `${code.slice(0, 3)}-${code.slice(3, 6)}-${code.slice(6)}`;
+}
+
+// 번호를 풀어서 { kind, amount, serial }을 돌려준다. 틀린 번호면 null.
+function parseCouponCode(text) {
+  const code = String(text || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (code.length !== 9 || [...code].some((ch) => !COUPON_ALPHA.includes(ch))) return null;
+  const payload = code.slice(0, 6);
+  if (couponCheck(payload) !== code.slice(6)) return null;
+  const n = COUPON_ALPHA.indexOf(code[0]);
+  const kind = COUPON_KINDS[Math.floor(n / 8)];
+  const amount = kind?.amounts[n % 8];
+  if (!kind || !amount) return null;
+  return { kind, amount, serial: code.slice(1, 6) };
+}
+
+function couponUsedBy(serial) {
+  return getFamily().find((m) => getProfileData(m.name).coupons.includes(serial))?.name || null;
+}
+
+// 쿠폰 등록. { ok, msg, levelUp }
+function redeemCoupon(profileName, text) {
+  if (Date.now() < couponWrong.until) return { ok: false, msg: "번호를 여러 번 틀렸어요. 1분 뒤에 다시 해 봐요." };
+  const c = parseCouponCode(text);
+  if (!c) {
+    couponWrong.n += 1;
+    if (couponWrong.n >= COUPON_WRONG_MAX) couponWrong = { n: 0, until: Date.now() + 60000 };
+    return { ok: false, msg: "쿠폰 번호가 맞지 않아요. 다시 확인해 봐요." };
+  }
+  couponWrong.n = 0;
+  const usedBy = couponUsedBy(c.serial) || (getSettings().couponsUsed || []).includes(c.serial);
+  if (usedBy) return { ok: false, msg: typeof usedBy === "string" ? `이미 ${escapeHtml(usedBy)}님이 쓴 쿠폰이에요.` : "이미 쓴 쿠폰이에요." };
+  const before = petStatus(profileName);
+  updateProfile(profileName, (p) => {
+    p.coupons = [...p.coupons, c.serial].slice(-300);
+    if (c.kind.id === "star") p.bonusStars += c.amount;
+    if (c.kind.id === "bond") p.care.bond += c.amount;
+    if (c.kind.id === "grow") p.petBoost += c.amount;
+  });
+  updateSettings({ couponsUsed: [...(getSettings().couponsUsed || []), c.serial].slice(-300) });
+  const after = petStatus(profileName);
+  const levelUp = after.stage.emoji !== before.stage.emoji || after.tier?.id !== before.tier?.id ? after : null;
+  return { ok: true, kind: c.kind, amount: c.amount, levelUp, msg: `${c.kind.emoji} ${c.kind.name} +${c.amount} 받았어요!` };
+}
+
+// ── 아이 화면: 별 상점 · 친구 방의 쿠폰 등록 칸 ──
+function couponBoxHtml() {
+  return `
+    <details class="coupon-box" id="couponBox">
+      <summary>🎟️ 쿠폰 등록하기</summary>
+      <form class="coupon-form" id="couponForm" autocomplete="off">
+        <input class="text-input coupon-input" id="couponInput" maxlength="13" placeholder="ABC-DEF-GHJ" aria-label="쿠폰 번호" autocapitalize="characters" spellcheck="false">
+        <button class="primary-btn" type="submit">등록</button>
+      </form>
+      <p class="settings-help" id="couponMsg">부모님께 받은 쿠폰 번호 9자리를 넣어요.</p>
+    </details>`;
+}
+
+function bindCouponBox(root, profileName, onDone) {
+  const input = root.querySelector("#couponInput");
+  if (!input) return;
+  input.addEventListener("input", () => {
+    const raw = input.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 9);
+    input.value = raw.match(/.{1,3}/g)?.join("-") || "";
+  });
+  root.querySelector("#couponForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const r = redeemCoupon(profileName, input.value);
+    const msg = root.querySelector("#couponMsg");
+    if (!r.ok) {
+      msg.innerHTML = `❌ ${r.msg}`;
+      playSound("wrong");
+      input.classList.add("shake");
+      setTimeout(() => input.classList.remove("shake"), 500);
+      return;
+    }
+    burstConfetti();
+    playSound("badge");
+    showToast(`<span class="toast-emoji">🎟️</span><span><b>쿠폰 등록!</b> ${r.msg}</span>`);
+    if (r.levelUp) setTimeout(() => showToast(`<span class="toast-emoji">${r.levelUp.stage.emoji}</span><span><b>레벨 업!</b> ${r.levelUp.stage.name} 단계가 됐어요!</span>`), 400);
+    announceBadges(checkNewBadges(profileName));
+    onDone();
+  });
+}
+
+// ── 부모님 화면: 설정의 쿠폰 만들기 ──
+let couponDraft = { kind: "star", amount: 10, last: null };
+
+function couponSettingsHtml() {
+  const kind = COUPON_KINDS.find((k) => k.id === couponDraft.kind);
+  const issued = getSettings().couponsIssued || [];
+  return `
+    <section class="settings-card" id="couponCard">
+      <h2 class="section-title">🎟️ 쿠폰 만들기 <small>(부모님용)</small></h2>
+      <p class="settings-help">칭찬할 일이 있을 때 쿠폰을 만들어 번호를 알려 주세요. 아이가 <b>⭐ 별 상점</b>이나 <b>🏠 친구 방</b>의 '쿠폰 등록하기'에 넣으면 받아요. 쿠폰 하나는 한 번만 쓸 수 있고, 다른 휴대폰에서도 등록돼요.${parentLockOn() ? "" : " <b>아이들이 직접 만들지 못하게 아래 '부모님 잠금'을 켜 두면 좋아요.</b>"}</p>
+      <div class="goal-kinds">${COUPON_KINDS.map((k) => `<button class="chip-btn${k.id === kind.id ? " on" : ""}" data-ckind="${k.id}">${k.emoji} ${k.name}</button>`).join("")}</div>
+      <p class="settings-help">${kind.emoji} ${kind.desc}</p>
+      <div class="goal-kinds">${kind.amounts.map((n) => `<button class="chip-btn${n === couponDraft.amount ? " on" : ""}" data-camount="${n}">${n}</button>`).join("")}</div>
+      <input class="text-input" id="couponNote" maxlength="20" placeholder="메모 (예: 방 청소 칭찬)">
+      <button class="primary-btn" id="couponMakeBtn">🎟️ ${kind.emoji} ${kind.name} ${couponDraft.amount} 쿠폰 만들기</button>
+      ${
+        couponDraft.last
+          ? `<div class="coupon-ticket"><small>${couponDraft.last.label}</small><b>${couponDraft.last.code}</b><button class="chip-btn" id="couponCopyBtn">📋 번호 복사</button></div>`
+          : ""
+      }
+      ${
+        issued.length
+          ? `<details class="coupon-issued"><summary>만든 쿠폰 ${issued.length}개</summary><ul>${issued
+              .slice()
+              .reverse()
+              .map((c) => {
+                const p = parseCouponCode(c.code);
+                const used = p && couponUsedBy(p.serial);
+                return `<li><b>${c.code}</b><span>${c.label}${c.note ? ` · ${escapeHtml(c.note)}` : ""}<small>${c.date} · ${used ? `✅ ${escapeHtml(used)} 사용` : "아직 안 씀"}</small></span></li>`;
+              })
+              .join("")}</ul></details>`
+          : ""
+      }
+    </section>`;
+}
+
+function bindCouponSettings(root, refresh) {
+  root.querySelectorAll("[data-ckind]").forEach((b) =>
+    b.addEventListener("click", () => {
+      couponDraft.kind = b.dataset.ckind;
+      const amounts = COUPON_KINDS.find((k) => k.id === couponDraft.kind).amounts;
+      if (!amounts.includes(couponDraft.amount)) couponDraft.amount = amounts[1];
+      refresh();
+    })
+  );
+  root.querySelectorAll("[data-camount]").forEach((b) =>
+    b.addEventListener("click", () => {
+      couponDraft.amount = Number(b.dataset.camount);
+      refresh();
+    })
+  );
+  root.querySelector("#couponMakeBtn")?.addEventListener("click", () => {
+    const code = makeCouponCode(couponDraft.kind, couponDraft.amount);
+    if (!code) return;
+    const kind = COUPON_KINDS.find((k) => k.id === couponDraft.kind);
+    const label = `${kind.emoji} ${kind.name} ${couponDraft.amount}`;
+    const note = cleanText(root.querySelector("#couponNote").value, 20);
+    couponDraft.last = { code, label };
+    updateSettings({ couponsIssued: [...(getSettings().couponsIssued || []), { code, label, note, date: dateKey() }].slice(-COUPON_ISSUED_KEEP) });
+    refresh();
+  });
+  root.querySelector("#couponCopyBtn")?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(couponDraft.last.code);
+      showToast(`<span class="toast-emoji">📋</span><span>쿠폰 번호를 복사했어요</span>`);
+    } catch {
+      showToast(`<span class="toast-emoji">✍️</span><span>복사가 안 돼요. 번호를 직접 적어 주세요: <b>${couponDraft.last.code}</b></span>`);
+    }
+  });
+}
+
+;
+
 /* ── js/screens/memberEdit.js ── */
 const MEMBER_EMOJIS = ["👨", "👩", "🧒", "👦", "👧", "👶", "👴", "👵", "🧑", "🐶", "🐱", "🐰", "🦊", "🐻", "🐼", "🦁", "🐸"];
 const MEMBER_COLORS = ["#4d96ff", "#ff6b81", "#ffb703", "#38b26b", "#8338ec", "#16a3a3", "#ff8b3d", "#3a5a78"];
@@ -36964,6 +37159,7 @@ function renderSettingsScreen(root, { profileName, actions }) {
       ${renderMenuUsageHtml(profileName)}
       ${renderMenuVisibilitySettingsHtml(profileName)}
 
+      ${couponSettingsHtml()}
       ${parentLockSettingsHtml()}
 
       <section class="settings-card">
@@ -36990,6 +37186,11 @@ function renderSettingsScreen(root, { profileName, actions }) {
 
   bindTextSizeControl(root);
   bindParentLockSettings(root, () => set({}));
+  bindCouponSettings(root, () => {
+    const y = window.scrollY;
+    set({});
+    window.scrollTo(0, y);
+  });
   bindMenuVisibilitySettings(root, profileName, () => set({}));
   bindMenuUsage(root, profileName, () => set({}));
   mountInstallGuide(root.querySelector("#installGuide"));
