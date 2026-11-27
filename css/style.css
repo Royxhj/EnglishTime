@@ -2907,3 +2907,38 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 @keyframes bgAurora { from { transform: translateX(-12%) skewX(-6deg); } to { transform: translateX(12%) skewX(6deg); } }
 @keyframes bgSpin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .bgfx::before, .bgfx::after { animation: none !important; } .bgfx-shoot::after { opacity: 0; } }
+
+/* ── 📖 친구 도감 ── */
+.dex-progress { display: block; margin: 4px 0 8px; }
+.dex-open { width: 100%; margin-bottom: 8px; }
+.dex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.dex-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 4px; border-radius: 16px; border: 2px solid transparent; background: var(--card-bg); box-shadow: var(--shadow); color: inherit; font: inherit; cursor: pointer; min-width: 0; }
+.dex-card:not(.seen) { opacity: 0.55; background: color-mix(in srgb, var(--muted) 12%, var(--card-bg)); box-shadow: none; }
+.dex-card.now { border-color: var(--primary); }
+.dex-card .dex-emoji { font-size: 38px; line-height: 1.2; }
+.dex-card b { font-size: 14px; }
+.dex-card small { font-size: 12px; color: var(--muted); text-align: center; }
+.dex-card i { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-style: normal; font-size: 11px; font-weight: 800; background: var(--primary); color: #fff; border-radius: 10px; padding: 1px 7px; white-space: nowrap; }
+.dex-card.tier-transcend, .dex-card.tier-immortal, .dex-card.tier-celestial { background: linear-gradient(160deg, color-mix(in srgb, #a78bfa 25%, var(--card-bg)), var(--card-bg)); }
+.dex-card.tier-origin { background: linear-gradient(160deg, #312e81, #0f0a2e); color: #fff; }
+.dex-card.tier-origin small { color: #ddd6fe; }
+/* 🎄 꼬마전구 (::before) · 눈 (::after) */
+.bgfx-lights::before {
+  background-image: radial-gradient(3px 3px at 15px 20px, #f87171, transparent), radial-gradient(3px 3px at 55px 35px, #fde047, transparent), radial-gradient(3px 3px at 95px 18px, #4ade80, transparent), radial-gradient(3px 3px at 135px 32px, #60a5fa, transparent), radial-gradient(3px 3px at 175px 22px, #f472b6, transparent);
+  background-size: 190px 60px; background-repeat: repeat-x;
+  animation: bgTwinkle 0.9s steps(2) infinite alternate;
+}
+.bgfx-snow::after {
+  background-image: radial-gradient(circle at 20px 20px, #fff 0 2.5px, transparent 3px), radial-gradient(circle at 90px 70px, rgba(255, 255, 255, 0.9) 0 2px, transparent 2.5px), radial-gradient(circle at 150px 130px, #fff 0 3px, transparent 3.5px), radial-gradient(circle at 60px 120px, rgba(255, 255, 255, 0.8) 0 1.5px, transparent 2px), radial-gradient(circle at 130px 30px, #fff 0 2px, transparent 2.5px);
+  background-size: 180px 160px;
+  animation: bgFall 6s linear infinite;
+}
+/* 🖼️ 상점 배경: 크게 옆으로 넘겨 보기 */
+.bg-strip { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 2px 12px; margin: 0 -2px; -webkit-overflow-scrolling: touch; }
+.bg-strip .bg-card { flex: 0 0 min(72%, 260px); scroll-snap-align: center; padding: 8px; gap: 4px; }
+.bg-card-view { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 130px; border-radius: 14px; isolation: isolate; overflow: hidden; }
+.bg-card-pet { font-size: 54px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25)); }
+.bg-card b { font-size: 15px; }
+.coupon-log ul { list-style: none; padding: 0; margin: 6px 0 0; display: flex; flex-direction: column; gap: 6px; }
+.coupon-log li { display: flex; gap: 10px; align-items: baseline; }
+.coupon-log li small { color: var(--muted); min-width: 38px; }

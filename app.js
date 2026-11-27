@@ -22740,6 +22740,7 @@ function normalizeProfile(profile) {
   }
   delete p.petBoost;
   p.coupons = Array.isArray(p.coupons) ? p.coupons.filter((c) => typeof c === "string" && /^[A-Z2-9]{5}$/.test(c)).slice(-300) : [];
+  p.couponLog = Array.isArray(p.couponLog) ? p.couponLog.filter((e) => e && /^\d{4}-\d{2}-\d{2}$/.test(e.d) && typeof e.t === "string").map((e) => ({ d: e.d, t: e.t.slice(0, 60) })).slice(-50) : [];
   p.attend = { claimed: Math.max(0, Math.floor(Number(p.attend?.claimed) || 0)) };
   p.chests = Array.isArray(p.chests) ? p.chests.filter((d) => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)).slice(-60) : [];
   const use = p.menuUse && typeof p.menuUse === "object" && !Array.isArray(p.menuUse) ? p.menuUse : {};
@@ -23575,6 +23576,12 @@ const BADGES = [
   { id: "house", emoji: "🏠", title: "우리 집 박사", desc: "우리 집 물건 방 7곳에서 별 2개 이상", test: (p) => HOUSE_ROOMS.filter((r) => r.group === "home").every((r) => ["listen", "look"].some((m) => { const b = p.house.best[`${r.id}:${m}`]; return b && b.correct / b.total >= 0.8; })) },
   { id: "school8", emoji: "🏫", title: "교과 표현 박사", desc: "교과 핵심 표현 8주제 퀴즈 통과", test: (p) => Object.values(p.school.best).filter((b) => b.correct / b.total >= 0.66).length >= 8 },
   { id: "yearGoal", emoji: "🎯", title: "목표 달성", desc: "새해 목표 이루기", test: (p) => !!p.yearGoal?.done },
+  // 📖 친구 도감 · 친구별 등급 모으기
+  { id: "dex5", emoji: "🔎", title: "친구 수집가", desc: "친구 5종 알에서 깨우기", test: (p) => petDexMet(p).length >= 5 },
+  { id: "dex15", emoji: "🗂️", title: "친구 박사", desc: "친구 15종 알에서 깨우기", test: (p) => petDexMet(p).length >= 15 },
+  { id: "dexAll", emoji: "🎖️", title: "친구 도감 완성", desc: "모든 친구 알에서 깨우기", test: (p) => petDexMet(p).length >= PET_KINDS.length },
+  { id: "legend5", emoji: "🏵️", title: "전설 다섯", desc: "친구 5종을 전설로 키우기", test: (p) => petCountAtLeast(p, 1500) >= 5 },
+  { id: "origin3", emoji: "🪐", title: "태초 삼총사", desc: "태초 친구 3종 만들기", test: (p) => petCountAtLeast(p, 20000) >= 3 },
   { id: "vacation", emoji: "⛄", title: "계획 박사", desc: "방학 계획표 세우기", test: (p) => !!p.vacation },
   { id: "advent10", emoji: "🎄", title: "크리스마스 요정", desc: "어드벤트 달력 도장 10개", test: (p) => p.advent.length >= 10 },
   { id: "petLove", emoji: "💕", title: "단짝 친구", desc: "캐릭터 친밀도 50 넘기기", test: (p) => p.care.bond >= 50 },
@@ -28495,6 +28502,12 @@ const STICKER_EVERY = 15;
 
 // 캐릭터가 자라는 점수: 친구마다 따로 (저장해 둔 성장 + 이 친구로 바꾼 뒤 푼 문제 수)
 const petGrowth = (p) => (p.petXp?.[p.petKind || "none"] || 0) + Math.max(0, (p.totalAnswered || 0) - (p.petSince ?? (p.totalAnswered || 0)));
+// 친구 하나의 성장 (지금 친구면 푼 문제까지 더해서)
+// (아직 친구를 안 고른 아이는 첫 친구인 병아리를 키우는 중)
+const petGrowthOf = (p, kindId) => (kindId === (p.petKind || PET_KINDS[0].id) ? petGrowth(p) : p.petXp?.[kindId] || 0);
+// 📖 도감: 알에서 깨어난(첫 단계를 지난) 친구 = 만난 친구
+const petDexMet = (p) => PET_KINDS.filter((k) => petGrowthOf(p, k.id) >= PET_MINS[1]);
+const petCountAtLeast = (p, min) => PET_KINDS.filter((k) => petGrowthOf(p, k.id) >= min).length;
 // 지금 친구에게만 성장 더하기 (🌱 · 🏆 쿠폰)
 const addPetXp = (p, n) => {
   const key = p.petKind || "none";
@@ -28540,12 +28553,12 @@ function petCardHtml(profileName) {
     </section>`;
 }
 
-function renderStickerScreen(root, { profileName, back, choosePet }) {
+function renderStickerScreen(root, { profileName, back, choosePet, dex }) {
   const s = petStatus(profileName);
   const p = getProfileData(profileName);
   // 친구마다 따로 자란다: 고르지 않은 친구는 저장해 둔 성장(처음이면 알)
   const kindLook = (k) => {
-    const g = k.id === s.kind.id ? s.total : p.petXp?.[k.id] || 0;
+    const g = petGrowthOf(p, k.id);
     const stages = petStages(k.id);
     const i = stages.reduce((a, x, j) => (g >= x.min ? j : a), 0);
     const tier = [...PET_TIERS].reverse().find((t) => g >= t.min);
@@ -28562,6 +28575,7 @@ function renderStickerScreen(root, { profileName, back, choosePet }) {
         <p class="settings-help">${s.next?.tier ? `${s.left}문제 더 풀면 ${s.next.emoji} ${s.next.name}이 돼요` : s.next ? `${s.left}문제 더 풀면 ${s.next.emoji} ${s.next.name}(으)로 자라요` : "가장 높은 태초 등급이에요!"} · 다음 스티커까지 ${s.toNextSticker}문제</p>
       </section>
       <h2 class="section-title">🐾 친구 고르기 <small>친구마다 따로 자라요 · 새 친구는 알부터, 키운 친구는 그대로</small></h2>
+      <button class="secondary-btn dex-open" id="petDexBtn">📖 친구 도감 · ${petDexMet(p).length} / ${PET_KINDS.length}종</button>
       <div class="pet-kinds">
         ${PET_KINDS.map((k) => {
           const look = kindLook(k);
@@ -28579,6 +28593,43 @@ function renderStickerScreen(root, { profileName, back, choosePet }) {
     </div>`;
   root.querySelector("#backBtn").addEventListener("click", back);
   root.querySelectorAll("[data-kind]").forEach((b) => b.addEventListener("click", () => choosePet(b.dataset.kind)));
+  root.querySelector("#petDexBtn")?.addEventListener("click", dex);
+}
+
+// ── 📖 친구 도감: 알에서 깨운 친구를 모은다. 못 만난 친구는 ❓ ──
+function renderPetDexScreen(root, { profileName, back, choosePet }) {
+  const p = getProfileData(profileName);
+  const cur = petStatus(profileName).kind.id;
+  const met = petDexMet(p);
+  const card = (k) => {
+    const g = petGrowthOf(p, k.id);
+    const stages = petStages(k.id);
+    const stage = stages.reduce((a, x) => (g >= x.min ? x : a), stages[0]);
+    const tier = [...PET_TIERS].reverse().find((t) => g >= t.min);
+    const seen = g >= PET_MINS[1];
+    return `<button class="dex-card${seen ? " seen" : ""}${k.id === cur ? " now" : ""}${tier ? ` tier-${tier.id}` : ""}" data-dex="${k.id}" aria-label="${seen ? `${k.title} ${stage.name}` : "아직 못 만난 친구"}">
+      <span class="dex-emoji">${seen ? stage.emoji : "❓"}</span>
+      <b>${seen ? k.title : "???"}</b>
+      <small>${seen ? `${tier ? `${tier.icon} ${tier.name}` : stage.name}` : `${k.stages[0][0]}에서 태어나요`}</small>
+      ${k.id === cur ? "<i>함께하는 중</i>" : ""}
+    </button>`;
+  };
+  root.innerHTML = `
+    <div class="screen screen-dex">
+      <button class="back-btn" id="backBtn">← 뒤로</button>
+      <h1 class="title">📖 친구 도감</h1>
+      <p class="subtitle">알에서 깨운 친구 <b>${met.length}</b> / ${PET_KINDS.length}종 · 🏅 전설 ${petCountAtLeast(p, 1500)}종 · 🌌 태초 ${petCountAtLeast(p, 20000)}종</p>
+      <span class="progress-track dex-progress"><span class="progress-fill" style="width:${Math.round((met.length / PET_KINDS.length) * 100)}%"></span></span>
+      <p class="settings-help">친구를 고르면 그 친구가 자라요. 문제를 ${PET_MINS[1]}개 풀면 알에서 깨어나 도감에 올라가요. 키운 친구는 등급이 그대로 남아요.</p>
+      <div class="dex-grid">${PET_KINDS.map(card).join("")}</div>
+    </div>`;
+  root.querySelector("#backBtn").addEventListener("click", back);
+  root.querySelectorAll("[data-dex]").forEach((b) =>
+    b.addEventListener("click", () => {
+      if (b.dataset.dex === cur) return;
+      choosePet(b.dataset.dex);
+    })
+  );
 }
 
 ;
@@ -29523,6 +29574,7 @@ const SHOP_ITEMS = [
 function shopItemUnlocked(profileName, item) {
   const p = getProfileData(profileName);
   if (item.advent) return p.advent.length >= item.advent;
+  if (item.month) return p.shop.owned.includes(item.id) || new Date().getMonth() + 1 === item.month;
   if (item.tier) return petGrowth(p) >= (PET_TIERS.find((t) => t.id === item.tier)?.min ?? Infinity);
   if (item.bond) return bondLevelIndex(p.care.bond) >= item.bond;
   return !item.perfect || p.perfectMonths.length >= item.perfect;
@@ -29530,6 +29582,7 @@ function shopItemUnlocked(profileName, item) {
 
 function shopLockLabel(it) {
   if (it.advent) return `🎄 도장 ${it.advent}개`;
+  if (it.month) return `🎄 ${it.month}월에만`;
   if (it.tier) {
     const t = PET_TIERS.find((x) => x.id === it.tier);
     return `${t.icon} ${t.name} 등급`;
@@ -29576,6 +29629,15 @@ function renderShopScreen(root, { profileName, actions }) {
     const open = shopItemUnlocked(profileName, it);
     const label = on ? "벗기" : owned ? "꾸미기" : !open ? shopLockLabel(it) : it.price ? `⭐ ${it.price}` : "🎁 받기";
     const cant = !owned && (!open || s.stars < it.price);
+    // 🖼️ 배경은 크게 보여 주고 옆으로 넘겨 본다
+    if (it.cat === "bg") {
+      const fx = it.fx ? ` bgfx${it.fx.split(" ").map((f) => ` bgfx-${f}`).join("")}` : "";
+      return `<button class="shop-item bg-card${on ? " on" : ""}${owned ? " owned" : ""}${cant ? " cant" : ""}${preview === it.id ? " trying" : ""}" data-item="${it.id}">
+      <span class="bg-card-view${fx}${it.dark ? " pet-dark" : ""}" style="background:${it.bg}"><span class="bg-card-pet">${pet.stage.emoji}</span></span>
+      <b>${it.emoji} ${it.name}</b>
+      <small>${label}</small>
+    </button>`;
+    }
     return `<button class="shop-item${on ? " on" : ""}${owned ? " owned" : ""}${cant ? " cant" : ""}${preview === it.id ? " trying" : ""}" data-item="${it.id}">
       <span class="shop-emoji${it.fx ? ` bgfx${it.fx.split(" ").map((f) => ` bgfx-${f}`).join("")}` : ""}"${it.bg ? ` style="background:${it.bg}"` : ""}>${it.emoji}</span>
       <b>${it.name}</b>
@@ -29607,7 +29669,11 @@ function renderShopScreen(root, { profileName, actions }) {
         <p class="shop-stars">⭐ <b>${s.stars}</b>개 있어요</p>
       </section>
       ${couponBoxHtml()}
-      ${SHOP_CATS.map((cat) => `<h2 class="section-title">${cat.title}</h2><div class="shop-grid">${SHOP_ITEMS.filter((it) => it.cat === cat.id).map(itemHtml).join("")}</div>`).join("")}
+      ${SHOP_CATS.map((cat) =>
+        cat.id === "bg"
+          ? `<h2 class="section-title">${cat.title} <small>← 옆으로 넘겨 보세요 →</small></h2><div class="bg-strip">${SHOP_ITEMS.filter((it) => it.cat === cat.id).map(itemHtml).join("")}</div>`
+          : `<h2 class="section-title">${cat.title}</h2><div class="shop-grid">${SHOP_ITEMS.filter((it) => it.cat === cat.id).map(itemHtml).join("")}</div>`
+      ).join("")}
       ${pv ? tryBarHtml(pv) : ""}
     </div>`;
     window.scrollTo(0, scrollY);
@@ -35707,6 +35773,16 @@ SHOP_ITEMS.push(
   { id: "bg-heaven", cat: "bg", emoji: "🕊️", name: "천상의 정원", price: 300, tier: "celestial", fx: "rays gems", bg: "radial-gradient(circle at 50% -10%, #fffbe6, #fde68a 35%, #fbcfe8 70%, #e0e7ff)" }
 );
 
+// 🎄 12월에만 살 수 있는 크리스마스 아이템 (산 건 1월에도 계속 쓸 수 있어요)
+SHOP_ITEMS.push(
+  { id: "hand-bell", cat: "hand", emoji: "🔔", name: "징글벨", price: 40, month: 12 },
+  { id: "hand-gift", cat: "hand", emoji: "🎁", name: "선물 상자", price: 45, month: 12 },
+  { id: "fx-sparkler", cat: "fx", emoji: "🎇", name: "반짝 불꽃", price: 60, month: 12 },
+  { id: "pal-reindeer", cat: "pal", emoji: "🦌", name: "루돌프", price: 90, month: 12 },
+  { id: "bg-xmastown", cat: "bg", emoji: "🏘️", name: "눈 내리는 마을", price: 120, month: 12, dark: true, fx: "lights snow", bg: "linear-gradient(180deg, transparent 78%, #e7f0ff 78.5%), radial-gradient(ellipse at 50% 120%, rgba(255, 214, 102, 0.35), transparent 60%), linear-gradient(180deg, #0b1a3a, #1d3a6e)" },
+  { id: "bg-xmastree", cat: "bg", emoji: "🎄", name: "트리 광장", price: 150, month: 12, dark: true, fx: "lights snow", bg: "linear-gradient(180deg, transparent 82%, #f1f5ff 82.5%), radial-gradient(circle at 50% 12%, #fde047 0 7px, rgba(253, 224, 71, 0.4) 10px, transparent 22px), conic-gradient(from 160deg at 50% 14%, transparent 0deg, #166534 0deg 40deg, transparent 40deg), linear-gradient(180deg, #0f1f3d, #3b0d1d)" }
+);
+
 // ── 저장 ──
 function petDoActivity(profileName, id) {
   const act = PET_ACTIVITIES.find((a) => a.id === id);
@@ -35791,6 +35867,7 @@ function renderPetRoomScreen(root, { profileName, actions }) {
       ${petTalkHtml(profileName)}
       <div class="room-tools">
         <button class="secondary-btn" id="photoBtn">📸 사진 찍기</button>
+        <button class="secondary-btn" id="petDexBtn">📖 친구 도감</button>
         ${getFamily().length > 1 ? `<button class="secondary-btn" id="parkBtn">👨‍👩‍👧 가족 놀이터</button>` : ""}
       </div>
 
@@ -35816,6 +35893,7 @@ function renderPetRoomScreen(root, { profileName, actions }) {
   bindCouponBox(root, profileName, actions.refresh);
   root.querySelector("#shopBtn").addEventListener("click", actions.shop);
   root.querySelector("#photoBtn").addEventListener("click", () => sharePetPhoto(profileName));
+  root.querySelector("#petDexBtn")?.addEventListener("click", actions.dex);
   root.querySelector("#parkBtn")?.addEventListener("click", actions.park);
   const bubble = (emoji, en, ko) => {
     const b = root.querySelector("#roomBubble");
@@ -36940,8 +37018,11 @@ function redeemCoupon(profileName, text) {
   // 99 = 👑 최종 진화: 한 번에 가장 높은 등급(태초)까지
   const nextTier = !PET_TIERS.some((t) => before.total < t.min) ? null : c.kind.id === "tier" && c.amount === 99 ? PET_TIERS[PET_TIERS.length - 1] : PET_TIERS.find((t) => before.total < t.min);
   if (c.kind.id === "tier" && !nextTier) return { ok: false, msg: "이미 가장 높은 등급이라 더 올릴 수 없어요. 쿠폰은 그대로 남아 있어요." };
+  const logText = c.kind.id === "tier" ? `${c.amount === 99 ? "👑 최종 진화" : "🏆 등급 올리기"} → ${nextTier.icon} ${nextTier.name} (${before.kind.title})` : `${c.kind.emoji} ${c.kind.name} +${c.amount}`;
   updateProfile(profileName, (p) => {
     p.coupons = [...p.coupons, c.serial].slice(-300);
+    // 🎁 받은 쿠폰 기록 (부모님 칭찬 기록처럼 남긴다)
+    p.couponLog = [...p.couponLog, { d: dateKey(), t: logText }].slice(-50);
     if (c.kind.id === "star") p.bonusStars += c.amount;
     if (c.kind.id === "bond") p.care.bond += c.amount;
     if (c.kind.id === "grow") addPetXp(p, c.amount);
@@ -37033,10 +37114,26 @@ function renderCouponScreen(root, { profileName, actions }) {
       <p class="subtitle">부모님께 받은 쿠폰 번호 4자리를 넣어요</p>
       ${couponBoxHtml(true)}
       <p class="settings-help">지금 내 친구: ${s.tier ? `${s.tier.icon} ` : ""}${s.stage.name} · ⭐ ${shopStatus(profileName).stars}개</p>
+      ${couponLogHtml(profileName)}
     </div>`;
   root.querySelector("#backBtn").addEventListener("click", actions.back);
   bindCouponBox(root, profileName, () => setTimeout(() => renderCouponScreen(root, { profileName, actions }), 600));
   root.querySelector("#couponInput")?.focus();
+}
+
+// 🎁 받은 쿠폰 기록
+function couponLogHtml(profileName) {
+  const log = getProfileData(profileName).couponLog;
+  if (!log.length) return `<p class="settings-help">아직 받은 쿠폰이 없어요. 열심히 하면 부모님이 쿠폰을 주실 거예요!</p>`;
+  return `
+    <section class="settings-card coupon-log">
+      <h2 class="section-title">🎁 받은 쿠폰 <small>${log.length}장</small></h2>
+      <ul>${log
+        .slice()
+        .reverse()
+        .map((e) => `<li><small>${e.d.slice(5).replace("-", "/")}</small><span>${escapeHtml(e.t)}</span></li>`)
+        .join("")}</ul>
+    </section>`;
 }
 
 ;
@@ -38850,6 +38947,14 @@ const store = createStore({
 const set = (patch) => store.setState(patch);
 const currentProfile = () => store.getState().profileName;
 const goHome = () => set({ screen: "home" });
+// 🐾 친구 바꾸기 (스티커북 · 도감)
+function choosePetKind(kindId) {
+  setPetKind(currentProfile(), kindId);
+  const s = petStatus(currentProfile());
+  playSound("correct");
+  showToast(`<span class="toast-emoji">${s.stage.emoji}</span><span>이제 ${s.kind.title} 친구와 함께해요!${s.total < PET_MINS[1] ? " 문제를 풀면 알에서 깨어나요." : ""}</span>`);
+  set({});
+}
 
 // ── 단어 ──
 function currentScore() {
@@ -40190,7 +40295,7 @@ function parentScreen(state) {
     case "settings": case "wrongNote": case "report": case "vocab": case "grammarNotes": case "phonics": case "talk":
     case "irregular": case "verbPattern": case "speakingList": case "listeningList": case "writingList":
     case "idioms": case "affixes": case "examList": case "goals": case "crosswordList": case "family": case "practiceList":
-    case "pictureList": case "stickers": case "memory": case "spellingList":
+    case "pictureList": case "stickers": case "petDex": case "memory": case "spellingList":
     case "topicList": case "numbersList": case "soundsList": case "storyList": case "diaryList": case "speedList": case "battleSetup": case "shop":
     case "chainList": case "bingoSetup": case "calendar": case "printSetup":
     case "wordSearchList": case "wordGuessList": case "riddleList": case "dictationList":
@@ -40281,7 +40386,7 @@ window.addEventListener("popstate", () => {
 // ── 새 버전 반영: 문제를 푸는 중이 아닐 때 새로고침하고, 보던 화면으로 돌아온다 ──
 const RELOAD_SAFE_SCREENS = new Set([
   "profile", "home", "level", "grammarList", "readingList", "chunkIntro",
-  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation", "houseList", "bizList", "dailyWrite", "fishingList", "coloringList", "boardSetup", "tableTalk", "newsList", "sceneList", "petRoom", "yearReview", "yearGoal", "recArchive", "coupon",
+  "vocab", "grammarNotes", "report", "wrongNote", "settings", "phonics", "talk", "irregular", "verbPattern", "speakingList", "listeningList", "writingList", "idioms", "affixes", "examList", "goals", "crosswordList", "family", "practiceList", "pictureList", "stickers", "spellingList", "topicList", "numbersList", "soundsList", "storyList", "diaryList", "speedList", "shop", "chainList", "bingoSetup", "calendar", "printSetup", "wordSearchList", "wordGuessList", "riddleList", "dictationList", "wordLists", "typingList", "roadmap", "wordRainList", "certificate", "advent", "pairsList", "drawSetup", "chantList", "cultureList", "schoolList", "vacation", "houseList", "bizList", "dailyWrite", "fishingList", "coloringList", "boardSetup", "tableTalk", "newsList", "sceneList", "petRoom", "yearReview", "yearGoal", "recArchive", "coupon", "petDex",
 ]);
 const RESUME_KEY = "englishword:resume";
 
@@ -40695,13 +40800,14 @@ function render() {
       renderStickerScreen(root, {
         profileName: state.profileName,
         back: goHome,
-        choosePet: (kindId) => {
-          setPetKind(state.profileName, kindId);
-          const s = petStatus(state.profileName);
-          playSound("correct");
-          showToast(`<span class="toast-emoji">${s.stage.emoji}</span><span>이제 ${s.kind.title} 친구와 함께해요!</span>`);
-          set({});
-        },
+        choosePet: (kindId) => choosePetKind(kindId),
+        dex: () => set({ screen: "petDex", dexFrom: "stickers" }),
+      }),
+    petDex: () =>
+      renderPetDexScreen(root, {
+        profileName: state.profileName,
+        back: () => set({ screen: state.dexFrom || "stickers" }),
+        choosePet: (kindId) => choosePetKind(kindId),
       }),
 
     topicList: () => renderTopicListScreen(root, { profileName: state.profileName, open: (topicId) => set({ topicId, screen: "topicView" }), back: goHome }),
@@ -40737,7 +40843,7 @@ function render() {
         write: (tplId) => set({ diaryDraft: { tplId, picks: findDiaryTemplate(tplId).lines.map(() => null) }, screen: "diaryWrite" }),
         back: goHome,
       }),
-    petRoom: () => renderPetRoomScreen(root, { profileName: state.profileName, actions: { back: goHome, shop: () => set({ screen: "shop" }), park: () => set({ screen: "petPark" }), refresh: () => set({}) } }),
+    petRoom: () => renderPetRoomScreen(root, { profileName: state.profileName, actions: { back: goHome, shop: () => set({ screen: "shop" }), park: () => set({ screen: "petPark" }), dex: () => set({ screen: "petDex", dexFrom: "petRoom" }), refresh: () => set({}) } }),
     yearReview: () => renderYearReviewScreen(root, { profileName: state.profileName, actions: { back: goHome, goal: () => set({ screen: "yearGoal" }) } }),
     yearGoal: () => renderYearGoalScreen(root, { profileName: state.profileName, actions: { back: goHome } }),
     recArchive: () => renderRecArchiveScreen(root, { profileName: state.profileName, actions: { back: goHome } }),
