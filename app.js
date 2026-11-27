@@ -23888,6 +23888,8 @@ function showToast(html) {
   toast.className = "toast";
   toast.innerHTML = html;
   stack.appendChild(toast);
+  // 한꺼번에 여러 개가 뜨면 화면을 가리므로 최근 3개만 남긴다
+  while (stack.children.length > 3) stack.firstElementChild.remove();
   setTimeout(() => toast.classList.add("toast--out"), 3200);
   setTimeout(() => toast.remove(), 3600);
 }
@@ -23895,6 +23897,10 @@ function showToast(html) {
 function announceBadges(badges) {
   if (badges.length === 0) return;
   playSound("badge");
+  if (badges.length > 2) {
+    showToast(`<span class="toast-emoji">🏅</span><span><b>새 배지 ${badges.length}개!</b> ${badges.map((b) => b.emoji).join(" ")}<br><small>${badges.map((b) => b.title).join(" · ")}</small></span>`);
+    return;
+  }
   badges.forEach((b) => showToast(`<span class="toast-emoji">${b.emoji}</span><span><b>새 배지!</b> ${b.title}<br><small>${b.desc}</small></span>`));
 }
 

@@ -102,8 +102,10 @@ html, body {
   padding: max(24px, env(safe-area-inset-top)) 16px calc(max(48px, env(safe-area-inset-bottom)) + var(--badge-space, 0px));
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  /* 화면을 위에서부터 그린다(가운데 정렬이면 문제마다 높이가 달라 위쪽 버튼이 오르내린다). 첫 화면만 가운데 */
+  justify-content: flex-start;
 }
+#app > .screen-profile { margin-block: auto; }
 
 .screen {
   display: flex;
@@ -2724,3 +2726,7 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .usage-list li span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .usage-bar { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
 .usage-bar i { display: block; height: 100%; background: var(--primary); }
+
+/* 👆 작은 버튼을 손가락 크기(40px 이상)로 */
+.chip-btn-cal { min-height: 36px; }
+.pet-care-btns .chip-btn, .reward-claim { min-height: 40px; }
