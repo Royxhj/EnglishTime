@@ -24967,7 +24967,7 @@ function renderHomeScreen(root, ctx) {
         <p class="pin-tip">💡 자주 하는 메뉴를 <b>꾹 누르면</b> 여기 맨 위에 고정돼요. 다시 꾹 누르면 풀려요.</p>
       </section>
       ${backupReminderHtml()}
-      ${isKid ? petCardHtml(profileName) : ""}
+      ${petCardHtml(profileName)}
       ${levelProgressHtml(profileName)}
       ${todayCardHtml(profileName, { daily, dueWrong, wrongTotal, next })}
       ${vacationHomeCardHtml(profileName)}
