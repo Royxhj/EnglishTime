@@ -24964,7 +24964,7 @@ function renderHomeScreen(root, ctx) {
       <section class="group pin-group" id="pinGroup">
         <h2 class="group-title">⭐ 내 메뉴</h2>
         <div class="tile-grid" id="pinGrid"></div>
-        <p class="pin-tip">💡 자주 하는 메뉴를 <b>꾹 누르면</b> 여기 맨 위에 고정돼요. 다시 꾹 누르면 풀려요.</p>
+        ${getSettings().pinTipHidden ? "" : `<p class="pin-tip">💡 자주 하는 메뉴를 <b>꾹 누르면</b> 여기 맨 위에 고정돼요. 다시 꾹 누르면 풀려요. <button class="pin-tip-close" id="pinTipClose" aria-label="안내 닫기">✕</button></p>`}
       </section>
       ${backupReminderHtml()}
       ${petCardHtml(profileName)}
@@ -25092,6 +25092,11 @@ function renderHomeScreen(root, ctx) {
 
   // 단계에 따라 숨긴 메뉴도 있어서 없으면 건너뛴다
   const bind = (id, fn) => root.querySelector(`#${id}`)?.addEventListener("click", fn);
+  bind("pinTipClose", (e) => {
+    e.stopPropagation();
+    updateSettings({ pinTipHidden: true });
+    e.currentTarget.closest(".pin-tip")?.remove();
+  });
   bind("backBtn", actions.backToProfile);
   bind("stickerBtn", actions.openStickers);
   bind("petPickBtn", actions.openStickers);
@@ -28543,7 +28548,7 @@ function petCardHtml(profileName) {
       <div class="pet-row">
         <button class="pet-pick-btn${s.aura}" id="petPickBtn" aria-label="친구 바꾸기">${dressedPetHtml(profileName, s.stage.emoji, false, s.stage.scale)}</button>
         <div class="pet-text">
-          <b>내 친구: ${s.tier ? `${s.tier.icon} ` : ""}${s.stage.name}</b>
+          <b>내 친구: ${s.tier ? `${s.tier.icon} ` : ""}${s.stage.name} <span class="pet-bond-inline" title="친밀도">${(() => { const bond = getProfileData(profileName).care.bond; return `${BOND_LEVELS[bondLevelIndex(bond)].icon} ${bond}`; })()}</span></b>
           <small>${s.chosen ? "" : "🐾 캐릭터를 눌러 좋아하는 동물로 바꿔 봐요! · "}${s.next?.tier ? `문제 ${s.left}개 더 풀면 ${s.next.emoji} ${s.next.name}이 돼요!` : s.next ? `문제 ${s.left}개 더 풀면 ${s.next.emoji}로 자라요!` : "🌌 가장 높은 태초 등급이에요! 🎉"}</small>
           <span class="progress-track"><span class="progress-fill" style="width:${pct}%"></span></span>
         </div>
@@ -29669,16 +29674,18 @@ function renderShopScreen(root, { profileName, actions }) {
         <p class="shop-stars">⭐ <b>${s.stars}</b>개 있어요</p>
       </section>
       ${couponBoxHtml()}
+      <nav class="shop-jump" aria-label="종류 바로 가기">${SHOP_CATS.map((cat) => `<button class="chip-btn" data-jump="${cat.id}">${cat.title}</button>`).join("")}</nav>
       ${SHOP_CATS.map((cat) =>
         cat.id === "bg"
-          ? `<h2 class="section-title">${cat.title} <small>← 옆으로 넘겨 보세요 →</small></h2><div class="bg-strip">${SHOP_ITEMS.filter((it) => it.cat === cat.id).map(itemHtml).join("")}</div>`
-          : `<h2 class="section-title">${cat.title}</h2><div class="shop-grid">${SHOP_ITEMS.filter((it) => it.cat === cat.id).map(itemHtml).join("")}</div>`
+          ? `<h2 class="section-title" id="shopcat-${cat.id}">${cat.title} <small>← 옆으로 넘겨 보세요 →</small></h2><div class="bg-strip">${SHOP_ITEMS.filter((it) => it.cat === cat.id).map(itemHtml).join("")}</div>`
+          : `<h2 class="section-title" id="shopcat-${cat.id}">${cat.title}</h2><div class="shop-grid">${SHOP_ITEMS.filter((it) => it.cat === cat.id).map(itemHtml).join("")}</div>`
       ).join("")}
       ${pv ? tryBarHtml(pv) : ""}
     </div>`;
     window.scrollTo(0, scrollY);
     root.querySelector("#backBtn").addEventListener("click", actions.back);
     bindCouponBox(root, profileName, () => renderShopScreen(root, { profileName, actions }));
+    root.querySelectorAll("[data-jump]").forEach((b) => b.addEventListener("click", () => root.querySelector(`#shopcat-${b.dataset.jump}`)?.scrollIntoView({ behavior: "smooth", block: "start" })));
     root.querySelectorAll("[data-item]").forEach((b) =>
       b.addEventListener("click", () => {
         const id = b.dataset.item;
@@ -32229,7 +32236,6 @@ function petCareHtml(profileName) {
         <button class="chip-btn" id="shopBtn" aria-label="별 상점, 별 ${shopStatus(profileName).stars}개">⭐ ${shopStatus(profileName).stars}</button>
         <button class="chip-btn" id="couponBtn">🎟️ 쿠폰</button>
         <button class="chip-btn" id="stickerBtn" aria-label="스티커북">📒 ${petStatus(profileName).stickers}</button>
-        <span class="pet-bond" title="친밀도">${BOND_LEVELS[bondLevelIndex(care.bond)].icon} ${care.bond}</span>
       </div>
     </div>`;
 }

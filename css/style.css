@@ -686,7 +686,7 @@ button {
 .tile:disabled { opacity: 0.5; }
 .tile-emoji { font-size: 30px; }
 .tile-title { font-size: 15px; font-weight: 800; }
-.tile-meta { font-size: 11px; color: var(--muted); font-weight: 600; }
+.tile-meta { font-size: 12px; color: var(--muted); font-weight: 600; }
 .tile-meta--warn { color: var(--wrong); }
 
 .rank-list {
@@ -887,7 +887,7 @@ button {
 }
 .chunk.wrong { border-color: var(--wrong); background: var(--wrong-bg); }
 .chunk.shake { animation: shake 0.4s ease; }
-.chunk-role { font-size: 11px; font-weight: 800; }
+.chunk-role { font-size: 12px; font-weight: 800; }
 .chunk-slash { color: var(--slash); font-size: 22px; padding-top: 10px; }
 .chunk-tip { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
 .chunk-translation { margin: 0; font-size: 17px; line-height: 1.8; font-weight: 700; }
@@ -896,7 +896,7 @@ button {
 /* Grammar list */
 .topic-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .topic-summary { font-size: 13px; color: var(--muted); }
-.topic-level { font-size: 11px; font-weight: 700; color: var(--accent, var(--primary)); }
+.topic-level { font-size: 12px; font-weight: 700; color: var(--accent, var(--primary)); }
 
 /* Grammar lesson */
 .lesson-head { display: flex; flex-direction: column; align-items: center; gap: 4px; }
@@ -1227,8 +1227,8 @@ button {
 .day-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 3px; min-width: 0; }
 .day-bar { width: 100%; min-height: 3px; border-radius: 4px 4px 0 0; background: color-mix(in srgb, var(--primary) 45%, var(--card-bg)); }
 .day-bar.today { background: var(--primary); }
-.day-count { font-size: 10px; color: var(--muted); font-weight: 700; }
-.day-label { font-size: 10px; color: var(--muted); }
+.day-count { font-size: 12px; color: var(--muted); font-weight: 700; }
+.day-label { font-size: 12px; color: var(--muted); }
 .weak-card { border: 2px solid var(--wrong-bg); }
 .report-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
 .report-table th, .report-table td { padding: 8px 4px; border-bottom: 1px solid var(--divider); }
@@ -1256,7 +1256,7 @@ button {
 .badge.earned { background: var(--soft); opacity: 1; }
 .badge-emoji { font-size: 28px; }
 .badge-title { font-size: 13px; font-weight: 800; }
-.badge-desc { font-size: 11px; color: var(--muted); }
+.badge-desc { font-size: 12px; color: var(--muted); }
 
 /* Vocabulary */
 .stat-grid--3 { grid-template-columns: repeat(3, 1fr); }
@@ -1417,7 +1417,7 @@ button {
 .family-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .family-stats > div { display: flex; flex-direction: column; align-items: center; padding: 8px 4px; border-radius: 10px; background: var(--surface); text-align: center; }
 .family-stats b { font-size: 18px; }
-.family-stats small { font-size: 11px; color: var(--muted); line-height: 1.3; }
+.family-stats small { font-size: 12px; color: var(--muted); line-height: 1.3; }
 .family-line { margin: 0; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
 
 /* 그림 퀴즈 */
@@ -1450,7 +1450,7 @@ button {
 .pet-stages { display: flex; flex-wrap: wrap; gap: 10px; font-size: 30px; }
 .pet-stages span { display: flex; flex-direction: column; align-items: center; opacity: 0.35; }
 .pet-stages span.got { opacity: 1; }
-.pet-stages small { font-size: 11px; color: var(--muted); }
+.pet-stages small { font-size: 12px; color: var(--muted); }
 
 /* 하단 탭 바 */
 #app.with-tabbar { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
@@ -1505,7 +1505,7 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 /* 나의 주간 기록 (혼자 쓰는 기기) */
 .week-card { display: flex; flex-direction: column; gap: 12px; }
 .week-stats { grid-template-columns: repeat(3, 1fr); }
-.week-delta { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.3; }
+.week-delta { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.3; }
 .week-delta.up { color: var(--correct); font-weight: 700; }
 .week-delta.down { color: var(--wrong); font-weight: 700; }
 .week-msg { margin: 0; font-weight: 800; text-align: center; line-height: 1.5; overflow-wrap: anywhere; }
@@ -1759,7 +1759,7 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
   margin: 0 1px;
   vertical-align: top;
 }
-.lesson-role small { font-size: 10px; font-weight: 800; }
+.lesson-role small { font-size: 12px; font-weight: 800; }
 .lesson-check { display: flex; flex-direction: column; gap: 8px; }
 .lesson-check + .lesson-check { padding-top: 12px; border-top: 1px dashed var(--border); }
 .lesson-check-q { margin: 0; font-weight: 800; line-height: 1.6; }
@@ -1821,7 +1821,7 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .tip-section { border: 2px solid color-mix(in srgb, var(--primary) 30%, var(--card-bg)); }
 .note-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .note-nav .secondary-btn { font-size: 15px; padding: 10px 12px; border-radius: 16px; display: flex; flex-direction: column; gap: 2px; }
-.note-nav .secondary-btn small { font-size: 11px; font-weight: 700; color: var(--muted); }
+.note-nav .secondary-btn small { font-size: 12px; font-weight: 700; color: var(--muted); }
 .bottom-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
 .topic-card[hidden] { display: none; }
 
@@ -1966,7 +1966,7 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .topic-word b { font-size: 15px; overflow-wrap: anywhere; }
 .topic-word small { font-size: 12px; color: var(--muted); text-align: center; }
 .topic-word-emoji { font-size: 30px; }
-.topic-word-level { font-size: 10px; color: var(--muted); background: var(--surface-2); border-radius: 999px; padding: 1px 6px; margin-top: 2px; }
+.topic-word-level { font-size: 12px; color: var(--muted); background: var(--surface-2); border-radius: 999px; padding: 1px 6px; margin-top: 2px; }
 
 /* ── 소리 구별 ── */
 .sound-preview { background: var(--card-bg); border-radius: 14px; box-shadow: var(--shadow); padding: 10px 14px; margin: 8px 0; }
@@ -2052,7 +2052,7 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .chain-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .chain-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--card-bg); border-radius: 999px; box-shadow: var(--shadow); padding: 4px 10px; font-size: 13px; }
 .chain-chip.me { background: color-mix(in srgb, var(--primary) 18%, var(--card-bg)); }
-.chain-chip small { color: var(--muted); font-size: 11px; }
+.chain-chip small { color: var(--muted); font-size: 12px; }
 .chain-arrow { color: var(--muted); font-weight: 800; }
 .chain-need { text-align: center; background: var(--card-bg); border-radius: 20px; box-shadow: var(--shadow); padding: 14px; }
 .chain-need p { font-size: 32px; margin: 0; }
@@ -2085,7 +2085,7 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .cal-cell.today { outline: 2px solid var(--primary); }
 .cal-cell.future { opacity: 0.45; }
 .cal-stamp { font-size: 20px; line-height: 1; margin-top: 6px; }
-.cal-cell small { font-size: 10px; color: var(--muted); }
+.cal-cell small { font-size: 12px; color: var(--muted); }
 
 /* ── 리포트 놀이 기록 ── */
 .report-fun { grid-template-columns: repeat(3, 1fr); margin: 10px 0; }
@@ -2122,7 +2122,8 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .pin-group.pin-empty #pinGrid { display: none; }
 .pin-group:not(.pin-empty) .pin-tip { display: none; }
 .pin-group.pin-empty .group-title { display: none; }
-.pin-tip { margin: 0; font-size: 13px; color: var(--muted); background: var(--surface-2); border-radius: 12px; padding: 8px 12px; }
+.pin-tip { position: relative; margin: 0; font-size: 13px; color: var(--muted); background: var(--surface-2); border-radius: 12px; padding: 8px 40px 8px 12px; }
+.pin-tip-close { position: absolute; top: 50%; right: 4px; transform: translateY(-50%); width: 34px; height: 34px; border: none; background: none; color: var(--muted); font-size: 16px; cursor: pointer; }
 
 /* ── 🔍 단어 찾기 ── */
 .ws-grid { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 3px; touch-action: none; user-select: none; -webkit-user-select: none; background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); padding: 6px; }
@@ -2304,7 +2305,7 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .pet-kind { display: flex; flex-direction: column; align-items: center; gap: 2px; border: 2px solid transparent; border-radius: 14px; background: var(--card-bg); box-shadow: var(--shadow); padding: 8px 2px; cursor: pointer; font: inherit; color: var(--text); min-width: 0; }
 .pet-kind.active { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 14%, var(--card-bg)); }
 .pet-kind-emoji { font-size: 28px; line-height: 1.1; }
-.pet-kind small { font-size: 11px; font-weight: 700; overflow-wrap: anywhere; text-align: center; }
+.pet-kind small { font-size: 12px; font-weight: 700; overflow-wrap: anywhere; text-align: center; }
 
 /* ── 🎄 어드벤트 달력 ── */
 .advent-home { display: flex; align-items: center; gap: 12px; width: 100%; border: none; border-radius: 18px; padding: 12px 14px; cursor: pointer; font: inherit; text-align: left; color: #fff; background: linear-gradient(135deg, #c92a2a, #2b8a3e); box-shadow: var(--shadow); }
@@ -2325,16 +2326,17 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .advent-gifts { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
 .advent-gifts span { display: flex; flex-direction: column; align-items: center; font-size: 26px; background: var(--card-bg); border-radius: 12px; box-shadow: var(--shadow); padding: 6px 10px; opacity: 0.55; }
 .advent-gifts span.got { opacity: 1; background: color-mix(in srgb, #f59f00 25%, var(--card-bg)); }
-.advent-gifts small { font-size: 11px; color: var(--muted); }
+.advent-gifts small { font-size: 12px; color: var(--muted); }
 
 /* ── 🍎 친구 돌보기 ── */
 .pet-card { flex-wrap: wrap; }
 .pet-care { flex-basis: 100%; display: flex; flex-direction: column; gap: 6px; }
 .pet-bubble { margin: 0; background: var(--card-bg); border-radius: 14px; padding: 6px 10px; font-size: 14px; font-weight: 700; position: relative; }
 .pet-bubble small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
-.pet-care-btns { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-.pet-care-btns .chip-btn { padding: 6px 10px; font-size: 14px; }
-.pet-bond { margin-left: auto; font-weight: 800; font-size: 14px; }
+.pet-care-btns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; align-items: stretch; }
+.pet-bond-inline { display: inline-block; font-size: 13px; font-weight: 800; padding: 1px 8px; margin-left: 4px; border-radius: 999px; background: color-mix(in srgb, #f06595 14%, transparent); vertical-align: middle; }
+.pet-care-btns .chip-btn { padding: 6px 0; font-size: 13px; gap: 3px; margin: 0; white-space: nowrap; justify-content: center; letter-spacing: -0.2px; }
+.pet-bond { display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; border-radius: 999px; background: color-mix(in srgb, #f06595 12%, transparent); }
 .pet-bounce { animation: petBounce 0.5s ease; }
 @keyframes petBounce { 30% { transform: translateY(-10px) scale(1.08); } 60% { transform: translateY(0) scale(0.96); } }
 
@@ -2391,7 +2393,7 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 /* ── 🗂️ 홈 정리 ── */
 .home-search input { width: 100%; box-sizing: border-box; font: inherit; font-size: 16px; padding: 10px 14px; border-radius: 999px; border: 2px solid color-mix(in srgb, var(--primary) 30%, transparent); background: var(--card-bg); color: var(--text); }
 .home-search p { margin: 6px 4px 0; }
-.group-toggle { cursor: pointer; user-select: none; display: flex; align-items: center; gap: 6px; }
+.group-toggle { cursor: pointer; user-select: none; display: flex; align-items: center; gap: 6px; min-height: 40px; }
 .group-count { font-size: 12px; color: var(--muted); font-weight: 700; }
 .group-caret { margin-left: auto; transition: transform 0.2s; color: var(--muted); }
 .group.collapsed .tile-grid { display: none; }
@@ -2406,9 +2408,11 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 /* ── ⛄ 방학 계획표 ── */
 .vacation-home { display: flex; align-items: center; gap: 12px; width: 100%; border: none; border-radius: 18px; padding: 12px 14px; cursor: pointer; font: inherit; text-align: left; color: var(--text); background: linear-gradient(135deg, color-mix(in srgb, #74c0fc 35%, var(--card-bg)), var(--card-bg)); box-shadow: var(--shadow); }
 .vacation-home-text { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
-.vacation-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.vacation-dates .text-input { width: 100%; box-sizing: border-box; }
-.vacation-check { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-weight: 700; }
+.vacation-dates { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.vacation-dates label { min-width: 0; }
+.vacation-dates .text-input { width: 100%; min-width: 0; box-sizing: border-box; font-size: 15px; padding-inline: 8px; }
+.vacation-check { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-weight: 700; min-height: 40px; }
+.vacation-check input { width: 22px; height: 22px; }
 .screen-vacation .print-toolbar { grid-template-columns: auto 1fr 1fr; }
 
 /* ── 🏫 교과 핵심 표현 ── */
@@ -2431,7 +2435,7 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .house-room { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: var(--room); border-radius: 20px; padding: 10px; box-shadow: var(--shadow); }
 .house-item { display: flex; flex-direction: column; align-items: center; gap: 2px; border: 3px solid transparent; border-radius: 16px; background: rgba(255, 255, 255, 0.85); color: #333; padding: 8px 4px; font: inherit; cursor: pointer; min-width: 0; }
 .house-item b { font-size: 15px; overflow-wrap: anywhere; text-align: center; }
-.house-item small { font-size: 11px; color: #666; text-align: center; overflow-wrap: anywhere; }
+.house-item small { font-size: 12px; color: #666; text-align: center; overflow-wrap: anywhere; }
 .house-item.pop { animation: petBounce 0.4s ease; }
 .house-item.correct { border-color: var(--correct); background: #e6f7ea; }
 .house-item.wrong { opacity: 0.45; animation: shake 0.4s ease; }
@@ -2623,7 +2627,7 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .animal-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 .animal-card { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 6px 2px; border: none; border-radius: 12px; background: var(--card-bg); box-shadow: var(--shadow); cursor: pointer; font: inherit; color: var(--text); transition: opacity 0.3s, transform 0.3s; }
 .animal-card span { font-size: 30px; line-height: 1.2; }
-.animal-card small { font-size: 11px; font-weight: 700; }
+.animal-card small { font-size: 12px; font-weight: 700; }
 .animal-card.out { opacity: 0.18; transform: scale(0.9); }
 .animal-card.found { outline: 3px solid var(--correct); transform: scale(1.1); }
 .animal-log { list-style: none; margin: 0; padding: 8px 12px; border-radius: 14px; background: var(--card-bg); box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 4px; font-size: 15px; }
@@ -2700,7 +2704,7 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .pet-talk-q small { display: block; color: var(--muted); font-size: 13px; }
 .pet-talk-answers { display: flex; flex-direction: column; gap: 6px; }
 .room-tools { display: flex; gap: 8px; }
-.room-tools .secondary-btn { flex: 1; margin: 0; }
+.room-tools .secondary-btn { flex: 1; margin: 0; min-width: 0; padding: 10px 4px; font-size: 14px; white-space: nowrap; }
 .park-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 .park-card { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 8px; border-radius: 18px; background: var(--card-bg); box-shadow: var(--shadow); text-align: center; min-width: 0; }
 .park-card.me { outline: 3px solid var(--primary); }
@@ -2918,7 +2922,7 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .dex-card .dex-emoji { font-size: 38px; line-height: 1.2; }
 .dex-card b { font-size: 14px; }
 .dex-card small { font-size: 12px; color: var(--muted); text-align: center; }
-.dex-card i { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-style: normal; font-size: 11px; font-weight: 800; background: var(--primary); color: #fff; border-radius: 10px; padding: 1px 7px; white-space: nowrap; }
+.dex-card i { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-style: normal; font-size: 12px; font-weight: 800; background: var(--primary); color: #fff; border-radius: 10px; padding: 1px 7px; white-space: nowrap; }
 .dex-card.tier-transcend, .dex-card.tier-immortal, .dex-card.tier-celestial { background: linear-gradient(160deg, color-mix(in srgb, #a78bfa 25%, var(--card-bg)), var(--card-bg)); }
 .dex-card.tier-origin { background: linear-gradient(160deg, #312e81, #0f0a2e); color: #fff; }
 .dex-card.tier-origin small { color: #ddd6fe; }
@@ -2942,3 +2946,10 @@ body:has(#app.with-tabbar) .toast-stack { bottom: calc(84px + env(safe-area-inse
 .coupon-log ul { list-style: none; padding: 0; margin: 6px 0 0; display: flex; flex-direction: column; gap: 6px; }
 .coupon-log li { display: flex; gap: 10px; align-items: baseline; }
 .coupon-log li small { color: var(--muted); min-width: 38px; }
+/* 🛍️ 상점 종류 바로 가기 */
+.shop-jump { display: flex; gap: 6px; overflow-x: auto; padding: 6px 2px 8px; margin: 6px 0 0; scrollbar-width: none; }
+.shop-jump::-webkit-scrollbar { display: none; }
+.shop-jump .chip-btn { flex: 0 0 auto; white-space: nowrap; min-height: 38px; }
+.screen-shop .section-title[id] { scroll-margin-top: 12px; }
+/* 글씨가 12px보다 작아지지 않게 (따로 크기를 정하지 않은 small) */
+small { font-size: max(12px, 0.85em); }
